@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //movement
         float x = Input.GetAxis("Horizontal");
         float y = Input.GetAxis("Vertical");
 
@@ -29,6 +30,17 @@ public class PlayerController : MonoBehaviour
         {
             lastFlip = (x < 0);
             parentRenderer.flipX = lastFlip;
+        }
+
+        if (Input.GetButton("Cancel"))  //pause menu, default ESC
+        {
+            GameObject loader = GameObject.Find("SceneLoader"); //get the scene loader
+            if (loader != null)
+            {
+                SceneLoader loadScript = loader.GetComponent<SceneLoader>();  //get the loader script
+                if (loadScript != null)
+                    loadScript.LoadPauseMenu();  //pause the game
+            }
         }
     }
 }
