@@ -177,6 +177,7 @@ MonoBehaviour:
       - Thanks! You just completed the quest.
       inProgressDialogue:
       - Talk to me more!!
+    currentStep: 0
     startDialogue:
     - After this, please talk to me a couple times!
     prerequisiteQuestNames: []

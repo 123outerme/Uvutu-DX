@@ -25,6 +25,7 @@ public class NPCDialogue : MonoBehaviour
     private NPCMovement movement;
     private bool prevEnableMoveSetting;
     
+    private GameObject player;
     private PlayerController pController;
     private Quests questsHandler;
     private TMP_Text dialogueText;
@@ -33,7 +34,7 @@ public class NPCDialogue : MonoBehaviour
     void Start()
     {
         //get some player scripts
-        GameObject player = GameObject.Find("Player");
+        player = GameObject.Find("Player");
         pController = player.GetComponent<PlayerController>();
         questsHandler = player.GetComponent<Quests>();
         
@@ -87,9 +88,7 @@ public class NPCDialogue : MonoBehaviour
 
                     inDialogue = true;
                     pController.SetMovementLock(true);  //lock player movement
-                    //show dialogue
-                    dialogueText.text = curDialogueList[dialogueItem];  //should be first string shown first
-                    //dialogueText.gameObject.transform.position = transform.position;
+                    UpdateDialogueText();  //show dialogue
 
                     prevEnableMoveSetting = movement.enableMovement;  //save previous NPC movement setting
                     movement.enableMovement = false;  //pause NPC movement until dialogue is complete
@@ -101,7 +100,7 @@ public class NPCDialogue : MonoBehaviour
                     {
                         //just show next line
                         dialogueItem++;
-                        dialogueText.text = curDialogueList[dialogueItem];
+                        UpdateDialogueText();  //update dialogue
                     }
                     else
                     { //the NPC is out of things to say
@@ -129,5 +128,18 @@ public class NPCDialogue : MonoBehaviour
                 }
             }
         }
+    }
+
+    void UpdateDialogueText()
+    {
+        dialogueText.text = curDialogueList[dialogueItem];  //should be first string shown first
+        Vector3 conversationPosDiff = player.transform.position - transform.position;  //vector from NPC to player
+
+        float newYPos = -1.0f;
+        if (conversationPosDiff.y > 0.1)  //player collision box is 0.9, so if we're above the vertical where we bump into a wall above
+            newYPos = 1.0f;
+
+        conversationPosDiff = new Vector3(conversationPosDiff.x, newYPos, 0);
+        dialogueText.gameObject.transform.position = transform.position - conversationPosDiff;
     }
 }
