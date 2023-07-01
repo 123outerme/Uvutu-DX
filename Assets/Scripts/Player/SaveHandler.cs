@@ -9,15 +9,19 @@ public class SaveHandler : MonoBehaviour
     public string saveDirectory = "save";
     public string saveFile = "save1.txt";
     
-    public GameObject playerStatsParent;
+    public GameObject playerDataObj;
 
     private PlayerStats stats;
+    private Quests quests;
+    //private Inventory inventory;
     private string saveFilePath;
 
     // Start is called before the first frame update
     void Start()
     {
-        stats = playerStatsParent.GetComponent<PlayerStats>();
+        stats = playerDataObj.GetComponent<PlayerStats>();
+        quests = playerDataObj.GetComponent<Quests>();
+        //inventory = playerDataObj.GetComponent<Inventory>();
         ComputeSavePath();
     }
 
@@ -29,7 +33,9 @@ public class SaveHandler : MonoBehaviour
         // Create a file to write to.
         using (StreamWriter sw = File.CreateText(saveFilePath))
         {
-            sw.WriteLine(JSONFromStats(stats));
+            sw.WriteLine(JsonUtility.ToJson(stats));
+            sw.WriteLine(JsonUtility.ToJson(quests));
+            //sw.WriteLine(JsonUtility.ToJson(inventory));
         }
         stats.loaded = true;
     }
@@ -41,13 +47,17 @@ public class SaveHandler : MonoBehaviour
             using (StreamReader sr = File.OpenText(saveFilePath))
             {
                 JsonUtility.FromJsonOverwrite(sr.ReadLine(), stats);
+                JsonUtility.FromJsonOverwrite(sr.ReadLine(), quests);
+                //JsonUtility.FromJsonOverwrite(sr.ReadLine(), inventory);
             }
         }
     }
 
     public void NewSave()
     {
-        stats = playerStatsParent.AddComponent<PlayerStats>() as PlayerStats;
+        stats = playerDataObj.AddComponent<PlayerStats>() as PlayerStats;
+        quests = playerDataObj.AddComponent<Quests>() as Quests;
+        //inventory = playerDataObj.AddCompoenent<Inventory>() as Inventory;
         Save();
     }
 
@@ -56,11 +66,6 @@ public class SaveHandler : MonoBehaviour
         ComputeSavePath();
         Debug.Log(File.Exists(saveFilePath) + " : " + saveFilePath);
         return File.Exists(saveFilePath);
-    }
-
-    private string JSONFromStats(PlayerStats pStats)
-    {
-        return JsonUtility.ToJson(pStats);
     }
 
     private void ComputeSavePath()

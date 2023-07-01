@@ -5,9 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    public GameObject mainPauseScreen;
-    public GameObject statsScreen;
-    public GameObject inventoryScreen;
+    public GameObject mainPausePanel;
+    public GameObject statsPanel;
+    public GameObject inventoryPanel;
+    public GameObject questsPanel;
 
     List<AsyncOperation> scenesToLoad = new List<AsyncOperation>();
 
@@ -31,10 +32,15 @@ public class PauseMenu : MonoBehaviour
 
     public void ShowStats(bool setting)
     {
-        statsScreen.SetActive(setting);
+        statsPanel.SetActive(setting);
     }
 
     public void ShowInventory()
+    {
+        //TODO
+    }
+
+    public void ShowQuests()
     {
         //TODO
     }
@@ -46,7 +52,6 @@ public class PauseMenu : MonoBehaviour
 
     public void SaveGame()
     {
-        //TODO
         saver.Save();
     }
 

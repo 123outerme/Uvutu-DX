@@ -21,4 +21,10 @@ public class NPCDialogueTrigger : MonoBehaviour
         if (transform.parent.gameObject.GetComponent<NPCDialogue>().enableDialogue)
             transform.parent.gameObject.GetComponent<NPCDialogue>().readyDialogue = true;
     }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (transform.parent.gameObject.GetComponent<NPCDialogue>().enableDialogue)
+            transform.parent.gameObject.GetComponent<NPCDialogue>().readyDialogue = false;
+    }
 }

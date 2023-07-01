@@ -53,4 +53,11 @@ public class PlayerController : MonoBehaviour
         else
             readyToSpeak = false;
     }
+
+    public void SetMovementLock(bool locked)
+    {
+        movementLocked = locked;
+        if (locked)
+            rb.velocity = new Vector2(0, 0);
+    }
 }

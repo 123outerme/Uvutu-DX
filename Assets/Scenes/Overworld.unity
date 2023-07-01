@@ -123,6 +123,68 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &410940066
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 799660637}
+    m_Modifications:
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8153743730924805425, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+      propertyPath: m_Name
+      value: House_2-1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+--- !u!4 &780014605 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3587084637016741529, guid: 2555b02c4b664b94e8f3db4fe230e560, type: 3}
+  m_PrefabInstance: {fileID: 410940066}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &799660635
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,7 +225,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 780014605}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -198,7 +261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   saveDirectory: save
   saveFile: save1.txt
-  playerStatsParent: {fileID: 1426036523}
+  playerDataObj: {fileID: 1426036523}
 --- !u!4 &811792329
 Transform:
   m_ObjectHideFlags: 0
@@ -424,7 +487,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb50deb9310f0574cbab45bee0e770ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1426036523}
 --- !u!1 &1426036523
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,6 +499,7 @@ GameObject:
   - component: {fileID: 1426036525}
   - component: {fileID: 1426036529}
   - component: {fileID: 1426036524}
+  - component: {fileID: 1426036530}
   - component: {fileID: 1426036527}
   - component: {fileID: 1426036528}
   m_Layer: 0
@@ -600,6 +663,19 @@ MonoBehaviour:
   map: TestMap
   underworldMap: 
   loaded: 0
+--- !u!114 &1426036530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426036523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7287de2da7d0e04988a888141fc6dbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  quests: []
 --- !u!1 &1620122693
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,7 +821,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid: {fileID: 799660635}
   playerStatsParent: {fileID: 1426036523}
-  disable: 0
+  disable: 1
 --- !u!4 &1696662600
 Transform:
   m_ObjectHideFlags: 0
