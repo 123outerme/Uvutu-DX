@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
 {
     public float speed = 8;
     public bool lastFlip = false;
+    public bool readyToSpeak = false;
+    public bool movementLocked = false;
     
     private SpriteRenderer parentRenderer;
     private Rigidbody2D rb;
@@ -21,15 +23,18 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         //movement
-        float x = Input.GetAxis("Horizontal");
-        float y = Input.GetAxis("Vertical");
-
-        rb.velocity = new Vector2(x, y).normalized * speed;
-        
-        if (x != 0 && (x < 0 ^ lastFlip)) //x position is changing and (x < 0 LOGICAL XOR lastFlip == true)
+        if (!movementLocked)
         {
-            lastFlip = (x < 0);
-            parentRenderer.flipX = lastFlip;
+            float x = Input.GetAxis("Horizontal");
+            float y = Input.GetAxis("Vertical");
+
+            rb.velocity = new Vector2(x, y).normalized * speed;
+            
+            if (x != 0 && (x < 0 ^ lastFlip)) //x position is changing and (x < 0 LOGICAL XOR lastFlip == true)
+            {
+                lastFlip = (x < 0);
+                parentRenderer.flipX = lastFlip;
+            }
         }
 
         if (Input.GetButton("Cancel"))  //pause menu, default ESC
@@ -42,5 +47,10 @@ public class PlayerController : MonoBehaviour
                     loadScript.LoadPauseMenu();  //pause the game
             }
         }
+
+        if (Input.GetButton("Fire1"))
+            readyToSpeak = true;
+        else
+            readyToSpeak = false;
     }
 }

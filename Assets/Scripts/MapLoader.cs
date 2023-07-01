@@ -6,6 +6,7 @@ public class MapLoader : MonoBehaviour
 {
     public GameObject grid;
     public GameObject playerStatsParent;
+    public bool disable = false;
 
     private PlayerStats stats;
 
@@ -25,16 +26,19 @@ public class MapLoader : MonoBehaviour
 
     public void LoadMap()
     {
-        //destroy each child object in the grid to clear space for the new map
-        foreach (Transform child in grid.transform)
+        if (!disable)
         {
-            Destroy(child.gameObject);
+            //destroy each child object in the grid to clear space for the new map
+            foreach (Transform child in grid.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            Debug.Log(stats.map);
+
+            GameObject mapPrefab = Resources.Load<GameObject>(stats.map);
+            GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
+            map.transform.SetParent(grid.transform, false);
         }
-
-        Debug.Log(stats.map);
-
-        GameObject mapPrefab = Resources.Load<GameObject>(stats.map);
-        GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
-        map.transform.SetParent(grid.transform, false);
     }
 }
