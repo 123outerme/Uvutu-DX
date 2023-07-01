@@ -231,7 +231,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   saveDirectory: save
   saveFile: save1.txt
-  playerStatsParent: {fileID: 1201379868}
+  playerDataObj: {fileID: 1201379868}
 --- !u!4 &349189113
 Transform:
   m_ObjectHideFlags: 0
@@ -1539,8 +1539,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1201379870}
   - component: {fileID: 1201379869}
+  - component: {fileID: 1201379871}
   m_Layer: 0
-  m_Name: PlayerStats
+  m_Name: PlayerData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1584,6 +1585,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1201379871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1201379868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7287de2da7d0e04988a888141fc6dbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  quests: []
 --- !u!1 &1220219066
 GameObject:
   m_ObjectHideFlags: 0

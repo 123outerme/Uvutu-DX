@@ -91,6 +91,7 @@ public class Quests : MonoBehaviour
         if (step != null)
         {
             //TODO: reward player for quest step completion
+            Debug.Log("Completed a quest step for " + q.name);
             q.GotoNextStep();
         }
     }
@@ -110,7 +111,7 @@ public class Quests : MonoBehaviour
         foreach(Quest curQuest in quests)
         {
             QuestStep step = curQuest.GetCurrentStep();
-            if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName)
+            if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName && !step.IsCompleted())
             {
                 step.AddProgress(1);  //add 1 instance of talking as progress!
             }

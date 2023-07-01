@@ -52,7 +52,7 @@ public class Quest
     public string name;
     public string description;
     public QuestStep[] steps;
-    [field: System.NonSerialized] public int currentStep = 0;  //which step player is on; out of range means whole quest is complete
+    public int currentStep = 0;  //which step player is on; out of range means whole quest is complete
     //hide current step in editor (or do I not, for debug use?)
     public List<string> startDialogue = new List<string>();  //dialogue NPC gives you when you start the quest
     public List<string> prerequisiteQuestNames = new List<string>();  //whole quests that must be completed before you are given the quest
