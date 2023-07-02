@@ -11,11 +11,12 @@ GameObject:
   - component: {fileID: 605354481}
   - component: {fileID: 605354485}
   - component: {fileID: 605354484}
+  - component: {fileID: 5289904354207346825}
   - component: {fileID: 605354483}
   - component: {fileID: 605354482}
   m_Layer: 0
-  m_Name: CoconutHead
-  m_TagString: Untagged
+  m_Name: Coconut Head
+  m_TagString: NPC
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -115,6 +116,26 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &5289904354207346825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605354480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09a628d671d9fd648a62d96f14c07347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveStatus: 1
+  state:
+    position: {x: 0, y: 0, z: 0}
+    enableMovement: 0
+    startMovement: 0
+    step: 0
+    frame: 0
+    name: 
 --- !u!114 &605354483
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,13 +156,16 @@ MonoBehaviour:
   - {x: 0.5, y: 5.5, z: 0}
   timeSteps:
   - 30
-  - 30
+  - 500
   - 30
   - 30
   - 30
   loop: 0
   enableMovement: 1
   startMovement: 0
+  step: 0
+  frame: 0
+  lastMinusNext: {x: 0, y: 0, z: 0}
 --- !u!114 &605354482
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,7 +178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31816790b4cc0a245813796989c4bec7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  npcName: Coconut Head
   enableDialogue: 1
   readyDialogue: 0
   inDialogue: 0

@@ -10,10 +10,10 @@ public class NPCMovement : MonoBehaviour
     public bool enableMovement = false;
     public bool startMovement = false;
 
-    private int step = 0;
-    private int frame = 0;
+    public int step = 0;
+    public int frame = 0;
 
-    private Vector3 lastMinusNext = new Vector3();
+    public Vector3 lastMinusNext = new Vector3(0,0,0);
 
     //private Rigidbody2D rb;
 
@@ -21,7 +21,8 @@ public class NPCMovement : MonoBehaviour
     void Start()
     {
         //rb = GetComponent<Rigidbody2D>();
-        lastMinusNext = posSteps[0] - transform.position;  //get difference in this position and last for movement
+        if (lastMinusNext == new Vector3(0,0,0))
+            lastMinusNext = posSteps[0] - transform.position;  //get difference in this position and last for movement
         
         if (posSteps.Count <= 0 && timeSteps.Count != posSteps.Count)
             enableMovement = false;

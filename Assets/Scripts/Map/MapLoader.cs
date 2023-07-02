@@ -10,10 +10,13 @@ public class MapLoader : MonoBehaviour
 
     private PlayerStats stats;
 
+    private SaveHandler saver;
+
     // Start is called before the first frame update
     void Start()
     {
         stats = playerStatsParent.GetComponent<PlayerStats>();
+        saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
 
         LoadMap();
     }
@@ -28,8 +31,11 @@ public class MapLoader : MonoBehaviour
     {
         if (!disable)
         {
+            Debug.Log("save before loading new map");
+            saver.Save();  //TODO broken
+            
             //destroy each child object in the grid to clear space for the new map
-            foreach (Transform child in grid.transform)
+            foreach(Transform child in grid.transform)
             {
                 Destroy(child.gameObject);
             }
@@ -39,6 +45,8 @@ public class MapLoader : MonoBehaviour
             GameObject mapPrefab = Resources.Load<GameObject>(stats.map);
             GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
             map.transform.SetParent(grid.transform, false);
+
+            saver.LoadNPCs();
         }
     }
 }

@@ -5,7 +5,6 @@ using TMPro;
 
 public class NPCDialogue : MonoBehaviour
 {
-    public string npcName = "Coconut Head";
     public bool enableDialogue = true;
     public bool readyDialogue = false;
     public bool inDialogue = false;
@@ -59,10 +58,10 @@ public class NPCDialogue : MonoBehaviour
                 if (!inDialogue && readyDialogue)  //If the NPC is not yet speaking but ready to speak, start dialogue
                 {
                     //tell quest handler to add progress to quest steps that involve talking to this NPC (so progress can be checked below on self-referencing talk quests)
-                    questsHandler.ProgressTalkQuest(npcName);
+                    questsHandler.ProgressTalkQuest(gameObject.name);
 
                     //get all quest steps that are being turned in
-                    turningInQuestSteps = questsHandler.GetQuestStepsForTurnIn(npcName);                
+                    turningInQuestSteps = questsHandler.GetQuestStepsForTurnIn(gameObject.name);                
                     foreach(QuestAndStepPair pair in turningInQuestSteps)
                         curDialogueList.AddRange(pair.step.turnInDialogue); //add all dialogues for all quests being turned in currently
 

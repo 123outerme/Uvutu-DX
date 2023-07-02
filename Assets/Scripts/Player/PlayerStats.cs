@@ -24,8 +24,8 @@ public class PlayerStats : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
-        saver.Load();
+        //saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
+        //saver.Load();
         ApplyPosition();
     }
 
