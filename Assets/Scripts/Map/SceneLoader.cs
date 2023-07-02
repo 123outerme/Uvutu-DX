@@ -28,10 +28,23 @@ public class SceneLoader : MonoBehaviour
         scenesToLoad.Add(SceneManager.LoadSceneAsync("PauseMenu"));
     }
 
+    public void LoadBattle()
+    {
+        SavePlayerData();
+        scenesToLoad.Add(SceneManager.LoadSceneAsync("Battle"));
+    }
+
+    public void ResumeGame()
+    {
+        SavePlayerData();
+        PlayerLocation location = player.GetComponent<PlayerLocation>();
+        scenesToLoad.Add(SceneManager.LoadSceneAsync(location.scene));  //resume from the proper scene
+    }
+
     void SavePlayerData()
     {
-        PlayerStats stats = player.GetComponent<PlayerStats>();
-        stats.position = player.transform.position;
+        PlayerLocation location = player.GetComponent<PlayerLocation>();
+        location.position = player.transform.position;
         saver.Save();
     }
 }
