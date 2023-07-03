@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Rat
   m_EditorClassIdentifier: 
   combatantName: Rat
-  sprite: {fileID: -1263379768, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  sprite: {fileID: -731449358, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  level: 1
+  exp: 0
   health: 25
   maxHealth: 25
-  attack: 1
+  physAttack: 1
   magicAttack: 2
   affinity: 2
   resistance: 1

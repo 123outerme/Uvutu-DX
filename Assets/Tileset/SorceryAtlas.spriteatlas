@@ -74,8 +74,10 @@ SpriteAtlas:
   - {fileID: 509412510, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: -161816039, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: -419651678, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  - {fileID: -300176606, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: -323383445, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: 68806785, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  - {fileID: -516937319, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: 2058738324, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: -359589197, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   - {fileID: 1803390214, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
@@ -202,8 +204,10 @@ SpriteAtlas:
   - SOUVUTU0_111
   - SOUVUTU0_106
   - SOUVUTU0_110
+  - SOUVUTU0_126
   - SOUVUTU0_107
   - SOUVUTU0_117
+  - SOUVUTU0_127
   - SOUVUTU0_108
   - SOUVUTU0_116
   - SOUVUTU0_124

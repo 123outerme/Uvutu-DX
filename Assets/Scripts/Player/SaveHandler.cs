@@ -12,7 +12,7 @@ public class SaveHandler : MonoBehaviour
     
     public GameObject playerDataObj;
 
-    public bool loadData = true;
+    public bool loadDataOnInit = true;
 
     private PlayerLocation location;
     private Stats playerStats;
@@ -25,6 +25,11 @@ public class SaveHandler : MonoBehaviour
     private GameObject enemy1 = null;
     private GameObject enemy2 = null;
     private GameObject enemy3 = null;
+
+    private Stats minionStats = null;
+    private Stats enemy1Stats = null;
+    private Stats enemy2Stats = null;
+    private Stats enemy3Stats = null;
     
     private string saveFilePath;
 
@@ -38,8 +43,8 @@ public class SaveHandler : MonoBehaviour
         npcDict = new NPCDict();
 
         ComputeSavePath();
-
-        Load();
+        if (loadDataOnInit)
+            Load();
     }
 
     public void Save()
@@ -63,10 +68,7 @@ public class SaveHandler : MonoBehaviour
             //save current battle state
             location.inBattle = true;
             
-            minion = GameObject.Find("Minion");
-            enemy1 = GameObject.Find("Enemy1");
-            enemy2 = GameObject.Find("Enemy2");
-            enemy3 = GameObject.Find("Enemy3");
+            TryGetCombatantsStats();
         }
         else
             location.inBattle = false;
@@ -84,23 +86,23 @@ public class SaveHandler : MonoBehaviour
             npcDict.GetAll();
             sw.WriteLine(JsonUtility.ToJson(npcDict));
 
-            if (minion != null)
-                sw.WriteLine(JsonUtility.ToJson(minion));
+            if (minionStats != null)
+                sw.WriteLine(JsonUtility.ToJson(minionStats));
             else
                 sw.WriteLine("");
 
-            if (enemy1 != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy1));
+            if (enemy1Stats != null)
+                sw.WriteLine(JsonUtility.ToJson(enemy1Stats));
             else
                 sw.WriteLine("");
 
-            if (enemy2 != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy2));
+            if (enemy2Stats != null)
+                sw.WriteLine(JsonUtility.ToJson(enemy2Stats));
             else
                 sw.WriteLine("");
 
-            if (enemy3 != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy3));
+            if (enemy3Stats != null)
+                sw.WriteLine(JsonUtility.ToJson(enemy3Stats));
             else
                 sw.WriteLine("");
         }
@@ -109,8 +111,10 @@ public class SaveHandler : MonoBehaviour
 
     public void Load()
     {
-        if (loadData && File.Exists(saveFilePath))
+        if (File.Exists(saveFilePath))
         {
+            TryGetCombatantsStats();
+
             using (StreamReader sr = File.OpenText(saveFilePath))
             {
                 bool usePosition = location.usePosition;  //keep usePosition property as the scene demands
@@ -123,20 +127,20 @@ public class SaveHandler : MonoBehaviour
                 npcDict.SetAll();
 
                 string minionLine = sr.ReadLine();
-                if (minionLine != "" && minion != null)
-                    JsonUtility.FromJsonOverwrite(minionLine, minion);
+                if (minionLine != "" && minionStats != null)
+                    JsonUtility.FromJsonOverwrite(minionLine, minionStats);
 
                 string enemy1Line = sr.ReadLine();
-                if (enemy1Line != "" && enemy1 != null)
-                    JsonUtility.FromJsonOverwrite(enemy1Line, enemy1);
+                if (enemy1Line != "" && enemy1Stats != null)
+                    JsonUtility.FromJsonOverwrite(enemy1Line, enemy1Stats);
                 
                 string enemy2Line = sr.ReadLine();
-                if (enemy2Line != "" && enemy2 != null)
-                    JsonUtility.FromJsonOverwrite(enemy2Line, enemy2);
+                if (enemy2Line != "" && enemy2Stats != null)
+                    JsonUtility.FromJsonOverwrite(enemy2Line, enemy2Stats);
 
                 string enemy3Line = sr.ReadLine();
-                if (enemy1Line != "" && enemy3 != null)
-                    JsonUtility.FromJsonOverwrite(enemy3Line, enemy3);
+                if (enemy3Line != "" && enemy3Stats != null)
+                    JsonUtility.FromJsonOverwrite(enemy3Line, enemy3Stats);
             }
 
             LoadNPCs();
@@ -155,12 +159,18 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
-    public void NewSave()
+    public void AddPlayerSaveComponents()
     {
         location = playerDataObj.AddComponent<PlayerLocation>() as PlayerLocation;
         playerStats = playerDataObj.AddComponent<Stats>() as Stats;
         quests = playerDataObj.AddComponent<Quests>() as Quests;
         //inventory = playerDataObj.AddCompoenent<Inventory>() as Inventory;
+    }
+
+    public void NewSave()
+    {
+        AddPlayerSaveComponents();
+
         npcDict = new NPCDict();
         Save();
     }
@@ -176,5 +186,40 @@ public class SaveHandler : MonoBehaviour
         string[] paths = new string[] {saveDirectory, saveFile};
 
         saveFilePath = Path.Combine(paths);
+    }
+
+    private void TryGetCombatantsStats()
+    {
+        minion = GameObject.Find("Minion");
+        if (minion)
+            minionStats = minion.GetComponent<Stats>();  //if the minion is active, get its stats script
+        else
+            minionStats = null;  //if the minion doesn't exist, then no need to save its stats
+
+        enemy1 = GameObject.Find("Enemy1");
+        if (enemy1)  //enemy1 should always be active but just in case      
+            enemy1Stats = enemy1.GetComponent<Stats>();
+        else
+            enemy1Stats = null;
+
+        enemy2 = GameObject.Find("Enemy2");
+        if (enemy2)
+            enemy2Stats = enemy2.GetComponent<Stats>();
+        else
+            enemy2Stats = null;
+
+        enemy3 = GameObject.Find("Enemy3");
+        if (enemy3)
+            enemy3Stats = enemy3.GetComponent<Stats>();
+        else
+            enemy3Stats = null;
+    }
+
+    public string GetSceneToLoad()
+    {
+        if (location.inBattle)
+            return "Battle";
+        else
+            return location.scene;
     }
 }

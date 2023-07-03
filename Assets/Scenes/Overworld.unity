@@ -199,6 +199,7 @@ MonoBehaviour:
   saveDirectory: save
   saveFile: save1.txt
   playerDataObj: {fileID: 1426036523}
+  loadDataOnInit: 1
 --- !u!4 &811792329
 Transform:
   m_ObjectHideFlags: 0
@@ -395,7 +396,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -2
-  m_Sprite: {fileID: -598744663, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  m_Sprite: {fileID: 1392123364, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -485,6 +486,7 @@ MonoBehaviour:
   usePosition: 1
   map: TestMap
   underworldMap: 
+  prestige: 0
   scene: 
   inBattle: 0
   loaded: 0
@@ -513,15 +515,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 101770c032673314bad09fb35aeeb36a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  combatantName: 
+  combatantStats: {fileID: 11400000, guid: 52c7a981b209e214094ca68a89e4ec19, type: 2}
+  level: 1
+  exp: 0
   health: 20
   maxHealth: 20
-  attack: 1
+  physAttack: 1
   magicAttack: 1
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
+  moveset: []
 --- !u!4 &1446552586 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5216746890708783459, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}

@@ -28,13 +28,15 @@ public class MainMenu : MonoBehaviour
 
     public void ResumeGame()
     {
-        scenesToLoad.Add(SceneManager.LoadSceneAsync("Overworld"));
+        saver.AddPlayerSaveComponents();
+        saver.Load();
+        scenesToLoad.Add(SceneManager.LoadSceneAsync(saver.GetSceneToLoad()));
     }
 
     public void NewGame()
     {
         saver.NewSave();  //save before loading a new game, thereby creating a new game file
-        scenesToLoad.Add(SceneManager.LoadSceneAsync("Overworld"));
+        scenesToLoad.Add(SceneManager.LoadSceneAsync(saver.GetSceneToLoad()));
     }
 
     public void OpenSettings()

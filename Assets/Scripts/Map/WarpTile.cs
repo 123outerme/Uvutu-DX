@@ -28,7 +28,7 @@ public class WarpTile : MonoBehaviour
         PlayerLocation location = player.GetComponent<PlayerLocation>();
         location.position = position;
         location.map = map;
-        Debug.Log("Warp: " + map);
+        Debug.Log("Warp: " + location.map);
         maploader.LoadMap();
         location.ApplyPosition();
     }

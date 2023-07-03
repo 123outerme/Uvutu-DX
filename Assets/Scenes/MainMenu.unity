@@ -200,7 +200,7 @@ MonoBehaviour:
   saveDirectory: save
   saveFile: save1.txt
   playerDataObj: {fileID: 421311212}
-  loadData: 0
+  loadDataOnInit: 0
 --- !u!4 &349189113
 Transform:
   m_ObjectHideFlags: 0
@@ -274,7 +274,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -598744663, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  m_Sprite: {fileID: 1392123364, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1728,7 +1728,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1197408473, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  m_Sprite: {fileID: -280651777, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

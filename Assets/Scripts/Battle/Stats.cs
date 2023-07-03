@@ -7,13 +7,17 @@ public class Stats : MonoBehaviour
 {
     public Combatant combatantStats;
 
+    public int level = 1;  //level
+    public int exp = 0;  //exp
     public int health = 20;  //current health
     public int maxHealth = 20;  //maximum health
-    public int attack = 1;  //attack modifier stat
+    public int physAttack = 1;  //attack modifier stat
     public int magicAttack = 1;  //magic attack modifier stat
     public int affinity = 1;  // buff/debuff/status strength modifier stat
     public int resistance = 1;  //damage resistance stat
     public int speed = 1;  //move speed stat
+
+    public Move[] moveset;
 
     private SpriteRenderer spr;
 
@@ -35,9 +39,11 @@ public class Stats : MonoBehaviour
             if (spr != null && combatantStats.sprite != null)
                 spr.sprite = combatantStats.sprite;
         
+            level = combatantStats.level;
+            exp = combatantStats.exp;
             health = combatantStats.health;
             maxHealth = combatantStats.maxHealth;
-            attack = combatantStats.attack;
+            physAttack = combatantStats.physAttack;
             magicAttack = combatantStats.magicAttack;
             affinity = combatantStats.affinity;
             resistance = combatantStats.resistance;

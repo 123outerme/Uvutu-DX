@@ -27,7 +27,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
-        scenesToLoad.Add(SceneManager.LoadSceneAsync("Overworld"));
+        scenesToLoad.Add(SceneManager.LoadSceneAsync(saver.GetSceneToLoad()));
     }
 
     public void ShowStats(bool setting)

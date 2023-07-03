@@ -42,7 +42,7 @@ public class MapLoader : MonoBehaviour
 
             Debug.Log(location.map);
 
-            GameObject mapPrefab = Resources.Load<GameObject>(location.map);
+            GameObject mapPrefab = Resources.Load<GameObject>("Maps/" + location.map);
             GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
             map.transform.SetParent(grid.transform, false);
 

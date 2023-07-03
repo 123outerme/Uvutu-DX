@@ -232,7 +232,7 @@ MonoBehaviour:
   saveDirectory: save
   saveFile: save1.txt
   playerDataObj: {fileID: 1201379868}
-  loadData: 1
+  loadDataOnInit: 1
 --- !u!4 &349189113
 Transform:
   m_ObjectHideFlags: 0
@@ -306,7 +306,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -598744663, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  m_Sprite: {fileID: 1392123364, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1622,6 +1622,7 @@ MonoBehaviour:
   usePosition: 1
   map: 0
   underworldMap: 
+  prestige: 0
   scene: 
   inBattle: 0
   loaded: 0
@@ -1666,14 +1667,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 0}
+  level: 1
+  exp: 0
   health: 20
   maxHealth: 20
-  attack: 1
+  physAttack: 1
   magicAttack: 1
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
+  moveset: []
 --- !u!1 &1220219066
 GameObject:
   m_ObjectHideFlags: 0
@@ -3220,7 +3223,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1197408473, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  m_Sprite: {fileID: -280651777, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
