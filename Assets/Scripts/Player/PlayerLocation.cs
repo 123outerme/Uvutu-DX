@@ -10,6 +10,8 @@ public class PlayerLocation : MonoBehaviour
     public string map = "TestMap";
     public string underworldMap = "";
 
+    public int prestige = 0;
+
     public string scene;
     public bool inBattle = false;
 

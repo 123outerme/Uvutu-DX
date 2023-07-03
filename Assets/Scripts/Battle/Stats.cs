@@ -14,7 +14,6 @@ public class Stats : MonoBehaviour
     public int affinity = 1;  // buff/debuff/status strength modifier stat
     public int resistance = 1;  //damage resistance stat
     public int speed = 1;  //move speed stat
-    public int prestige = 0;  //number of prestiges
 
     private SpriteRenderer spr;
 
@@ -43,7 +42,6 @@ public class Stats : MonoBehaviour
             affinity = combatantStats.affinity;
             resistance = combatantStats.resistance;
             speed = combatantStats.speed;
-            prestige = combatantStats.prestige;
         }
     }
 }

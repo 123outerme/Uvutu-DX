@@ -228,7 +228,6 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
 --- !u!1 &224188239
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,7 +333,6 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
 --- !u!1 &285786832 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2721634216804203383, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
@@ -473,7 +471,6 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
 --- !u!114 &314126950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,6 +487,7 @@ MonoBehaviour:
   usePosition: 0
   map: TestMap
   underworldMap: 
+  prestige: 0
   scene: 
   inBattle: 0
   loaded: 0
@@ -745,7 +743,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203382, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203382, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_AnchorMax.x
@@ -821,7 +819,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203383, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_Name
-      value: Enemy3HealthPanel
+      value: Enemy2HealthPanel
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203383, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_IsActive
@@ -1102,7 +1100,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203382, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203382, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1178,7 +1176,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203383, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_Name
-      value: Enemy2HealthPanel
+      value: Enemy3HealthPanel
       objectReference: {fileID: 0}
     - target: {fileID: 2721634216804203383, guid: c291c5dab69c9fa45a9acb07f9983b07, type: 3}
       propertyPath: m_IsActive
@@ -1296,7 +1294,6 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
 --- !u!1 &1241773298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1334,8 +1331,8 @@ MonoBehaviour:
   playerHealthPanel: {fileID: 1377312238}
   minionHealthPanel: {fileID: 924367293}
   enemy1HealthPanel: {fileID: 354152220}
-  enemy2HealthPanel: {fileID: 336487092}
-  enemy3HealthPanel: {fileID: 285786832}
+  enemy2HealthPanel: {fileID: 285786832}
+  enemy3HealthPanel: {fileID: 336487092}
 --- !u!4 &1241773300
 Transform:
   m_ObjectHideFlags: 0
@@ -1608,8 +1605,8 @@ RectTransform:
   - {fileID: 1942294962}
   - {fileID: 660828649}
   - {fileID: 1372516620}
-  - {fileID: 1194974868}
   - {fileID: 879822163}
+  - {fileID: 1194974868}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1771,7 +1768,6 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
-  prestige: 0
 --- !u!1 &1723629094
 GameObject:
   m_ObjectHideFlags: 0

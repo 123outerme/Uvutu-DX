@@ -24,24 +24,44 @@ public class BattleHandler : MonoBehaviour
     {
         //TODO: decide upon number of enemies and their types and stats
         Stats enemy1Stats = enemy1.GetComponent<Stats>();
-        enemy1Stats.combatantStats = Resources.Load<Combatant>("Combatants/Rat");
+        
+        List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
+        
+        int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
+        
+        enemy1Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy1Pick]);
         enemy1Stats.UpdateStats();
+
+        int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+        if (enemy2Pick >= 0)
+        {
+            Stats enemy2Stats = enemy2.GetComponent<Stats>();
+            enemy2Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy2Pick]);
+            enemy2Stats.UpdateStats();
+        }
+
+        int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+        //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
+        if (enemy2Pick >= 0 && enemy3Pick >= 0)
+        {
+            Stats enemy3Stats = enemy3.GetComponent<Stats>();
+            enemy3Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy3Pick]);
+            enemy3Stats.UpdateStats();
+        }
+        else
+            enemy3Pick = -1;
 
         //TODO: enable health displays for enemies and for minion (if summoned)
         UpdateHealthDisplay(playerHealthPanel, player, true);
-        UpdateHealthDisplay(enemy1HealthPanel, enemy1, true);        
+        UpdateHealthDisplay(enemy1HealthPanel, enemy1, true);
+        UpdateHealthDisplay(enemy2HealthPanel, enemy2, enemy2Pick >= 0);
+        UpdateHealthDisplay(enemy3HealthPanel, enemy3, enemy3Pick >= 0);
     }
 
     // Update is called once per frame
     void Update()
     {
         
-    }
-
-    void UpdateSprite(GameObject obj, bool active)
-    {
-        //TODO: update sprite of the given game object with a given new sprite option
-        obj.SetActive(active);
     }
 
     void UpdateHealthDisplay(GameObject healthPanel, GameObject spriteObj, bool enable)
@@ -55,8 +75,12 @@ public class BattleHandler : MonoBehaviour
             text.text = "???";
 
         if (healthPanel.activeSelf != enable)
-            healthPanel.SetActive(true);
-        Debug.Log(healthPanel.name + " " + healthPanel.activeSelf);
+            healthPanel.SetActive(enable);
+
+        if (spriteObj.activeSelf != enable)
+            spriteObj.SetActive(enable);
+        
+        //Debug.Log(healthPanel.name + " " + healthPanel.activeSelf);
     }
 
     public void DoTurn()

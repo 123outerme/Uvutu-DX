@@ -16,5 +16,4 @@ public class Combatant : ScriptableObject
     public int affinity = 1;  // buff/debuff/status strength modifier stat
     public int resistance = 1;  //damage resistance stat
     public int speed = 1;  //move speed stat
-    public int prestige = 0;  //number of prestiges
 }
