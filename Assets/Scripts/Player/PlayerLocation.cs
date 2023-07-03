@@ -14,6 +14,7 @@ public class PlayerLocation : MonoBehaviour
 
     public string scene = "Overworld";  //start scene on new save
     public bool inBattle = false;
+    public bool exitingBattle = false;
 
     public bool loaded = false;
 

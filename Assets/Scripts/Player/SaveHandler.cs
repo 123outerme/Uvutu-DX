@@ -5,6 +5,19 @@ using System;
 using System.IO;
 using UnityEngine.SceneManagement;
 
+public enum SaveFormat : int
+{
+    Location = 0,
+    PStats = 1,
+    Quests = 2,
+    NPCDictionary = 3,
+    Minion = 4,
+    Enemy1 = 5,
+    Enemy2 = 6,
+    Enemy3 = 7,
+    SaveFileLength = 8
+}
+
 public class SaveHandler : MonoBehaviour
 {
     public string saveDirectory = "save";
@@ -60,10 +73,10 @@ public class SaveHandler : MonoBehaviour
 
         //save what last "gameplay" scene was (for pause menu, etc)
         Scene curScene = SceneManager.GetActiveScene();
-        if (curScene.name == "Overworld" || curScene.name == "Battle")  //scene state that SHOULD be saved
+        if (curScene.name == "Overworld")  //scene state that SHOULD be saved - world scene (overworld or underworld)
             location.scene = curScene.name;
 
-        if (curScene.name == "Battle")
+        if ((curScene.name == "Battle" || location.inBattle) && !location.exitingBattle)  //if we're in battle/about to be in battle and not trying to exit back to the world
         {
             //save current battle state
             location.inBattle = true;
@@ -73,38 +86,24 @@ public class SaveHandler : MonoBehaviour
         else
             location.inBattle = false;
 
+        location.exitingBattle = false;  //disable the exitingBattle flag no matter what, so the state doesn't mess up future saving
+
         //create save folder
         Directory.CreateDirectory(saveDirectory);
+
+        string[] previousSave = new string[(int) SaveFormat.SaveFileLength];
+        if (File.Exists(saveFilePath))
+            previousSave = LoadSaveFileText();
 
         // Create a file to write to.
         using (StreamWriter sw = File.CreateText(saveFilePath))
         {
-            sw.WriteLine(JsonUtility.ToJson(location));
-            sw.WriteLine(JsonUtility.ToJson(playerStats));
-            sw.WriteLine(JsonUtility.ToJson(quests));
-            //sw.WriteLine(JsonUtility.ToJson(inventory));
-            npcDict.GetAll();
-            sw.WriteLine(JsonUtility.ToJson(npcDict));
+            string[] lines = CreateSaveFileText();
 
-            if (minionStats != null)
-                sw.WriteLine(JsonUtility.ToJson(minionStats));
-            else
-                sw.WriteLine("");
-
-            if (enemy1Stats != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy1Stats));
-            else
-                sw.WriteLine("");
-
-            if (enemy2Stats != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy2Stats));
-            else
-                sw.WriteLine("");
-
-            if (enemy3Stats != null)
-                sw.WriteLine(JsonUtility.ToJson(enemy3Stats));
-            else
-                sw.WriteLine("");
+            for(int i = 0; i < lines.Length; i++)
+            {
+                sw.WriteLine(lines[i]);
+            }
         }
         location.loaded = true;
     }
@@ -115,33 +114,27 @@ public class SaveHandler : MonoBehaviour
         {
             TryGetCombatantsStats();
 
-            using (StreamReader sr = File.OpenText(saveFilePath))
-            {
-                bool usePosition = location.usePosition;  //keep usePosition property as the scene demands
-                JsonUtility.FromJsonOverwrite(sr.ReadLine(), location);                
-                location.usePosition = usePosition;  //restore usePosition property after load
-                JsonUtility.FromJsonOverwrite(sr.ReadLine(), playerStats);
-                JsonUtility.FromJsonOverwrite(sr.ReadLine(), quests);
-                //JsonUtility.FromJsonOverwrite(sr.ReadLine(), inventory);
-                JsonUtility.FromJsonOverwrite(sr.ReadLine(), npcDict);
-                npcDict.SetAll();
+            string[] fileLines = LoadSaveFileText();
+            bool usePosition = location.usePosition;  //keep usePosition property as the scene demands
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Location], location);                
+            location.usePosition = usePosition;  //restore usePosition property after load
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PStats], playerStats);
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Quests], quests);
+            //JsonUtility.FromJsonOverwrite(sr.ReadLine(), inventory);
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
+            npcDict.SetAll();
 
-                string minionLine = sr.ReadLine();
-                if (minionLine != "" && minionStats != null)
-                    JsonUtility.FromJsonOverwrite(minionLine, minionStats);
+            if (fileLines[(int) SaveFormat.Minion] != "" && minionStats != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Minion], minionStats);
 
-                string enemy1Line = sr.ReadLine();
-                if (enemy1Line != "" && enemy1Stats != null)
-                    JsonUtility.FromJsonOverwrite(enemy1Line, enemy1Stats);
-                
-                string enemy2Line = sr.ReadLine();
-                if (enemy2Line != "" && enemy2Stats != null)
-                    JsonUtility.FromJsonOverwrite(enemy2Line, enemy2Stats);
+            if (fileLines[(int) SaveFormat.Enemy1] != "" && enemy1Stats != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy1], enemy1Stats);
+            
+            if (fileLines[(int) SaveFormat.Enemy2] != "" && enemy2Stats != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy2], enemy2Stats);
 
-                string enemy3Line = sr.ReadLine();
-                if (enemy3Line != "" && enemy3Stats != null)
-                    JsonUtility.FromJsonOverwrite(enemy3Line, enemy3Stats);
-            }
+            if (fileLines[(int) SaveFormat.Enemy3] != "" && enemy3Stats != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy3], enemy3Stats);
 
             LoadNPCs();
         }
@@ -221,5 +214,50 @@ public class SaveHandler : MonoBehaviour
             return "Battle";
         else
             return location.scene;
+    }
+
+    private string[] CreateSaveFileText()
+    {
+        string[] saveText = new string[(int) SaveFormat.SaveFileLength];
+        saveText[(int) SaveFormat.Location] = JsonUtility.ToJson(location);
+        saveText[(int) SaveFormat.PStats] = JsonUtility.ToJson(playerStats);
+        saveText[(int) SaveFormat.Quests] = JsonUtility.ToJson(quests);
+        //saveText.Add(JsonUtility.ToJson(inventory));
+        npcDict.GetAll();
+        saveText[(int) SaveFormat.NPCDictionary] = JsonUtility.ToJson(npcDict);
+
+        string minionStr = "";
+        if (minionStats != null)
+            minionStr = JsonUtility.ToJson(minionStats);
+        saveText[(int) SaveFormat.Minion] = minionStr;
+
+        string enemy1Str = "";
+        if (enemy1Stats != null)
+            enemy1Str = JsonUtility.ToJson(enemy1Stats);
+        saveText[(int) SaveFormat.Enemy1] = enemy1Str;
+
+        string enemy2Str = "";
+        if (enemy2Stats != null)
+            enemy2Str = JsonUtility.ToJson(enemy2Stats);
+        saveText[(int) SaveFormat.Enemy2] = enemy2Str;
+
+        string enemy3Str = "";
+        if (enemy3Stats != null)
+            enemy3Str = JsonUtility.ToJson(enemy3Stats);
+        saveText[(int) SaveFormat.Enemy3] = enemy3Str;
+
+        return saveText;
+    }
+
+    private string[] LoadSaveFileText()
+    {
+        List<string> saveText = new List<string>();
+        using (StreamReader sr = File.OpenText(saveFilePath))
+        {
+            string line;
+            while((line = sr.ReadLine()) != null)
+                saveText.Add(line);
+        }
+        return saveText.ToArray();
     }
 }

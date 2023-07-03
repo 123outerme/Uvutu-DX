@@ -8,17 +8,20 @@ public enum StatusCondition
     //TODO: create interesting status conditions
 }
 
+//[System.Serializable]
 [CreateAssetMenu(fileName = "New Move", menuName = "Uvutu Move")]
 public class Move : ScriptableObject
 {
-    string moveName;
-    float attackPower = 1f;
-    bool isMagic = false;
-    float physAttackMultiplier = 1.0f;
-    float magicAttackMultiplier = 1.0f;
-    float affinityMultiplier = 1.0f;
-    float resistanceMultiplier = 1.0f;
-    float speedMultiplier = 1.0f;
-    StatusCondition appliedCondition = StatusCondition.None;
-    float conditionChance = 0.0f;
+    public string moveName;
+    public Sprite sprite;
+
+    public float attackPower = 1f;
+    public bool isMagic = false;
+    public float physAttackMultiplier = 1.0f;
+    public float magicAttackMultiplier = 1.0f;
+    public float affinityMultiplier = 1.0f;
+    public float resistanceMultiplier = 1.0f;
+    public float speedMultiplier = 1.0f;
+    public StatusCondition appliedCondition = StatusCondition.None;
+    public float conditionChance = 0.0f;
 }

@@ -18,5 +18,5 @@ public class Combatant : ScriptableObject
     public int resistance = 1;  //damage resistance stat
     public int speed = 1;  //move speed stat
 
-    Move[] moveset = {};
+    public Move[] moveset;
 }

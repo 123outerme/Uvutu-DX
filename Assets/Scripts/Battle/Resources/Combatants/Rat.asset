@@ -23,3 +23,5 @@ MonoBehaviour:
   affinity: 2
   resistance: 1
   speed: 2
+  moveset:
+  - {fileID: 11400000, guid: 3a9b3e3245f6c9b4ababb93e535f2f63, type: 2}

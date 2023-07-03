@@ -31,8 +31,8 @@ public class MapLoader : MonoBehaviour
     {
         if (!disable)
         {
-            Debug.Log("save before loading new map");
-            saver.Save();  //TODO broken?
+            //Debug.Log("save before loading new map");
+            saver.Save();
             
             //destroy each child object in the grid to clear space for the new map
             foreach(Transform child in grid.transform)
@@ -40,7 +40,7 @@ public class MapLoader : MonoBehaviour
                 Destroy(child.gameObject);
             }
 
-            Debug.Log(location.map);
+            //Debug.Log(location.map);
 
             GameObject mapPrefab = Resources.Load<GameObject>("Maps/" + location.map);
             GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;

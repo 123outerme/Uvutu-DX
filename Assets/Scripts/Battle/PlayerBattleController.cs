@@ -23,5 +23,20 @@ public class PlayerBattleController : MonoBehaviour
                     loadScript.LoadPauseMenu();  //pause the game
             }
         }
+
+        if (Input.GetButton("Fire2"))
+        {
+            
+            GameObject loader = GameObject.Find("SceneLoader");
+            if (loader != null)
+            {
+                SceneLoader loadScript = loader.GetComponent<SceneLoader>();
+                if (loadScript != null)
+                {
+                    GetComponent<PlayerLocation>().exitingBattle = true;
+                    loadScript.ResumeGame();
+                }
+            }
+        }
     }
 }

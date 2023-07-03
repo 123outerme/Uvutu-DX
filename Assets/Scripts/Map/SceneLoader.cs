@@ -30,6 +30,7 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadBattle()
     {
+        PlayerLocation location = player.GetComponent<PlayerLocation>();
         SavePlayerData();
         scenesToLoad.Add(SceneManager.LoadSceneAsync("Battle"));
     }
@@ -38,13 +39,19 @@ public class SceneLoader : MonoBehaviour
     {
         SavePlayerData();
         PlayerLocation location = player.GetComponent<PlayerLocation>();
-        scenesToLoad.Add(SceneManager.LoadSceneAsync(location.scene));  //resume from the proper scene
+        string loadScene = location.scene;
+
+        if (location.inBattle)
+            loadScene = "Battle";
+
+        scenesToLoad.Add(SceneManager.LoadSceneAsync(loadScene));  //resume from the proper scene
     }
 
     void SavePlayerData()
     {
         PlayerLocation location = player.GetComponent<PlayerLocation>();
-        location.position = player.transform.position;
+        if (location.usePosition)  //don't overwrite position if the scene does not use saved world position
+            location.position = player.transform.position;
         saver.Save();
     }
 }
