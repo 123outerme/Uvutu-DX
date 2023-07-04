@@ -24,7 +24,7 @@ public class PlayerBattleController : MonoBehaviour
             }
         }
 
-        if (Input.GetButton("Fire2"))
+        if (Input.GetButtonUp("Fire2"))
         {
             
             GameObject loader = GameObject.Find("SceneLoader");

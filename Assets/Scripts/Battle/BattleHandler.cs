@@ -33,12 +33,14 @@ public class BattleHandler : MonoBehaviour
 
         bool startFromLoad = false;
         Stats enemy1Stats = enemy1.GetComponent<Stats>();
+        Debug.Log(enemy1Stats.combatantStats.combatantName);
         Stats enemy2Stats = enemy2.GetComponent<Stats>();
         Stats enemy3Stats = enemy3.GetComponent<Stats>();
 
         if (enemy1Stats.combatantStats.combatantName != "MissingNo.")
             startFromLoad = true;
 
+        //*
         if (!startFromLoad)
         {
             enemy1Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy1Pick]);
@@ -50,13 +52,11 @@ public class BattleHandler : MonoBehaviour
                 enemy2Stats.UpdateStats();
             }
 
-            if (enemy2Pick >= 0 && enemy3Pick >= 0)
+            if (enemy3Pick >= 0)
             {
                 enemy3Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy3Pick]);
                 enemy3Stats.UpdateStats();
             }
-            else
-                enemy3Pick = -1;
         }
         else
         {
@@ -70,8 +70,8 @@ public class BattleHandler : MonoBehaviour
             else
                 enemy3Pick = 0;
         }
+        //*/
 
-        //TODO: enable health displays for enemies and for minion (if summoned)
         UpdateHealthDisplay(playerHealthPanel, player, true);
         UpdateHealthDisplay(minionHealthPanel, minion, false);
         UpdateHealthDisplay(enemy1HealthPanel, enemy1, true);

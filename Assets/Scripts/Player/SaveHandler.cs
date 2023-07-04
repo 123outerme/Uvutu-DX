@@ -91,10 +91,6 @@ public class SaveHandler : MonoBehaviour
         //create save folder
         Directory.CreateDirectory(saveDirectory);
 
-        string[] previousSave = new string[(int) SaveFormat.SaveFileLength];
-        if (File.Exists(saveFilePath))
-            previousSave = LoadSaveFileText();
-
         // Create a file to write to.
         using (StreamWriter sw = File.CreateText(saveFilePath))
         {
@@ -123,7 +119,9 @@ public class SaveHandler : MonoBehaviour
             //JsonUtility.FromJsonOverwrite(sr.ReadLine(), inventory);
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
+            LoadNPCs();
 
+            //*
             if (fileLines[(int) SaveFormat.Minion] != "" && minionStats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Minion], minionStats);
 
@@ -135,8 +133,7 @@ public class SaveHandler : MonoBehaviour
 
             if (fileLines[(int) SaveFormat.Enemy3] != "" && enemy3Stats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy3], enemy3Stats);
-
-            LoadNPCs();
+            //*/
         }
     }
 
@@ -251,13 +248,17 @@ public class SaveHandler : MonoBehaviour
 
     private string[] LoadSaveFileText()
     {
-        List<string> saveText = new List<string>();
-        using (StreamReader sr = File.OpenText(saveFilePath))
+        if (File.Exists(saveFilePath))
         {
-            string line;
-            while((line = sr.ReadLine()) != null)
-                saveText.Add(line);
+            List<string> saveText = new List<string>();
+            using (StreamReader sr = File.OpenText(saveFilePath))
+            {
+                string line;
+                while((line = sr.ReadLine()) != null)
+                    saveText.Add(line);
+            }
+            return saveText.ToArray();
         }
-        return saveText.ToArray();
+        else return new string[(int) SaveFormat.SaveFileLength];
     }
 }

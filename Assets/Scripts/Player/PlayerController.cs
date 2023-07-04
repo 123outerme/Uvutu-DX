@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
         else
             readyToSpeak = false;
         
-        if (Input.GetButton("Fire2"))
+        if (Input.GetButtonUp("Fire2"))
         {
             GameObject loader = GameObject.Find("SceneLoader");
             if (loader != null)

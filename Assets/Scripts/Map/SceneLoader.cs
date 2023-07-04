@@ -30,7 +30,6 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadBattle()
     {
-        PlayerLocation location = player.GetComponent<PlayerLocation>();
         SavePlayerData();
         scenesToLoad.Add(SceneManager.LoadSceneAsync("Battle"));
     }
