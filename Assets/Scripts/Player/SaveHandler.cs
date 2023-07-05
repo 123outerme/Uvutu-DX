@@ -30,7 +30,7 @@ public class SaveHandler : MonoBehaviour
     private PlayerLocation location;
     private Stats playerStats;
 
-    private Quests quests;
+    private QuestInventory quests;
     //private Inventory inventory;
     private NPCDict npcDict;
     
@@ -51,7 +51,7 @@ public class SaveHandler : MonoBehaviour
     {
         location = playerDataObj.GetComponent<PlayerLocation>();
         playerStats = playerDataObj.GetComponent<Stats>();
-        quests = playerDataObj.GetComponent<Quests>();
+        quests = playerDataObj.GetComponent<QuestInventory>();
         //inventory = playerDataObj.GetComponent<Inventory>();
         npcDict = new NPCDict();
 
@@ -153,7 +153,7 @@ public class SaveHandler : MonoBehaviour
     {
         location = playerDataObj.AddComponent<PlayerLocation>() as PlayerLocation;
         playerStats = playerDataObj.AddComponent<Stats>() as Stats;
-        quests = playerDataObj.AddComponent<Quests>() as Quests;
+        quests = playerDataObj.AddComponent<QuestInventory>() as QuestInventory;
         //inventory = playerDataObj.AddCompoenent<Inventory>() as Inventory;
     }
 

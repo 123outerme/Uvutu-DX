@@ -10,7 +10,7 @@ public enum QuestStatus
     Completed
 }
 
-public class Quests : MonoBehaviour
+public class QuestInventory : MonoBehaviour
 {
     public List<Quest> quests;
 
@@ -80,7 +80,9 @@ public class Quests : MonoBehaviour
         {
             QuestStep step = curQuest.GetCurrentStep();
             if (step != null && step.turnInName == turnInName && step.IsCompleted())  //if this step turns in to the NPC we are checking for, and it is completed
+            {
                 pairs.Add(new QuestAndStepPair(step, curQuest));  //add to the list of steps that are about to be turned in
+            }
         }
         return pairs;
     }

@@ -49,6 +49,8 @@ public class QuestStep
 [System.Serializable]
 public class Quest
 {
+    [System.NonSerialized] public QuestItem questItem;
+
     public string name;
     public string description;
     public QuestStep[] steps;
@@ -69,5 +71,15 @@ public class Quest
             return null;  //quest is completed; get no step
 
         return steps[currentStep];
+    }
+
+    public void LoadQuestFromItem(QuestItem qItem)
+    {
+        questItem = qItem;
+        name = questItem.name;
+        description = questItem.description;
+        steps = questItem.steps;
+        startDialogue = new List<string>(questItem.startDialogue);
+        prerequisiteQuestNames = new List<string>(questItem.prerequisiteQuestNames);
     }
 }

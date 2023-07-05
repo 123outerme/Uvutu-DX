@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Stats : MonoBehaviour
 {
-    public Combatant combatantStats;
+    public Combatant combatantStats;  // cannot be [System.NonSerialized] because of MissingNo. combatant used to detect if battle is new or loading from previous save/scene
 
     public string combatantName;  //name
     public int level = 1;  //level

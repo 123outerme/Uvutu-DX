@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffb508c4236179d49801be78b0228512, type: 3}
+  m_Name: Talk to Coconut Head
+  m_EditorClassIdentifier: 
+  name: Talk to Coconut Head
+  description: He wants to talk to you.
+  steps:
+  - description: Give him a little talking!
+    type: 0
+    count: 2
+    objectiveName: Coconut Head
+    turnInName: Coconut Head
+    progress: 0
+    turnInDialogue:
+    - Thanks! You just completed the quest.
+    inProgressDialogue:
+    - Talk to me more!!
+  startDialogue:
+  - After this, please talk to me a couple times!
+  prerequisiteQuestNames: []

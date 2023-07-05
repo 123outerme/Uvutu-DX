@@ -25,11 +25,14 @@ public class WarpTile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        PlayerLocation location = player.GetComponent<PlayerLocation>();
-        location.position = position;
-        location.map = map;
-        Debug.Log("Warp: " + location.map);
-        maploader.LoadMap();
-        location.ApplyPosition();
+        if (player != null)
+        {
+            PlayerLocation location = player.GetComponent<PlayerLocation>();
+            location.position = position;
+            location.map = map;
+            //Debug.Log("Warp: " + location.map);
+            maploader.LoadMap();
+            location.ApplyPosition();
+        }
     }
 }

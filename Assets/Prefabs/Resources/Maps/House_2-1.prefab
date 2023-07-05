@@ -186,24 +186,8 @@ MonoBehaviour:
   - Hello there!
   - I'm giving out a silly quest to travellers.
   dialogueItem: 0
-  quests:
-  - name: Talk to Coconut Head
-    description: He wants to talk to you.
-    steps:
-    - description: Give him a little talking!
-      type: 0
-      count: 2
-      objectiveName: Coconut Head
-      turnInName: Coconut Head
-      progress: 0
-      turnInDialogue:
-      - Thanks! You just completed the quest.
-      inProgressDialogue:
-      - Talk to me more!!
-    currentStep: 0
-    startDialogue:
-    - After this, please talk to me a couple times!
-    prerequisiteQuestNames: []
+  questItems:
+  - {fileID: 11400000, guid: 2bd7a7ce9b3fc3b4bba848f2a6683f3c, type: 2}
   givesQuests: 1
 --- !u!1 &1358153046
 GameObject:

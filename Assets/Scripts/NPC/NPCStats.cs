@@ -61,11 +61,11 @@ public class NPCStats : MonoBehaviour
 
             movement.lastMinusNext = movement.posSteps[movement.step] - state.position;
             movement.startMovement = state.startMovement;
-            Debug.Log("given state is not null.");
+            //Debug.Log("given state is not null.");
         }
         else
         {
-            Debug.Log("given state is null!!");  //This triggers on first load. Why?
+            Debug.Log("given state is null!!");
         }
     }
 }

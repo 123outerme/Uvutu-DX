@@ -15,8 +15,9 @@ public class NPCDialogue : MonoBehaviour
     public List<string> dialogue = new List<string>();
     public int dialogueItem = 0;
 
-    public Quest[] quests;
+    public QuestItem[] questItems;  //for adding quests w/ inspector
     public bool givesQuests = false;
+    private List<Quest> quests = new List<Quest>();  //full list of quests this NPC gives
     private List<Quest> questsToGive = new List<Quest>();  //quests to give the player upon completion of dialogue reading
     private List<QuestAndStepPair> turningInQuestSteps;  //quests the player is turning in upon completion of dialogue reading
     private List<string> curDialogueList = new List<string>();  //the list of all lines of dialogue to present
@@ -26,7 +27,7 @@ public class NPCDialogue : MonoBehaviour
     
     private GameObject player;
     private PlayerController pController;
-    private Quests questsHandler;
+    private QuestInventory questsInventory;
     private TMP_Text dialogueText;
 
     // Start is called before the first frame update
@@ -35,15 +36,23 @@ public class NPCDialogue : MonoBehaviour
         //get some player scripts
         player = GameObject.Find("Player");
         pController = player.GetComponent<PlayerController>();
-        questsHandler = player.GetComponent<Quests>();
+        questsInventory = player.GetComponent<QuestInventory>();
         
         //get movement script for use in pausing movement while dialogue is active
         movement = GetComponent<NPCMovement>();
         prevEnableMoveSetting = movement.enableMovement;
         
+        //copy from QuestItem (scriptable object) to Quest for all quests
+        foreach(QuestItem q in questItems)
+        {
+            Quest newQuest = new Quest();
+            newQuest.LoadQuestFromItem(q);
+            quests.Add(newQuest);
+        }
+
         //get dialogue text component for showing dialogue text
         dialogueText = GameObject.Find("Canvas").transform.Find("Dialogue").gameObject.GetComponent<TMP_Text>();
-        
+
         //set baseline for talk activation delay logic
         dialogProgressTime = Time.realtimeSinceStartup;
     }
@@ -58,10 +67,10 @@ public class NPCDialogue : MonoBehaviour
                 if (!inDialogue && readyDialogue)  //If the NPC is not yet speaking but ready to speak, start dialogue
                 {
                     //tell quest handler to add progress to quest steps that involve talking to this NPC (so progress can be checked below on self-referencing talk quests)
-                    questsHandler.ProgressTalkQuest(gameObject.name);
+                    questsInventory.ProgressTalkQuest(gameObject.name);
 
                     //get all quest steps that are being turned in
-                    turningInQuestSteps = questsHandler.GetQuestStepsForTurnIn(gameObject.name);                
+                    turningInQuestSteps = questsInventory.GetQuestStepsForTurnIn(gameObject.name);                
                     foreach(QuestAndStepPair pair in turningInQuestSteps)
                         curDialogueList.AddRange(pair.step.turnInDialogue); //add all dialogues for all quests being turned in currently
 
@@ -70,15 +79,15 @@ public class NPCDialogue : MonoBehaviour
                     
                     foreach(Quest q in quests)
                     {
-                        if (questsHandler.GetQuestStatus(q.name) == QuestStatus.NotStarted && questsHandler.ArePrereqsCompleted(q.prerequisiteQuestNames))
+                        if (questsInventory.GetQuestStatus(q.name) == QuestStatus.NotStarted && questsInventory.ArePrereqsCompleted(q.prerequisiteQuestNames))
                         {
                             curDialogueList.AddRange(q.startDialogue);  //add start dialogue from quest that is about to be added  
                             questsToGive.Add(q);  //add quest to list of quests to be given once dialogue is closed
                         }
 
-                        if (questsHandler.GetQuestStatus(q.name) == QuestStatus.InProgress)
+                        if (questsInventory.GetQuestStatus(q.name) == QuestStatus.InProgress)
                         {
-                            QuestStep curStep = questsHandler.GetQuestByName(q.name).GetCurrentStep();
+                            QuestStep curStep = questsInventory.GetQuestByName(q.name).GetCurrentStep();
                             //getting from quest handler so we can get the updated quest details
                             if (curStep != null)
                                 curDialogueList.AddRange(curStep.inProgressDialogue); //add in-progress dialogue from currently active quest
@@ -107,11 +116,11 @@ public class NPCDialogue : MonoBehaviour
 
                         //give quest(s) (if any)
                         foreach(Quest q in questsToGive)
-                            questsHandler.AddQuest(q);
+                            questsInventory.AddQuest(q);
                             
                         //turn in quest(s) (if any)
                         foreach(QuestAndStepPair pair in turningInQuestSteps)
-                            questsHandler.TurnInCurrentQuestStep(pair.quest);
+                            questsInventory.TurnInCurrentQuestStep(pair.quest);
 
                         //reset state to disable dialogue mode changes
                         pController.SetMovementLock(false);  //unlock player movement

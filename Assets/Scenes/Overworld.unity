@@ -489,6 +489,7 @@ MonoBehaviour:
   prestige: 0
   scene: 
   inBattle: 0
+  exitingBattle: 0
   loaded: 0
 --- !u!114 &1426036530
 MonoBehaviour:
@@ -516,6 +517,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: 52c7a981b209e214094ca68a89e4ec19, type: 2}
+  combatantName: 
   level: 1
   exp: 0
   health: 20
@@ -525,6 +527,11 @@ MonoBehaviour:
   affinity: 1
   resistance: 1
   speed: 1
+  physAttackMultiplier: 1
+  magicAttackMultiplier: 1
+  affinityMultiplier: 1
+  resistanceMultiplier: 1
+  speedMultiplier: 1
   moveset: []
 --- !u!4 &1446552586 stripped
 Transform:
