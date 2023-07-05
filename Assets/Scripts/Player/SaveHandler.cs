@@ -160,7 +160,7 @@ public class SaveHandler : MonoBehaviour
     public void NewSave()
     {
         AddPlayerSaveComponents();
-
+        playerStats.combatantName = "Player";  //TODO give the player the ability to enter a custom name
         npcDict = new NPCDict();
         Save();
     }

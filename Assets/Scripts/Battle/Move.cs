@@ -9,7 +9,7 @@ public enum StatusCondition
 }
 
 //[System.Serializable]
-[CreateAssetMenu(fileName = "New Move", menuName = "Uvutu Move")]
+[CreateAssetMenu(fileName = "New Move", menuName = "Uvutu/Move")]
 public class Move : ScriptableObject
 {
     public string moveName;
