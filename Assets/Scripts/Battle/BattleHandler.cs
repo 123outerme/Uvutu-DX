@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class BattleHandler : MonoBehaviour
 {
@@ -165,6 +166,20 @@ public class BattleHandler : MonoBehaviour
 
     public void ChooseAttack()
     {
+        Stats currentStats;
+        if (!commandingMinion)
+            currentStats = player.GetComponent<Stats>();
+        else
+            currentStats = minion.GetComponent<Stats>();
+
+        for(int i = 0; i < currentStats.moveset.Length; i++)
+        {
+            string buttonName = "Attack" + (i+1) + "Button";
+            GameObject buttonObj = attackPanel.transform.Find(buttonName).gameObject;
+            buttonObj.transform.Find("Text (TMP)").GetComponent<TMP_Text>().text = currentStats.moveset[i];
+            buttonObj.GetComponent<Button>().interactable = true;
+        }
+
         commandPanel.SetActive(false);
         attackPanel.SetActive(true);
     }
@@ -174,12 +189,15 @@ public class BattleHandler : MonoBehaviour
         //queue attack at player or minion's Stats.moveset[attackIndex]
         if (!commandingMinion)
         {
-            playerMove = playerStats.moveset[attackIndex];
+            Debug.Log(playerStats.moveset[attackIndex]);
+            playerMove = Resources.Load<Move>("Moves/" + playerStats.moveset[attackIndex]);
+            Debug.Log(playerMove.moveName);
         }
         else
         {
-            Stats s = minion.GetComponent<Stats>();
-            minionMove = playerStats.moveset[attackIndex];
+            Debug.Log(minionStats.moveset[attackIndex]);
+            minionMove = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
+            Debug.Log(minionMove.moveName);
         }
 
         SelectActionTarget();
@@ -214,12 +232,12 @@ public class BattleHandler : MonoBehaviour
         //TODO
         if (!commandingMinion)
         {
-            playerMove = Resources.Load<Move>("Guard");
+            playerMove = Resources.Load<Move>("Moves/Guard");
             playerMoveTarget = player;
         }
         else
         {
-            minionMove = Resources.Load<Move>("Guard");
+            minionMove = Resources.Load<Move>("Moves/Guard");
             minionMoveTarget = minion;
         }
         CompleteCommand();
@@ -250,6 +268,12 @@ public class BattleHandler : MonoBehaviour
     {
         commandingMinion = false;
         SetCommandMenuUI();
+    }
+
+    public void ReturnToCommand(GameObject currentPanel)
+    {
+        currentPanel.SetActive(false);
+        commandPanel.SetActive(true);
     }
 
     public void CompleteCommand()

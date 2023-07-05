@@ -116,7 +116,8 @@ public class SaveHandler : MonoBehaviour
             location.usePosition = usePosition;  //restore usePosition property after load
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PStats], playerStats);
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Quests], quests);
-            //JsonUtility.FromJsonOverwrite(sr.ReadLine(), inventory);
+            quests.LoadAllQuestDetails();  //load all Quests (for the details) into each quest tracker that was just loaded from save file
+            //JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Inventory], inventory);
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
             LoadNPCs();
@@ -161,6 +162,8 @@ public class SaveHandler : MonoBehaviour
     {
         AddPlayerSaveComponents();
         playerStats.combatantName = "Player";  //TODO give the player the ability to enter a custom name
+        playerStats.moveset = new string[1];
+        playerStats.moveset[0] = "Slice";  //give the player the Slice to start
         npcDict = new NPCDict();
         Save();
     }

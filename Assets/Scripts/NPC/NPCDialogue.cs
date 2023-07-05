@@ -15,10 +15,9 @@ public class NPCDialogue : MonoBehaviour
     public List<string> dialogue = new List<string>();
     public int dialogueItem = 0;
 
-    public QuestItem[] questItems;  //for adding quests w/ inspector
+    public Quest[] quests;  //list of all quests this NPC gives
     public bool givesQuests = false;
-    private List<Quest> quests = new List<Quest>();  //full list of quests this NPC gives
-    private List<Quest> questsToGive = new List<Quest>();  //quests to give the player upon completion of dialogue reading
+    private List<QuestTracker> questsToGive = new List<QuestTracker>();  //quests to give the player upon completion of dialogue reading
     private List<QuestAndStepPair> turningInQuestSteps;  //quests the player is turning in upon completion of dialogue reading
     private List<string> curDialogueList = new List<string>();  //the list of all lines of dialogue to present
 
@@ -41,14 +40,6 @@ public class NPCDialogue : MonoBehaviour
         //get movement script for use in pausing movement while dialogue is active
         movement = GetComponent<NPCMovement>();
         prevEnableMoveSetting = movement.enableMovement;
-        
-        //copy from QuestItem (scriptable object) to Quest for all quests
-        foreach(QuestItem q in questItems)
-        {
-            Quest newQuest = new Quest();
-            newQuest.LoadQuestFromItem(q);
-            quests.Add(newQuest);
-        }
 
         //get dialogue text component for showing dialogue text
         dialogueText = GameObject.Find("Canvas").transform.Find("Dialogue").gameObject.GetComponent<TMP_Text>();
@@ -82,12 +73,14 @@ public class NPCDialogue : MonoBehaviour
                         if (questsInventory.GetQuestStatus(q.name) == QuestStatus.NotStarted && questsInventory.ArePrereqsCompleted(q.prerequisiteQuestNames))
                         {
                             curDialogueList.AddRange(q.startDialogue);  //add start dialogue from quest that is about to be added  
-                            questsToGive.Add(q);  //add quest to list of quests to be given once dialogue is closed
+                            QuestTracker newQuest = new QuestTracker();
+                            newQuest.LoadDetailsFromQuest(q);
+                            questsToGive.Add(newQuest);  //add quest to list of quests to be given once dialogue is closed
                         }
 
                         if (questsInventory.GetQuestStatus(q.name) == QuestStatus.InProgress)
                         {
-                            QuestStep curStep = questsInventory.GetQuestByName(q.name).GetCurrentStep();
+                            QuestStep curStep = questsInventory.GetQuestByName(q.name).GetCurrentStepInfo();
                             //getting from quest handler so we can get the updated quest details
                             if (curStep != null)
                                 curDialogueList.AddRange(curStep.inProgressDialogue); //add in-progress dialogue from currently active quest
@@ -115,19 +108,19 @@ public class NPCDialogue : MonoBehaviour
                         inDialogue = false;
 
                         //give quest(s) (if any)
-                        foreach(Quest q in questsToGive)
+                        foreach(Quest q in quests)
                             questsInventory.AddQuest(q);
                             
                         //turn in quest(s) (if any)
                         foreach(QuestAndStepPair pair in turningInQuestSteps)
-                            questsInventory.TurnInCurrentQuestStep(pair.quest);
+                            questsInventory.TurnInCurrentQuestStep(pair.quest.name);
 
                         //reset state to disable dialogue mode changes
                         pController.SetMovementLock(false);  //unlock player movement
                         dialogueItem = 0;  //reset current dialogue string index
                         //hide dialogue
                         dialogueText.text = "";  //reset dialogue text to nothing (hide)
-                        questsToGive = new List<Quest>();  //clear list of quests to be given
+                        questsToGive = new List<QuestTracker>();  //clear list of quests to be given
                         turningInQuestSteps = new List<QuestAndStepPair>();  //clear list of quest steps to turn in
                         curDialogueList = new List<string>();  //clear list of dialogue strings
                         movement.enableMovement = prevEnableMoveSetting; //resume NPC movement (if previous setting was enabled)

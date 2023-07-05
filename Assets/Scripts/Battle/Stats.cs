@@ -24,7 +24,7 @@ public class Stats : MonoBehaviour
     public float resistanceMultiplier = 1.0f;  //currently applied resistance multiplier
     public float speedMultiplier = 1.0f;  //currently applied speed multiplier
 
-    public Move[] moveset;
+    public string[] moveset;
 
     private SpriteRenderer spr;
 

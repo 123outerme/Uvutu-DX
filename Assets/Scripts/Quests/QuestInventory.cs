@@ -12,7 +12,7 @@ public enum QuestStatus
 
 public class QuestInventory : MonoBehaviour
 {
-    public List<Quest> quests;
+    public List<QuestTracker> quests;
 
     // Start is called before the first frame update
     void Start()
@@ -29,12 +29,16 @@ public class QuestInventory : MonoBehaviour
     public void AddQuest(Quest q)
     {
         if (GetQuestByName(q.name) == null)
-            quests.Add(q);
+        {
+            QuestTracker newQuest = new QuestTracker();
+            newQuest.LoadDetailsFromQuest(q);
+            quests.Add(newQuest);
+        }
     }
 
-    public Quest GetQuestByName(string name)
+    public QuestTracker GetQuestByName(string name)
     {
-        foreach(Quest curQuest in quests)
+        foreach(QuestTracker curQuest in quests)
         {
             if (name == curQuest.name)
                 return curQuest;
@@ -44,14 +48,14 @@ public class QuestInventory : MonoBehaviour
 
     public QuestStatus GetQuestStatus(string name)
     {
-        Quest entry = GetQuestByName(name);
+        QuestTracker entry = GetQuestByName(name);
         if (entry == null)  //if not found, the player hasn't started it
             return QuestStatus.NotStarted;
 
-        QuestStep curStep = entry.GetCurrentStep();
-        if (curStep != null)  //GetCurrentStep() returns null if quest is complete
+        int step = entry.GetCurrentStepProgress();
+        if (step >= 0)  //GetCurrentStep() returns null if quest is complete
         {
-            if (curStep.IsCompleted())  //if the current step has completed progress, that means the player hasn't turned it in yet
+            if (entry.IsCurrentStepCompleted())  //if the current step has completed progress, that means the player hasn't turned it in yet
                 return QuestStatus.ReadyToTurnInStep;
             else
                 return QuestStatus.InProgress;  //if the current step isn't completed, we're still working on this step
@@ -62,11 +66,11 @@ public class QuestInventory : MonoBehaviour
 
     public bool SetQuestStepProgress(string questName, QuestType type, string objectiveName, int accomplishedCount)
     {
-        Quest q = GetQuestByName(questName);
-        QuestStep step = q.GetCurrentStep();
+        QuestTracker q = GetQuestByName(questName);
+        QuestStep step = q.GetCurrentStepInfo();
         if (step.type == type && step.objectiveName == objectiveName)
         {
-            step.progress = accomplishedCount;
+            q.SetProgressForCurrentStep(accomplishedCount);
             return true;
         }
 
@@ -76,20 +80,21 @@ public class QuestInventory : MonoBehaviour
     public List<QuestAndStepPair> GetQuestStepsForTurnIn(string turnInName)
     {
         List<QuestAndStepPair> pairs = new List<QuestAndStepPair>();  //create a list of quest & quest-step pairs (for completing the quest step, telling the quest to go to the next step)
-        foreach(Quest curQuest in quests)  //for each quest we have
+        foreach(QuestTracker curQuest in quests)  //for each quest we have
         {
-            QuestStep step = curQuest.GetCurrentStep();
-            if (step != null && step.turnInName == turnInName && step.IsCompleted())  //if this step turns in to the NPC we are checking for, and it is completed
+            QuestStep step = curQuest.GetCurrentStepInfo();
+            if (step != null && step.turnInName == turnInName && curQuest.IsCurrentStepCompleted())  //if this step turns in to the NPC we are checking for, and it is completed
             {
-                pairs.Add(new QuestAndStepPair(step, curQuest));  //add to the list of steps that are about to be turned in
+                pairs.Add(new QuestAndStepPair(step, curQuest.quest));  //add to the list of steps that are about to be turned in
             }
         }
         return pairs;
     }
 
-    public void TurnInCurrentQuestStep(Quest q)
+    public void TurnInCurrentQuestStep(string questName)
     {
-        QuestStep step = q.GetCurrentStep();
+        QuestTracker q = GetQuestByName(questName);
+        QuestStep step = q.GetCurrentStepInfo();
         if (step != null)
         {
             //TODO: reward player for quest step completion
@@ -98,7 +103,7 @@ public class QuestInventory : MonoBehaviour
         }
     }
 
-    public bool ArePrereqsCompleted(List<string> prereqs)
+    public bool ArePrereqsCompleted(string[] prereqs)
     {
         foreach(string prereqName in prereqs)
         {
@@ -110,13 +115,21 @@ public class QuestInventory : MonoBehaviour
 
     public void ProgressTalkQuest(string npcName)
     {
-        foreach(Quest curQuest in quests)
+        foreach(QuestTracker curQuest in quests)
         {
-            QuestStep step = curQuest.GetCurrentStep();
-            if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName && !step.IsCompleted())
+            QuestStep step = curQuest.GetCurrentStepInfo();
+            if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName && !curQuest.IsCurrentStepCompleted())
             {
-                step.AddProgress(1);  //add 1 instance of talking as progress!
+                curQuest.AddProgressToCurrentStep(1);  //add 1 instance of talking as progress!
             }
+        }
+    }
+
+    public void LoadAllQuestDetails()
+    {
+        foreach(QuestTracker q in quests)
+        {
+            q.LoadDetailsByName(q.name);
         }
     }
 }

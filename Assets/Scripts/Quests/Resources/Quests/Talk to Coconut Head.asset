@@ -15,12 +15,12 @@ MonoBehaviour:
   name: Talk to Coconut Head
   description: He wants to talk to you.
   steps:
-  - description: Give him a little talking!
+  - name: Talkative Man
+    description: Give him a little talking!
     type: 0
     count: 2
     objectiveName: Coconut Head
     turnInName: Coconut Head
-    progress: 0
     turnInDialogue:
     - Thanks! You just completed the quest.
     inProgressDialogue:
