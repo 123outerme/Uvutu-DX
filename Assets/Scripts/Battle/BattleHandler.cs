@@ -4,8 +4,33 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+public enum BattleActionType
+{
+    Move,
+    UseItem,
+    Flee,
+    None
+}
+
+public class BattleAction
+{
+    public BattleActionType type = BattleActionType.None;
+    public Move move = null;
+    public GameObject target = null;
+    public InventoryItem item = null;
+    public bool escape = false;
+    public GameObject user = null;
+
+    public BattleAction(GameObject actionUser)
+    {
+        user = actionUser;
+    }
+}
+
 public class BattleHandler : MonoBehaviour
 {
+    public int turnCount = 0;
+
     public GameObject player;
     public GameObject minion;
     public GameObject enemy1;
@@ -21,6 +46,7 @@ public class BattleHandler : MonoBehaviour
     public GameObject summonPanel;
     public GameObject commandPanel;
     public GameObject attackPanel;
+    public GameObject targetPanel;
 
     private bool commandingMinion = false;
 
@@ -30,17 +56,11 @@ public class BattleHandler : MonoBehaviour
     private Stats enemy2Stats;
     private Stats enemy3Stats;
 
-    private Move playerMove = null;
-    private GameObject playerMoveTarget = null;
-
-    private Move minionMove = null;
-    private GameObject minionMoveTarget = null;
-    
-    private InventoryItem useItem = null;
-    private GameObject InventoryItemTarget = null;
-
-    private bool playerEscape = false;
-    private bool minionEscape = false;
+    private BattleAction playerAction;
+    private BattleAction minionAction;
+    private BattleAction enemy1Action;
+    private BattleAction enemy2Action;
+    private BattleAction enemy3Action;
 
     private string[] availableEnemyTypes;
 
@@ -121,6 +141,20 @@ public class BattleHandler : MonoBehaviour
         
     }
 
+    public void StartTurn()
+    {
+        //start a new turn, refreshing/updating all variables
+        turnCount++;
+
+        commandingMinion = false;
+        SetCommandMenuUI();
+        playerAction = new BattleAction(player);
+        minionAction = new BattleAction(minion);
+        enemy1Action = new BattleAction(enemy1);
+        enemy2Action = new BattleAction(enemy2);
+        enemy3Action = new BattleAction(enemy3);
+    }
+
     void UpdateHealthDisplay(GameObject healthPanel, GameObject spriteObj, bool enable)
     {
         Stats stats = spriteObj.GetComponent<Stats>();
@@ -162,6 +196,8 @@ public class BattleHandler : MonoBehaviour
 
         summonPanel.SetActive(false);
         commandPanel.SetActive(true);
+
+        StartTurn();
     }
 
     public void ChooseAttack()
@@ -187,39 +223,66 @@ public class BattleHandler : MonoBehaviour
     public void SelectAttack(int attackIndex)
     {
         //queue attack at player or minion's Stats.moveset[attackIndex]
+        string targetFor = "Minion";
+        string moveName = "Attack";
+
         if (!commandingMinion)
         {
             Debug.Log(playerStats.moveset[attackIndex]);
-            playerMove = Resources.Load<Move>("Moves/" + playerStats.moveset[attackIndex]);
-            Debug.Log(playerMove.moveName);
+            playerAction.move = Resources.Load<Move>("Moves/" + playerStats.moveset[attackIndex]);
+            moveName = playerAction.move.moveName;
+            targetFor = playerStats.combatantName;
         }
         else
         {
             Debug.Log(minionStats.moveset[attackIndex]);
-            minionMove = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
-            Debug.Log(minionMove.moveName);
+            minionAction.move = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
+            moveName = minionAction.move.moveName;
         }
 
-        SelectActionTarget();
+        attackPanel.SetActive(false);
+
+        targetFor += "'s " + moveName;
+        
+        SelectActionTarget(targetFor, new string[0] {});
     }
 
-    public void SelectActionTarget()
+    public void SelectActionTarget(string targetFor, string[] validTargets)
     {
-        //depending on action, change "select target" text
-        //enable selection GUI
-    }
-       
+        //NOTE: any panel active before this should be deactivated, and validTargets should be filled, before calling SelectActionTarget() since multiple types of actions & different target options
+        
+        TMP_Text targetForText = targetPanel.transform.Find("TargetForText").GetComponent<TMP_Text>();
+        targetForText.text = "Select a target for " + targetFor + ":";
 
-    public void SetActionTarget()
+        targetPanel.SetActive(true);
+        //TODO enable selection GUI for valid targets only
+    }
+
+    public void CancelSelectActionTarget()
     {
+        targetPanel.SetActive(false);
+        attackPanel.SetActive(true);
+    }  
+
+    public void SetActionTarget(GameObject target)
+    {
+        Stats targetStats = target.GetComponent<Stats>();
+
+        TMP_Text targetText = targetPanel.transform.Find("TargetNameText").GetComponent<TMP_Text>();
+        targetText.text = targetStats.combatantName;
+
+        GameObject buttonObj = targetPanel.transform.Find("ConfirmButton").gameObject;
+        buttonObj.GetComponent<Button>().interactable = true;
+
         if (!commandingMinion)
-        {
-            //set playerTarget
-        }
+            playerAction.target = target;
         else
-        {
-            //set minionTarget
-        }
+            minionAction.target = target;
+    }
+
+    public void ConfirmTarget()
+    {
+        //TODO
     }
 
     public void ChooseItems()
@@ -232,13 +295,13 @@ public class BattleHandler : MonoBehaviour
         //TODO
         if (!commandingMinion)
         {
-            playerMove = Resources.Load<Move>("Moves/Guard");
-            playerMoveTarget = player;
+            playerAction.move = Resources.Load<Move>("Moves/Guard");
+            playerAction.target = player;
         }
         else
         {
-            minionMove = Resources.Load<Move>("Moves/Guard");
-            minionMoveTarget = minion;
+            minionAction.move = Resources.Load<Move>("Moves/Guard");
+            minionAction.target = minion;
         }
         CompleteCommand();
     }
@@ -246,9 +309,9 @@ public class BattleHandler : MonoBehaviour
     public void ChooseEscape()
     {
         if (!commandingMinion)
-            playerEscape = true;
+            playerAction.escape = true;
         else
-            minionEscape = true;
+            minionAction.escape = true;
         
         CompleteCommand();
         //TODO move the escape logic until after fleeing is going to work and notifying the player
@@ -307,6 +370,9 @@ public class BattleHandler : MonoBehaviour
     {
         //TODO: hide some player-specific UI like items or some minion-specific UI like "back to player command"
         TMP_Text chooseCommandNameText = commandPanel.transform.Find("ChooseCommandNameText").GetComponent<TMP_Text>();
+
+        GameObject backButton = commandPanel.transform.Find("BackButton").gameObject;
+
         if (!commandingMinion)
         {
             string playerName = "yourself";
@@ -314,10 +380,12 @@ public class BattleHandler : MonoBehaviour
                 playerName = playerStats.combatantName;
 
             chooseCommandNameText.text = "Give a command for " + playerName + " to carry out:";
+            backButton.SetActive(false);
         }
         else
         {
             chooseCommandNameText.text = "Give a command to your minion:";
+            backButton.SetActive(true);
         }
     }
 
@@ -332,5 +400,8 @@ public class BattleHandler : MonoBehaviour
         //- if move, use the move on the intended target
         //- if item, use the item's effects on the intended target
         //- if flee, attempt to flee
+
+        //after completion, start a new turn
+        StartTurn();
     }
 }
