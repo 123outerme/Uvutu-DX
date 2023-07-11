@@ -4941,7 +4941,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
-        m_MethodName: CompleteCommand
+        m_MethodName: ConfirmTarget
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

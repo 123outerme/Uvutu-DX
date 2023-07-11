@@ -360,6 +360,12 @@ public class BattleHandler : MonoBehaviour
         }
     }
 
+    public void ConfirmTarget()
+    {
+        targetPanel.SetActive(false);
+        CompleteCommand();
+    }
+
     public void ChooseItems()
     {
         //TODO
@@ -479,6 +485,7 @@ public class BattleHandler : MonoBehaviour
         //- if flee, attempt to flee
 
         //after completion, start a new turn
+        commandPanel.SetActive(true);
         StartTurn();
     }
 }
