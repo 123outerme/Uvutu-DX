@@ -16,7 +16,7 @@ public class BattleAction
 {
     public BattleActionType type = BattleActionType.None;
     public Move move = null;
-    public GameObject target = null;
+    public List<GameObject> targets = new List<GameObject>();
     public InventoryItem item = null;
     public bool escape = false;
     public GameObject user = null;
@@ -43,6 +43,12 @@ public class BattleHandler : MonoBehaviour
     public GameObject enemy2HealthPanel;
     public GameObject enemy3HealthPanel;
 
+    public GameObject playerTargetSprite;
+    public GameObject minionTargetSprite;
+    public GameObject enemy1TargetSprite;
+    public GameObject enemy2TargetSprite;
+    public GameObject enemy3TargetSprite;
+
     public GameObject summonPanel;
     public GameObject commandPanel;
     public GameObject attackPanel;
@@ -62,7 +68,7 @@ public class BattleHandler : MonoBehaviour
     private BattleAction enemy2Action;
     private BattleAction enemy3Action;
 
-    private string[] availableEnemyTypes;
+    private string[] availableEnemyTypes; //TODO
 
     // Start is called before the first frame update
     void Start()
@@ -225,6 +231,9 @@ public class BattleHandler : MonoBehaviour
         //queue attack at player or minion's Stats.moveset[attackIndex]
         string targetFor = "Minion";
         string moveName = "Attack";
+        BattleAction action;
+        string selfName = "";
+        string allyName = "";
 
         if (!commandingMinion)
         {
@@ -232,19 +241,61 @@ public class BattleHandler : MonoBehaviour
             playerAction.move = Resources.Load<Move>("Moves/" + playerStats.moveset[attackIndex]);
             moveName = playerAction.move.moveName;
             targetFor = playerStats.combatantName;
+            action = playerAction;
+            selfName = "Player";
+            allyName = "Minion";
         }
         else
         {
             Debug.Log(minionStats.moveset[attackIndex]);
             minionAction.move = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
             moveName = minionAction.move.moveName;
+            //targetFor already == "Minion"
+            action = minionAction;
+            selfName = "Minion";
+            allyName = "Player";
         }
 
         attackPanel.SetActive(false);
 
         targetFor += "'s " + moveName;
-        
-        SelectActionTarget(targetFor, new string[0] {});
+
+        List<string> curValidTargets = new List<string>();
+
+        if (action.move.validTargets == ValidBattleTarget.Self)
+            curValidTargets.Add(selfName);
+
+        if (action.move.validTargets == ValidBattleTarget.Ally || action.move.validTargets == ValidBattleTarget.Allies)
+            curValidTargets.Add(allyName);
+
+        if (action.move.validTargets == ValidBattleTarget.Enemy)
+        {
+            curValidTargets.Add("Enemy1");
+            curValidTargets.Add("Enemy2");
+            curValidTargets.Add("Enemy3");
+        }
+
+        if (action.move.validTargets != ValidBattleTarget.AllAllies && action.move.validTargets != ValidBattleTarget.AllEnemies)
+        {
+            SelectActionTarget(targetFor, curValidTargets.ToArray());
+        }
+        else
+        {
+            action.targets = new List<GameObject>();
+            if (action.move.validTargets == ValidBattleTarget.AllAllies)
+            {
+                action.targets.Add(player);
+                action.targets.Add(minion);
+            }
+            else
+            {
+                //action.move.validTargets == ValidBattleTarget.AllEnemies
+                action.targets.Add(enemy1);
+                action.targets.Add(enemy2);
+                action.targets.Add(enemy3);
+            }
+            CompleteCommand();
+        }
     }
 
     public void SelectActionTarget(string targetFor, string[] validTargets)
@@ -254,35 +305,59 @@ public class BattleHandler : MonoBehaviour
         TMP_Text targetForText = targetPanel.transform.Find("TargetForText").GetComponent<TMP_Text>();
         targetForText.text = "Select a target for " + targetFor + ":";
 
+        //enable selection GUI for valid targets only
+        playerTargetSprite.SetActive(false);
+        minionTargetSprite.SetActive(false);
+        enemy1TargetSprite.SetActive(false);
+        enemy2TargetSprite.SetActive(false);
+        enemy3TargetSprite.SetActive(false);
+
+        foreach(string target in validTargets)
+        {
+            if (target == "Player")
+                playerTargetSprite.SetActive(true);
+
+            if (target == "Minion" && minion.activeSelf)
+                minionTargetSprite.SetActive(true);
+
+            if (target == "Enemy1")
+                enemy1TargetSprite.SetActive(true);
+            
+            if (target == "Enemy2" && enemy2.activeSelf)
+                enemy2TargetSprite.SetActive(true);
+
+            if (target == "Enemy3" && enemy3.activeSelf)
+                enemy3TargetSprite.SetActive(true);
+        }
+
         targetPanel.SetActive(true);
-        //TODO enable selection GUI for valid targets only
     }
 
     public void CancelSelectActionTarget()
     {
         targetPanel.SetActive(false);
         attackPanel.SetActive(true);
-    }  
+    }
 
     public void SetActionTarget(GameObject target)
     {
         Stats targetStats = target.GetComponent<Stats>();
-
         TMP_Text targetText = targetPanel.transform.Find("TargetNameText").GetComponent<TMP_Text>();
-        targetText.text = targetStats.combatantName;
+        targetText.text = targetStats.combatantName + " (" + target.name + ")";
 
         GameObject buttonObj = targetPanel.transform.Find("ConfirmButton").gameObject;
         buttonObj.GetComponent<Button>().interactable = true;
 
         if (!commandingMinion)
-            playerAction.target = target;
+        {
+            playerAction.targets = new List<GameObject>();
+            playerAction.targets.Add(target);
+        }
         else
-            minionAction.target = target;
-    }
-
-    public void ConfirmTarget()
-    {
-        //TODO
+        {
+            minionAction.targets = new List<GameObject>();
+            minionAction.targets.Add(target);
+        }
     }
 
     public void ChooseItems()
@@ -296,12 +371,14 @@ public class BattleHandler : MonoBehaviour
         if (!commandingMinion)
         {
             playerAction.move = Resources.Load<Move>("Moves/Guard");
-            playerAction.target = player;
+            playerAction.targets = new List<GameObject>();
+            playerAction.targets.Add(player);
         }
         else
         {
             minionAction.move = Resources.Load<Move>("Moves/Guard");
-            minionAction.target = minion;
+            minionAction.targets = new List<GameObject>();
+            minionAction.targets.Add(minion);
         }
         CompleteCommand();
     }
