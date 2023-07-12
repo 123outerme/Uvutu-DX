@@ -11,7 +11,7 @@ public enum StatusCondition
 public enum ValidBattleTarget
 {
     Self,  //only valid target is self
-    Ally,  //only valid target is 1 other ally
+    Ally,  //only valid target is 1 non-self ally
     Allies,  //all units on the allied side are a valid target (single-target)
     AllAllies,  //all allies are targeted (multi-target)
     Enemy,  //only valid target is any 1 enemy

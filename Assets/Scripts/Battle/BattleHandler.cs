@@ -180,7 +180,7 @@ public class BattleHandler : MonoBehaviour
         //start a new turn, refreshing/updating all variables
         turnCount++;
 
-        commandingMinion = false;
+        commandingMinion = !player.activeSelf;  //if player is downed, then the minion is the only one to be commanded, otherwise the minion waits until the player's done
         SetCommandMenuUI();
         SetActionTarget(null);
         playerAction = new BattleAction(player);
@@ -421,13 +421,16 @@ public class BattleHandler : MonoBehaviour
             playerAction.move = Resources.Load<Move>("Moves/Guard");
             playerAction.targets = new List<GameObject>();
             playerAction.targets.Add(player);
+            playerAction.type = BattleActionType.Move;
         }
         else
         {
             minionAction.move = Resources.Load<Move>("Moves/Guard");
             minionAction.targets = new List<GameObject>();
             minionAction.targets.Add(minion);
+            minionAction.type = BattleActionType.Move;
         }
+        commandPanel.SetActive(false);
         CompleteCommand();
     }
 
@@ -499,7 +502,7 @@ public class BattleHandler : MonoBehaviour
         else
         {
             chooseCommandNameText.text = "Give a command to your minion:";
-            backButton.SetActive(true);
+            backButton.SetActive(player.activeSelf);  //set the back button active if the player can still be controlled, inactive otherwise
         }
     }
 
@@ -509,8 +512,7 @@ public class BattleHandler : MonoBehaviour
 
         //TODO: simulate whole turn based on player's desired action(s)
         //first: generate enemy actions and targets based on their "tendencies" and the battle status
-
-        //then: sort actions based on combatants' speed (and some random factors?)
+        //and sort actions based on combatants' speed (and some random factors?)
         turnQueue = new PrioQueue<BattleAction, BattleAction>(new BattleActionPriorityComparer());
 
         if (player.activeSelf)
@@ -520,13 +522,22 @@ public class BattleHandler : MonoBehaviour
             turnQueue.Enqueue(minionAction, minionAction);
 
         if (enemy1.activeSelf)
+        {
+            GetEnemyAIDecision(enemy1Stats, enemy1Action);
             turnQueue.Enqueue(enemy1Action, enemy1Action);
+        }
         
         if (enemy2.activeSelf)
+        {
+            GetEnemyAIDecision(enemy2Stats, enemy2Action);
             turnQueue.Enqueue(enemy2Action, enemy2Action);
+        }
         
         if (enemy3.activeSelf)
+        {
+            GetEnemyAIDecision(enemy3Stats, enemy3Action);
             turnQueue.Enqueue(enemy3Action, enemy3Action);
+        }
 
         //finally: play out each action, updating statuses, etc.
         turnPanel.SetActive(true);
@@ -630,9 +641,9 @@ public class BattleHandler : MonoBehaviour
                     actionText += " used " + action.move.moveName;  //using a move on self, allies
 
                 if (action.move.attackPower > 0)
-                    actionText +=  ", dealing ";  //dealt damage
+                    actionText +=  ", dealing";  //dealt damage
                 else if (action.move.attackPower < 0)
-                    actionText += ", healing "; //healing damage
+                    actionText += ", healing"; //healing damage
                 else
                     actionText += "";  //TODO figure out what to say with buffs/debuffs
 
@@ -645,9 +656,13 @@ public class BattleHandler : MonoBehaviour
                         {
                             float damage = action.move.attackPower;
                             if (action.move.isMagic)
-                                damage *= userStats.magicAttack * userStats.magicAttackMultiplier;
+                            {
+                                damage += userStats.magicAttack * userStats.magicAttackMultiplier;
+                            }
                             else
-                                damage *= userStats.physAttack * userStats.physAttackMultiplier;
+                            {
+                                damage += userStats.physAttack * userStats.physAttackMultiplier;
+                            }
                             //TODO take into account target's resistance and resistance multiplier
 
                             damage = Mathf.Round(damage);  //finally, round up decimal points of damage
@@ -656,13 +671,19 @@ public class BattleHandler : MonoBehaviour
                             UpdateHealthDisplay(action.targets[i], true);
 
                             //and update actionText for the full diplay of the turn details
-                            actionText += "" + ((int) damage) + " damage to " + targetStats.combatantName;
+                            if (damage > 0)  //damage, not healing
+                                actionText += " " + ((int) damage) + " damage to " + targetStats.combatantName;
+                            else
+                                actionText += " " + targetStats.combatantName + " by " + ((int) (-1 * damage)) + "HP";
                         }
                         else
                         {
                             //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
                             //TODO
-                            actionText += " buffs to " + targetStats.combatantName;
+                            if (targetStats.combatantName != userStats.combatantName)  //if target is NOT self
+                                actionText += ", buffing " + targetStats.combatantName;
+                            else
+                                actionText += " on self";
                         }
                     }
                     else
@@ -676,7 +697,7 @@ public class BattleHandler : MonoBehaviour
                         {
                             //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
                             //TODO
-                            actionText += " too little, too late for " + targetStats.combatantName;
+                            actionText += ", but too little, too late for " + targetStats.combatantName;
                         }
                     }
 
@@ -687,7 +708,7 @@ public class BattleHandler : MonoBehaviour
                         actionText += " ";  //always add the space with more than one target
 
                         if (i == action.targets.Count - 2)
-                            actionText += "and ";  //if this is the second-to-last target, add an "and"
+                            actionText += "and";  //if this is the second-to-last target, add an "and"
                     }
                 }
                 actionText += ".";
@@ -769,6 +790,80 @@ public class BattleHandler : MonoBehaviour
                 playerStats.ResetMultipliers();
                 loadScript.ResumeGame();
             }
+        }
+    }
+
+    private void GetEnemyAIDecision(Stats enemyStats, BattleAction enemyAction)
+    {
+        //TEMP: testing AI, always uses a Move and randomly selects one from the list, then randomly selects a valid target
+        enemyAction.type = BattleActionType.Move;
+        int moveIndex = Mathf.RoundToInt(Random.Range(0, enemyStats.moveset.Length));
+        enemyAction.move = enemyStats.combatantStats.moveset[moveIndex];
+        GameObject[] targets = EnemyGetValidTargets(enemyAction);
+        
+        if (enemyAction.move.validTargets == ValidBattleTarget.AllAllies || enemyAction.move.validTargets == ValidBattleTarget.AllEnemies)
+        {
+            //all-targeting moves
+            enemyAction.targets = new List<GameObject>();
+            enemyAction.targets.AddRange(targets);
+        }
+        else
+        {
+            //choose a single target
+            int targetIndex = Mathf.RoundToInt(Random.Range(0, targets.Length));
+            enemyAction.targets = new List<GameObject>();
+            enemyAction.targets.Add(targets[targetIndex]);
+        }
+    }
+
+    private GameObject[] EnemyGetValidTargets(BattleAction action)
+    {
+        if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //any enemy
+        {
+            List<GameObject> targets = new List<GameObject>();
+            
+            if (player.activeSelf)
+                targets.Add(player);
+            if (minion.activeSelf)
+                targets.Add(minion);
+
+            return targets.ToArray();  
+        }
+        else
+        {
+            if (action.move.validTargets == ValidBattleTarget.Self)  //only self
+                return new GameObject[1] {action.user};
+
+            if (action.move.validTargets == ValidBattleTarget.Ally)  //non-self allies
+            {
+                List<GameObject> targets = new List<GameObject>();
+
+                if (enemy1.activeSelf)
+                    targets.Add(enemy1);
+                if (enemy2.activeSelf)
+                    targets.Add(enemy2);
+                if (enemy3.activeSelf)
+                    targets.Add(enemy3);
+
+                targets.Remove(action.user);  //remove self from the list
+                return targets.ToArray();
+            }
+
+            if (action.move.validTargets == ValidBattleTarget.Allies || action.move.validTargets == ValidBattleTarget.AllAllies)  //all allies, including self
+            {
+                List<GameObject> targets = new List<GameObject>();
+
+                if (enemy1.activeSelf)
+                    targets.Add(enemy1);
+                if (enemy2.activeSelf)
+                    targets.Add(enemy2);
+                if (enemy3.activeSelf)
+                    targets.Add(enemy3);
+
+                return targets.ToArray();
+            }
+
+            return new GameObject[0];  //default: no targets were calculated
         }
     }
 }
