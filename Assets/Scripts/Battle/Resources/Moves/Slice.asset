@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveName: Slice
   sprite: {fileID: 1952881963, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
-  attackPower: 1
+  attackPower: 6
   isMagic: 0
   physAttackMultiplier: 1.1
   magicAttackMultiplier: 1
@@ -23,3 +23,4 @@ MonoBehaviour:
   speedMultiplier: 1.2
   appliedCondition: 0
   conditionChance: 0
+  validTargets: 4

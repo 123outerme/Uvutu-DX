@@ -350,13 +350,13 @@ public class BattleHandler : MonoBehaviour
 
         foreach(string target in validTargets)
         {
-            if (target == "Player")
+            if (target == "Player" && player.activeSelf)
                 playerTargetSprite.SetActive(true);
 
             if (target == "Minion" && minion.activeSelf)
                 minionTargetSprite.SetActive(true);
 
-            if (target == "Enemy1")
+            if (target == "Enemy1" && enemy1.activeSelf)
                 enemy1TargetSprite.SetActive(true);
             
             if (target == "Enemy2" && enemy2.activeSelf)
@@ -535,7 +535,59 @@ public class BattleHandler : MonoBehaviour
         if (escaping)  //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
             EscapeBattle();
 
-        //TODO: handle combatants dying after losing all HP, and defeating either side
+        //handle combatants dying after losing all HP, and defeating either side
+        int downedPlayers = 0;
+        if (playerStats.health <= 0)
+        {
+            if (player.activeSelf)
+                UpdateHealthDisplay(player, false);
+            downedPlayers++;
+        }
+        
+        if (minionStats.health <= 0)
+        {
+            if (minion.activeSelf)
+                UpdateHealthDisplay(minion, false);
+            downedPlayers++;
+        }
+
+        if (downedPlayers == 2)
+        {
+            //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's position and stats
+            escaping = true;
+            UpdateTurnPanel("You have been defeated.");
+            return;
+        }
+
+        int downedEnemies = 0;
+        if (enemy1Stats.health <= 0)
+        {
+            if (enemy1.activeSelf)
+                UpdateHealthDisplay(enemy1, false);
+            downedEnemies++;
+        }
+
+        if (enemy2Stats.health <= 0)
+        {
+            if (enemy2.activeSelf)
+                UpdateHealthDisplay(enemy2, false);
+            downedEnemies++;
+        }
+
+        if (enemy3Stats.health <= 0)
+        {
+            if (enemy3.activeSelf)
+                UpdateHealthDisplay(enemy3, false);
+            downedEnemies++;
+        }
+
+        if (downedEnemies == 3)
+        {
+            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, then leave the battle
+            escaping = true;
+            UpdateTurnPanel("You defeated all the enemies!");
+            return;
+        }
 
         //do next action, updating statuses, etc.
         //- if move, use the move on the intended target
@@ -547,6 +599,9 @@ public class BattleHandler : MonoBehaviour
             Debug.Log("action " + action.type);
 
             Stats userStats = action.user.GetComponent<Stats>();
+
+            if (userStats.health <= 0)
+                return;  //if the user died before this turn, skip them
 
             string actionText = userStats.combatantName + " passed.";
             
@@ -650,6 +705,7 @@ public class BattleHandler : MonoBehaviour
             if (loadScript != null)
             {
                 player.GetComponent<PlayerLocation>().exitingBattle = true;
+                playerStats.ResetMultipliers();
                 loadScript.ResumeGame();
             }
         }
