@@ -55,6 +55,13 @@ public class Stats : MonoBehaviour
             affinity = combatantStats.affinity;
             resistance = combatantStats.resistance;
             speed = combatantStats.speed;
+
+            if (moveset.Length == 0)
+            {
+                moveset = new string[combatantStats.moveset.Length];
+                for(int i = 0; i < combatantStats.moveset.Length; i++)
+                    moveset[i] = combatantStats.moveset[i].moveName;
+            }
         }
     }
 

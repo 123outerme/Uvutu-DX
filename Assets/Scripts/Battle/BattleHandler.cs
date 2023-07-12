@@ -223,13 +223,15 @@ public class BattleHandler : MonoBehaviour
     public void ChooseMinionSummon()
     {
         //TODO open choose summon menu, then once picked activate the command panel for player turn
+        
+        LoadMinionSummon("Rat");  //TEMP: testing summon feature
     }
 
     public void LoadMinionSummon(string summonName)
     {
         if (summonName != "")
         {
-            minionStats.combatantStats = Resources.Load<Combatant>(summonName);
+            minionStats.combatantStats = Resources.Load<Combatant>("Combatants/" + summonName);
             minionStats.UpdateStats();
 
             UpdateHealthDisplay(minion, true);
@@ -282,6 +284,7 @@ public class BattleHandler : MonoBehaviour
         }
         else
         {
+            Debug.Log("" + attackIndex + ", " + minionStats.moveset.Length);
             Debug.Log(minionStats.moveset[attackIndex]);
             minionAction.move = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
             moveName = minionAction.move.moveName;
@@ -595,14 +598,25 @@ public class BattleHandler : MonoBehaviour
         //- if flee, attempt to flee
         if (turnQueue.GetCount() > 0)
         {
-            BattleAction action = turnQueue.Dequeue();
+            Stats userStats = null;
+            BattleAction action = null;
+            while(userStats == null)  //go until we find an action where the user isn't downed
+            {
+                action = turnQueue.Dequeue();
+
+                if (action == null)  //if the queue is empty
+                {
+                    CompleteTurnPanel();  // the turn is now over
+                    return;
+                }
+
+                userStats = action.user.GetComponent<Stats>();  //get user's stats
+
+                if (userStats.health <= 0)  //if the user is downed
+                    userStats = null;  //set stats to null, signaling to the while loop to keep going until we find one where a user isn't downed, or we completed the turn
+            }
+
             Debug.Log("action " + action.type);
-
-            Stats userStats = action.user.GetComponent<Stats>();
-
-            if (userStats.health <= 0)
-                return;  //if the user died before this turn, skip them
-
             string actionText = userStats.combatantName + " passed.";
             
             if (action.type == BattleActionType.Move)
@@ -613,48 +627,93 @@ public class BattleHandler : MonoBehaviour
                 if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)
                     actionText += " attacked with " + action.move.moveName;  //using a move on enemies
                 else
-                    actionText += " used ";  //using a move on self, allies
+                    actionText += " used " + action.move.moveName;  //using a move on self, allies
 
                 if (action.move.attackPower > 0)
                     actionText +=  ", dealing ";  //dealt damage
+                else if (action.move.attackPower < 0)
+                    actionText += ", healing "; //healing damage
                 else
-                    actionText += ""; //TODO figure out what to say with buffs/debuffs
+                    actionText += "";  //TODO figure out what to say with buffs/debuffs
 
                 for(int i = 0; i < action.targets.Count; i++)
                 {
-                    Stats targetStats = action.targets[i].GetComponent<Stats>();                    
-
-                    if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)
-                    {
-                        float damage = action.move.attackPower;
-                        if (action.move.isMagic)
-                            damage *= userStats.magicAttack * userStats.magicAttackMultiplier;
-                        else
-                            damage *= userStats.physAttack * userStats.physAttackMultiplier;
-                        //TODO take into account target's resistance and resistance multiplier
-
-                        damage = Mathf.Round(damage);  //finally, round up decimal points of damage
-                        targetStats.health -= (int) damage;
-                        Debug.Log(damage);
-                        UpdateHealthDisplay(action.targets[i], true);
-
-                        userStats.RecieveMultipliers(action.move);
-
-                        //and update actionText for the full diplay of the turn details
-                        actionText += "" + ((int) damage) + " damage to " + targetStats.combatantName;
-                        if (i < action.targets.Count - 1)
+                    Stats targetStats = action.targets[i].GetComponent<Stats>();
+                    if (targetStats.health > 0)
+                    {                
+                        if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
                         {
-                            if (action.targets.Count > 2)
-                                actionText += ",";  //only add commas when there are 3+ targets
-                            actionText += " ";  //always add the space with more than one target
+                            float damage = action.move.attackPower;
+                            if (action.move.isMagic)
+                                damage *= userStats.magicAttack * userStats.magicAttackMultiplier;
+                            else
+                                damage *= userStats.physAttack * userStats.physAttackMultiplier;
+                            //TODO take into account target's resistance and resistance multiplier
 
-                            if (i == action.targets.Count - 2)
-                                actionText += "and ";  //if this is the second-to-last target, add an "and"
+                            damage = Mathf.Round(damage);  //finally, round up decimal points of damage
+                            targetStats.health -= (int) damage;
+                            Debug.Log(damage);
+                            UpdateHealthDisplay(action.targets[i], true);
+
+                            //and update actionText for the full diplay of the turn details
+                            actionText += "" + ((int) damage) + " damage to " + targetStats.combatantName;
                         }
                         else
-                            actionText += ".";
+                        {
+                            //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
+                            //TODO
+                            actionText += " buffs to " + targetStats.combatantName;
+                        }
+                    }
+                    else
+                    {
+                        //previous valid target has no health now
+                        if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //
+                        {
+                            actionText = " overkill damage to " + targetStats.combatantName;
+                        }
+                        else
+                        {
+                            //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
+                            //TODO
+                            actionText += " too little, too late for " + targetStats.combatantName;
+                        }
+                    }
+
+                    if (i < action.targets.Count - 1)
+                    {
+                        if (action.targets.Count > 2)
+                            actionText += ",";  //only add commas when there are 3+ targets
+                        actionText += " ";  //always add the space with more than one target
+
+                        if (i == action.targets.Count - 2)
+                            actionText += "and ";  //if this is the second-to-last target, add an "and"
                     }
                 }
+                actionText += ".";
+                
+                userStats.RecieveMultipliers(action.move);
+
+                    if (action.move.HasMultipliers())
+                    {
+                        actionText += " " + userStats.combatantName + " boosts ";
+                        StatMultiplierText[] multipliers = action.move.GetMultipliers();
+
+                        for(int i = 0; i < multipliers.Length; i++)
+                        {
+                            actionText += multipliers[i].statName + " " + multipliers[i].multiplier + "x";
+                            if (i < multipliers.Length - 1)
+                            {
+                                if (multipliers.Length > 2)
+                                    actionText += ",";  //only add commas when there are 3+ targets
+                                actionText += " ";  //always add the space with more than one target
+
+                                if (i == multipliers.Length - 2)
+                                    actionText += "and ";  //if this is the second-to-last target, add an "and"
+                            }
+                        }
+                        actionText += ".";
+                    }
             }
 
             if (action.type == BattleActionType.UseItem)
@@ -674,23 +733,25 @@ public class BattleHandler : MonoBehaviour
             UpdateTurnPanel(actionText);
         }
         else
-        {
-            //after completion, start a new turn
-            turnPanel.SetActive(false);
-            commandPanel.SetActive(true);
-            StartTurn();
-        }
+            CompleteTurnPanel();  //start a new turn
+    }
+
+    private void CompleteTurnPanel()
+    {
+        turnPanel.SetActive(false);
+        commandPanel.SetActive(true);
+        StartTurn();
     }
 
     private void UpdateTurnPanel(string text)
     {
-        Transform turnTextPanel = turnPanel.transform.Find("TurnTextPanel");
-        TMP_Text turnText = turnTextPanel.Find("TurnText").GetComponent<TMP_Text>();
+        TMP_Text turnText = turnPanel.transform.Find("TurnText").GetComponent<TMP_Text>();
         turnText.text = text;
 
-        Vector2 preferredDims = turnText.GetPreferredValues(text);
+        RectTransform rt = turnText.gameObject.GetComponent<RectTransform>();
 
-        RectTransform rt = turnTextPanel.gameObject.GetComponent<RectTransform>();
+        Vector2 preferredDims = turnText.GetPreferredValues(turnText.text, rt.sizeDelta.x, -1);
+        
         //rt.sizeDelta = new Vector2(rt.sizeDelta.x, preferredDims.y);  //change the y dimensions to fit the string
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredDims.y);  //change the height to fit the string
         //NOTE: we have to use this function because we're on stretch mode and it is a different calc than setting the deltas between each corner of the RectTransform
