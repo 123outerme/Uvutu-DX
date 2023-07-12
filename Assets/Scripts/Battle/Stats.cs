@@ -66,4 +66,13 @@ public class Stats : MonoBehaviour
         resistanceMultiplier = 1.0f;  //currently applied resistance multiplier
         speedMultiplier = 1.0f;  //currently applied speed multiplier
     }
+
+    public void RecieveMultipliers(Move m)
+    {
+        physAttackMultiplier *= m.physAttackMultiplier;
+        magicAttackMultiplier *= m.magicAttackMultiplier;
+        affinityMultiplier *= affinityMultiplier;
+        resistanceMultiplier *= resistanceMultiplier;
+        speedMultiplier *= speedMultiplier;
+    }
 }
