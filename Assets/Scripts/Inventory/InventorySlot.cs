@@ -5,8 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class InventorySlot
 {
-    [System.NonSerialized]  //the below field does not get serialized
-    Item item;
+    //[System.NonSerialized]  //the below field does not get serialized
+    public Item item;
 
     public string itemName;
     public ItemType type;

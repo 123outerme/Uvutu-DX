@@ -116,6 +116,7 @@ public class SaveHandler : MonoBehaviour
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Quests], quests);
             quests.LoadAllQuestDetails();  //load all Quests (for the details) into each quest tracker that was just loaded from save file
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Inventory], inventory);
+            inventory.LoadAllInventorySlots();
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
             LoadNPCs();
@@ -211,7 +212,9 @@ public class SaveHandler : MonoBehaviour
         saveText[(int) SaveFormat.PlayerInfo] = JsonUtility.ToJson(playerInfo);
         saveText[(int) SaveFormat.PStats] = JsonUtility.ToJson(playerStats);
         saveText[(int) SaveFormat.Quests] = JsonUtility.ToJson(quests);
+        inventory.RemoveEmptyItemSlots();  //pretty up the state of the inventory
         saveText[(int) SaveFormat.Inventory] = JsonUtility.ToJson(inventory);
+        
         npcDict.GetAll();
         saveText[(int) SaveFormat.NPCDictionary] = JsonUtility.ToJson(npcDict);
 
@@ -229,7 +232,7 @@ public class SaveHandler : MonoBehaviour
         if (enemy3Stats != null)
             enemy3Str = JsonUtility.ToJson(enemy3Stats);
         saveText[(int) SaveFormat.Enemy3] = enemy3Str;
-
+        
         return saveText;
     }
 

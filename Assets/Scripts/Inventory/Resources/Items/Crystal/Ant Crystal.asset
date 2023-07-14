@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc1af99656442c44c8be1e0688ace7f7, type: 3}
-  m_Name: RatCrystal
+  m_Name: Ant Crystal
   m_EditorClassIdentifier: 
-  _ItemName: Rat Crystal
-  minion: {fileID: 11400000, guid: 8f54339114551b44c8057b28e199462c, type: 2}
+  _ItemName: Ant Crystal
+  minion: {fileID: 11400000, guid: 35448b66cd1ebb1478f7b86b581cef6e, type: 2}

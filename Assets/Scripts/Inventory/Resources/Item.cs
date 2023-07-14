@@ -30,4 +30,21 @@ public abstract class Item : ScriptableObject
     public virtual ItemType Type { get; private set; }
 
     public Sprite sprite;
+
+    public static string ItemTypeToString(ItemType type)
+    {
+        if (type == ItemType.Healing)
+            return "Healing";
+
+        if (type == ItemType.Crystal)
+            return "Crystal";
+        
+        if (type == ItemType.Armor)
+            return "Armor";
+
+        if (type == ItemType.Weapon)
+            return "Weapon";
+
+        return "Other";
+    }
 }
