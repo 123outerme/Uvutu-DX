@@ -7,11 +7,11 @@ using UnityEngine.SceneManagement;
 
 public enum SaveFormat : int
 {
-    Location = 0,
+    PlayerInfo = 0,
     PStats = 1,
     Quests = 2,
-    NPCDictionary = 3,
-    Minion = 4,
+    Inventory = 3,
+    NPCDictionary = 4,
     Enemy1 = 5,
     Enemy2 = 6,
     Enemy3 = 7,
@@ -27,19 +27,17 @@ public class SaveHandler : MonoBehaviour
 
     public bool loadDataOnInit = true;
 
-    private PlayerLocation location;
+    private PlayerInfo playerInfo;
     private Stats playerStats;
 
     private QuestInventory quests;
-    //private Inventory inventory;
+    private Inventory inventory;
     private NPCDict npcDict;
     
-    private GameObject minion = null;
     private GameObject enemy1 = null;
     private GameObject enemy2 = null;
     private GameObject enemy3 = null;
 
-    private Stats minionStats = null;
     private Stats enemy1Stats = null;
     private Stats enemy2Stats = null;
     private Stats enemy3Stats = null;
@@ -49,10 +47,10 @@ public class SaveHandler : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        location = playerDataObj.GetComponent<PlayerLocation>();
+        playerInfo = playerDataObj.GetComponent<PlayerInfo>();
         playerStats = playerDataObj.GetComponent<Stats>();
         quests = playerDataObj.GetComponent<QuestInventory>();
-        //inventory = playerDataObj.GetComponent<Inventory>();
+        inventory = playerDataObj.GetComponent<Inventory>();
         npcDict = new NPCDict();
 
         ComputeSavePath();
@@ -74,19 +72,19 @@ public class SaveHandler : MonoBehaviour
         //save what last "gameplay" scene was (for pause menu, etc)
         Scene curScene = SceneManager.GetActiveScene();
         if (curScene.name == "Overworld")  //scene state that SHOULD be saved - world scene (overworld or underworld)
-            location.scene = curScene.name;
+            playerInfo.scene = curScene.name;
 
-        if ((curScene.name == "Battle" || location.inBattle) && !location.exitingBattle)  //if we're in battle/about to be in battle and not trying to exit back to the world
+        if ((curScene.name == "Battle" || playerInfo.inBattle) && !playerInfo.exitingBattle)  //if we're in battle/about to be in battle and not trying to exit back to the world
         {
             //save current battle state
-            location.inBattle = true;
+            playerInfo.inBattle = true;
             
             TryGetCombatantsStats();
         }
         else
-            location.inBattle = false;
+            playerInfo.inBattle = false;
 
-        location.exitingBattle = false;  //disable the exitingBattle flag no matter what, so the state doesn't mess up future saving
+        playerInfo.exitingBattle = false;  //disable the exitingBattle flag no matter what, so the state doesn't mess up future saving
 
         //create save folder
         Directory.CreateDirectory(saveDirectory);
@@ -101,7 +99,7 @@ public class SaveHandler : MonoBehaviour
                 sw.WriteLine(lines[i]);
             }
         }
-        location.loaded = true;
+        playerInfo.loaded = true;
     }
 
     public void Load()
@@ -111,21 +109,18 @@ public class SaveHandler : MonoBehaviour
             TryGetCombatantsStats();
 
             string[] fileLines = LoadSaveFileText();
-            bool usePosition = location.usePosition;  //keep usePosition property as the scene demands
-            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Location], location);                
-            location.usePosition = usePosition;  //restore usePosition property after load
+            bool usePosition = playerInfo.usePosition;  //keep usePosition property as the scene demands
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PlayerInfo], playerInfo);                
+            playerInfo.usePosition = usePosition;  //restore usePosition property after load
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PStats], playerStats);
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Quests], quests);
             quests.LoadAllQuestDetails();  //load all Quests (for the details) into each quest tracker that was just loaded from save file
-            //JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Inventory], inventory);
+            JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Inventory], inventory);
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
             LoadNPCs();
 
             //*
-            if (fileLines[(int) SaveFormat.Minion] != "" && minionStats != null)
-                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Minion], minionStats);
-
             if (fileLines[(int) SaveFormat.Enemy1] != "" && enemy1Stats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy1], enemy1Stats);
             
@@ -152,18 +147,18 @@ public class SaveHandler : MonoBehaviour
 
     public void AddPlayerSaveComponents()
     {
-        location = playerDataObj.AddComponent<PlayerLocation>() as PlayerLocation;
+        playerInfo = playerDataObj.AddComponent<PlayerInfo>() as PlayerInfo;
         playerStats = playerDataObj.AddComponent<Stats>() as Stats;
         quests = playerDataObj.AddComponent<QuestInventory>() as QuestInventory;
-        //inventory = playerDataObj.AddCompoenent<Inventory>() as Inventory;
+        inventory = playerDataObj.AddComponent<Inventory>() as Inventory;
     }
 
     public void NewSave()
     {
         AddPlayerSaveComponents();
-        playerStats.combatantName = "Player";  //TODO give the player the ability to enter a custom name
-        playerStats.moveset = new string[1];
-        playerStats.moveset[0] = "Slice";  //give the player the Slice to start
+        playerStats.combatantStats = Resources.Load<Combatant>("Combatants/Player");
+        playerStats.UpdateStats();
+        playerStats.combatantName = "Uvutu";  //TODO give the player the ability to enter a custom name
         npcDict = new NPCDict();
         Save();
     }
@@ -183,12 +178,6 @@ public class SaveHandler : MonoBehaviour
 
     private void TryGetCombatantsStats()
     {
-        minion = GameObject.Find("Minion");
-        if (minion)
-            minionStats = minion.GetComponent<Stats>();  //if the minion is active, get its stats script
-        else
-            minionStats = null;  //if the minion doesn't exist, then no need to save its stats
-
         enemy1 = GameObject.Find("Enemy1");
         if (enemy1)  //enemy1 should always be active but just in case      
             enemy1Stats = enemy1.GetComponent<Stats>();
@@ -210,26 +199,21 @@ public class SaveHandler : MonoBehaviour
 
     public string GetSceneToLoad()
     {
-        if (location.inBattle)
+        if (playerInfo.inBattle)
             return "Battle";
         else
-            return location.scene;
+            return playerInfo.scene;
     }
 
     private string[] CreateSaveFileText()
     {
         string[] saveText = new string[(int) SaveFormat.SaveFileLength];
-        saveText[(int) SaveFormat.Location] = JsonUtility.ToJson(location);
+        saveText[(int) SaveFormat.PlayerInfo] = JsonUtility.ToJson(playerInfo);
         saveText[(int) SaveFormat.PStats] = JsonUtility.ToJson(playerStats);
         saveText[(int) SaveFormat.Quests] = JsonUtility.ToJson(quests);
-        //saveText.Add(JsonUtility.ToJson(inventory));
+        saveText[(int) SaveFormat.Inventory] = JsonUtility.ToJson(inventory);
         npcDict.GetAll();
         saveText[(int) SaveFormat.NPCDictionary] = JsonUtility.ToJson(npcDict);
-
-        string minionStr = "";
-        if (minionStats != null)
-            minionStr = JsonUtility.ToJson(minionStats);
-        saveText[(int) SaveFormat.Minion] = minionStr;
 
         string enemy1Str = "";
         if (enemy1Stats != null)

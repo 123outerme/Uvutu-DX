@@ -17,7 +17,7 @@ public class BattleAction
     public BattleActionType type = BattleActionType.None;
     public Move move = null;
     public List<GameObject> targets = new List<GameObject>();
-    public InventoryItem item = null;
+    public InventorySlot item = null;
     public GameObject user = null;
 
     public BattleAction(GameObject actionUser)
@@ -71,6 +71,8 @@ public class BattleHandler : MonoBehaviour
     public GameObject targetPanel;
     public GameObject turnPanel;
 
+    public bool startOfBattle = true;
+
     private bool commandingMinion = false;
 
     private Stats playerStats;
@@ -101,16 +103,10 @@ public class BattleHandler : MonoBehaviour
         nameToHealthPanelMap[enemy2.name] = enemy2HealthPanel;
         nameToHealthPanelMap[enemy3.name] = enemy3HealthPanel;
 
-        //TODO: decide upon selection of enemy types
-        List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
-        //randomly generate 1-3 enemies to fight
-        //TODO: weighted randomness, random level within appropriate range for location
-        int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
-        int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
-        int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
-        //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
-
         bool startFromLoad = false;
+
+        bool playerActive = false, minionActive = false, enemy1Active = false, enemy2Active = false, enemy3Active = false;
+
         playerStats = player.GetComponent<Stats>();
         minionStats = minion.GetComponent<Stats>();
         enemy1Stats = enemy1.GetComponent<Stats>();
@@ -121,10 +117,21 @@ public class BattleHandler : MonoBehaviour
         if (enemy1Stats.combatantStats.combatantName != "MissingNo.")
             startFromLoad = true;
 
-        //*
         if (!startFromLoad)
         {
             //new battle
+             //TODO: decide upon selection of enemy types
+        List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
+        //randomly generate 1-3 enemies to fight
+        //TODO: weighted randomness, random level within appropriate range for location
+        int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
+        int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+        int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+        //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
+
+            playerActive = true;
+            enemy1Active = true;
+
             playerStats.ResetMultipliers();
             minionStats.ResetMultipliers();
             enemy1Stats.ResetMultipliers();
@@ -138,34 +145,41 @@ public class BattleHandler : MonoBehaviour
             {
                 enemy2Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy2Pick]);
                 enemy2Stats.UpdateStats();
+                enemy2Active = true;
             }
 
             if (enemy3Pick >= 0)
             {
                 enemy3Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy3Pick]);
                 enemy3Stats.UpdateStats();
+                enemy3Active = true;
             }
         }
         else
         {
             //load battle data from pause or save during battle
-            //set enabled flag for below, pick ID does not matter for enemy option after this
-            if (enemy2Stats.combatantStats.combatantName == "MissingNo.")
-                enemy2Pick = -1;
-            else
-                enemy2Pick = 0;
-            if (enemy3Stats.combatantStats.combatantName == "MissingNo.")
-                enemy3Pick = -1;
-            else
-                enemy3Pick = 0;
-        }
-        //*/
+            //set enabled flag for below
+            if (!(playerStats.combatantStats.combatantName == "MissingNo." || playerStats.health <= 0))
+                playerActive = true;
 
-        UpdateHealthDisplay(player, true);
-        UpdateHealthDisplay(minion, false);
-        UpdateHealthDisplay(enemy1, true);
-        UpdateHealthDisplay(enemy2, enemy2Pick >= 0);
-        UpdateHealthDisplay(enemy3, enemy3Pick >= 0);
+            if (!(minionStats.combatantStats.combatantName == "MissingNo." || minionStats.health <= 0))
+                minionActive = true;
+
+            if (!(enemy1Stats.combatantStats.combatantName == "MissingNo." || enemy1Stats.health <= 0))
+                enemy1Active = true;
+
+            if (!(enemy2Stats.combatantStats.combatantName == "MissingNo." || enemy2Stats.health <= 0))
+                enemy2Active = true;
+
+            if (!(enemy3Stats.combatantStats.combatantName == "MissingNo." || enemy3Stats.health <= 0))
+                enemy3Active = true;
+        }
+
+        UpdateHealthDisplay(player, playerActive);
+        UpdateHealthDisplay(minion, minionActive);
+        UpdateHealthDisplay(enemy1, enemy1Active);
+        UpdateHealthDisplay(enemy2, enemy2Active);
+        UpdateHealthDisplay(enemy3, enemy3Active);
         SetCommandMenuUI();  //set command menu text for the first time
     }
 
@@ -240,6 +254,7 @@ public class BattleHandler : MonoBehaviour
         summonPanel.SetActive(false);
         commandPanel.SetActive(true);
 
+        startOfBattle = false;
         StartTurn();
     }
 
@@ -441,6 +456,7 @@ public class BattleHandler : MonoBehaviour
         else
             minionAction.type = BattleActionType.Escape;
         
+        commandPanel.SetActive(false);
         CompleteCommand();
     }
 
@@ -546,8 +562,12 @@ public class BattleHandler : MonoBehaviour
 
     public void DoNextAction()
     {
-        if (escaping)  //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
+        if (escaping)
+        {
+            //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
             EscapeBattle();
+            return;  //don't show the next turn starting in the UI
+        }
 
         //handle combatants dying after losing all HP, and defeating either side
         int downedPlayers = 0;
@@ -663,7 +683,8 @@ public class BattleHandler : MonoBehaviour
                             {
                                 damage += userStats.physAttack * userStats.physAttackMultiplier;
                             }
-                            //TODO take into account target's resistance and resistance multiplier
+                            //TODO take into account target's resistance and resistance multiplier better
+                            damage -= targetStats.resistance * targetStats.resistanceMultiplier;
 
                             damage = Mathf.Round(damage);  //finally, round up decimal points of damage
                             targetStats.health -= (int) damage;
@@ -786,7 +807,7 @@ public class BattleHandler : MonoBehaviour
             SceneLoader loadScript = loader.GetComponent<SceneLoader>();
             if (loadScript != null)
             {
-                player.GetComponent<PlayerLocation>().exitingBattle = true;
+                player.GetComponent<PlayerInfo>().exitingBattle = true;
                 playerStats.ResetMultipliers();
                 loadScript.ResumeGame();
             }

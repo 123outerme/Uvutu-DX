@@ -5,7 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Crystal", menuName = "Uvutu/Items/Crystal")]
 public class Crystal : Item
 {
-    //public ItemType type = ItemType.Crystal;
+    public override ItemType Type { get { return ItemType.Crystal; } }
 
-    //TODO: crystal-related methods
+    public Combatant minion;
+
+    //TODO: crystal-related methods (if any)
 }

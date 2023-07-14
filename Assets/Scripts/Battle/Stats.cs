@@ -56,7 +56,7 @@ public class Stats : MonoBehaviour
             resistance = combatantStats.resistance;
             speed = combatantStats.speed;
 
-            if (moveset.Length == 0)
+            if (moveset == null || moveset.Length == 0)
             {
                 moveset = new string[combatantStats.moveset.Length];
                 for(int i = 0; i < combatantStats.moveset.Length; i++)

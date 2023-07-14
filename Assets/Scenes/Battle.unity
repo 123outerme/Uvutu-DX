@@ -1250,6 +1250,7 @@ GameObject:
   - component: {fileID: 314126946}
   - component: {fileID: 314126948}
   - component: {fileID: 314126950}
+  - component: {fileID: 314126951}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1349,6 +1350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c78a46db04cf03d4f91b71844be7430b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  battleHandler: {fileID: 1241773299}
 --- !u!114 &314126949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1395,10 +1397,25 @@ MonoBehaviour:
   map: TestMap
   underworldMap: 
   prestige: 0
+  statPoints: 0
   scene: 
   inBattle: 0
   exitingBattle: 0
+  turnCount: 0
   loaded: 0
+--- !u!114 &314126951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314126943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1990f9c0b07b01747a3e62410f59ce24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items: []
 --- !u!1 &314202261
 GameObject:
   m_ObjectHideFlags: 0
@@ -4506,6 +4523,7 @@ MonoBehaviour:
   attackPanel: {fileID: 449235635}
   targetPanel: {fileID: 953340962}
   turnPanel: {fileID: 981860971083511696}
+  startOfBattle: 1
 --- !u!4 &1241773300
 Transform:
   m_ObjectHideFlags: 0

@@ -35,14 +35,14 @@ public class PauseMenu : MonoBehaviour
         statsPanel.SetActive(setting);
     }
 
-    public void ShowInventory()
+    public void ShowInventory(bool setting)
     {
-        //TODO
+        inventoryPanel.SetActive(setting);
     }
 
-    public void ShowQuests()
+    public void ShowQuests(bool setting)
     {
-        //TODO
+        questsPanel.SetActive(setting);
     }
 
     public void OpenSettings()

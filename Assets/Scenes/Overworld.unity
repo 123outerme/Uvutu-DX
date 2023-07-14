@@ -332,6 +332,7 @@ GameObject:
   - component: {fileID: 1426036527}
   - component: {fileID: 1426036528}
   - component: {fileID: 1426036531}
+  - component: {fileID: 1426036532}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -487,6 +488,7 @@ MonoBehaviour:
   map: TestMap
   underworldMap: 
   prestige: 0
+  statPoints: 0
   scene: 
   inBattle: 0
   exitingBattle: 0
@@ -533,6 +535,19 @@ MonoBehaviour:
   resistanceMultiplier: 1
   speedMultiplier: 1
   moveset: []
+--- !u!114 &1426036532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426036523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1990f9c0b07b01747a3e62410f59ce24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items: []
 --- !u!4 &1446552586 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5216746890708783459, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
@@ -739,7 +754,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 799660635}
-  playerLocationParent: {fileID: 1426036523}
+  PlayerInfoParent: {fileID: 1426036523}
   disable: 0
 --- !u!4 &1696662600
 Transform:

@@ -37,10 +37,10 @@ public class SceneLoader : MonoBehaviour
     public void ResumeGame()
     {
         SavePlayerData();
-        PlayerLocation location = player.GetComponent<PlayerLocation>();
-        string loadScene = location.scene;
+        PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
+        string loadScene = playerInfo.scene;
 
-        if (location.inBattle)
+        if (playerInfo.inBattle)
             loadScene = "Battle";
 
         scenesToLoad.Add(SceneManager.LoadSceneAsync(loadScene));  //resume from the proper scene
@@ -48,9 +48,9 @@ public class SceneLoader : MonoBehaviour
 
     void SavePlayerData()
     {
-        PlayerLocation location = player.GetComponent<PlayerLocation>();
-        if (location.usePosition)  //don't overwrite position if the scene does not use saved world position
-            location.position = player.transform.position;
+        PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
+        if (playerInfo.usePosition)  //don't overwrite position if the scene does not use saved world position
+            playerInfo.position = player.transform.position;
         saver.Save();
     }
 }

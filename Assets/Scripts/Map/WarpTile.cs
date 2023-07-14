@@ -27,12 +27,12 @@ public class WarpTile : MonoBehaviour
     {
         if (player != null)
         {
-            PlayerLocation location = player.GetComponent<PlayerLocation>();
-            location.position = position;
-            location.map = map;
-            //Debug.Log("Warp: " + location.map);
+            PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
+            playerInfo.position = position;
+            playerInfo.map = map;
+            //Debug.Log("Warp: " + playerInfo.map);
             maploader.LoadMap();
-            location.ApplyPosition();
+            playerInfo.ApplyPosition();
         }
     }
 }

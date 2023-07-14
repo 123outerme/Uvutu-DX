@@ -12,9 +12,22 @@ public enum ItemType
     Other
 }
 
-[CreateAssetMenu(fileName = "New Item", menuName = "Uvutu/Items/Item")]
-public class Item : ScriptableObject
+public abstract class Item : ScriptableObject
 {
-    public string itemName;
-    public ItemType type;
+    [SerializeField]
+    private string _ItemName;
+
+    [SerializeField]
+    private string _Description;
+
+    [SerializeField]
+    private int _MaxCarryable;
+
+    public string ItemName => _ItemName;
+    public string Description => _Description;
+    public int MaxCarryable => _MaxCarryable; 
+
+    public virtual ItemType Type { get; private set; }
+
+    public Sprite sprite;
 }

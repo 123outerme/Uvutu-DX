@@ -5,17 +5,17 @@ using UnityEngine;
 public class MapLoader : MonoBehaviour
 {
     public GameObject grid;
-    public GameObject playerLocationParent;
+    public GameObject PlayerInfoParent;
     public bool disable = false;
 
-    private PlayerLocation location;
+    private PlayerInfo playerInfo;
 
     private SaveHandler saver;
 
     // Start is called before the first frame update
     void Start()
     {
-        location = playerLocationParent.GetComponent<PlayerLocation>();
+        playerInfo = PlayerInfoParent.GetComponent<PlayerInfo>();
         saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
 
         LoadMap();
@@ -40,9 +40,9 @@ public class MapLoader : MonoBehaviour
                 Destroy(child.gameObject);
             }
 
-            //Debug.Log(location.map);
+            //Debug.Log(playerInfo.map);
 
-            GameObject mapPrefab = Resources.Load<GameObject>("Maps/" + location.map);
+            GameObject mapPrefab = Resources.Load<GameObject>("Maps/" + playerInfo.map);
             GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
             map.transform.SetParent(grid.transform, false);
 
