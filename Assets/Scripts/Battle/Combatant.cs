@@ -9,7 +9,6 @@ public class Combatant : ScriptableObject
     public Sprite sprite;
     
     public int level = 1;  //current level
-    public int health = 20;  //current health
     public int maxHealth = 20;  //maximum health
     public int physAttack = 1;  //attack modifier stat
     public int magicAttack = 1;  //magic attack modifier stat

@@ -26,6 +26,18 @@ public class Inventory : MonoBehaviour
         return items.ToArray();
     }
 
+    public InventorySlot GetItemSlot(string name)
+    {
+        InventorySlot slot = null;
+        foreach(InventorySlot s in items)
+        {
+            if (s.itemName == name)
+                slot = s;
+        }
+
+        return slot;
+    }
+
     public void AddItemToInventory(Item i)
     {
         foreach(InventorySlot slot in items)

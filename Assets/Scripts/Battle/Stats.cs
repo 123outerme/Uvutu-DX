@@ -10,7 +10,7 @@ public class Stats : MonoBehaviour
     public string combatantName;  //name
     public int level = 1;  //level
     public int exp = 0;  //exp
-    public int health = 20;  //current health
+    public int health = -1;  //current health (-1 means fill in from max health upon Combatant load)
     public int maxHealth = 20;  //maximum health
     public int physAttack = 1;  //attack modifier stat
     public int magicAttack = 1;  //magic attack modifier stat
@@ -48,7 +48,8 @@ public class Stats : MonoBehaviour
 
             combatantName = combatantStats.combatantName;
             level = combatantStats.level;
-            health = combatantStats.health;
+            if (health == -1)
+                health = combatantStats.maxHealth;
             maxHealth = combatantStats.maxHealth;
             physAttack = combatantStats.physAttack;
             magicAttack = combatantStats.magicAttack;

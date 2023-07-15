@@ -18,7 +18,6 @@ public class PlayerInfo : MonoBehaviour
 
     public bool inBattle = false;
     public bool exitingBattle = false;
-    public int turnCount = 0;
 
     public bool loaded = false;
 

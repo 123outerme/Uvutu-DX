@@ -88,6 +88,19 @@ public class PrioQueue<TElement, TPriority>
             return default(TElement);
     }
 
+    public void Remove(TElement element)
+    {
+        PrioQueueItem<TElement, TPriority> removeItem = null;
+        foreach(PrioQueueItem<TElement, TPriority> item in queueList)
+        {
+            if (EqualityComparer<TElement>.Default.Equals(item.element, element))
+                removeItem = item;
+        }
+
+        if (removeItem != null)
+            queueList.Remove(removeItem);
+    }
+
     public void Clear()
     {
         queueList.Clear();

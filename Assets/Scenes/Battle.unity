@@ -345,10 +345,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: ReturnToCommand
-        m_Mode: 2
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 449235635}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1402,7 +1402,6 @@ MonoBehaviour:
   scene: 
   inBattle: 0
   exitingBattle: 0
-  turnCount: 0
   loaded: 0
 --- !u!114 &314126951
 MonoBehaviour:
@@ -1838,10 +1837,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: SetActionTarget
-        m_Mode: 2
+        m_Mode: 5
         m_Arguments:
-          m_ObjectArgument: {fileID: 224188239}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Minion
@@ -3101,10 +3100,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: SetActionTarget
-        m_Mode: 2
+        m_Mode: 5
         m_Arguments:
-          m_ObjectArgument: {fileID: 1691551934}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Enemy1
@@ -4343,10 +4342,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: SetActionTarget
-        m_Mode: 2
+        m_Mode: 5
         m_Arguments:
-          m_ObjectArgument: {fileID: 1204846691}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Enemy2
@@ -4816,7 +4815,44 @@ MonoBehaviour:
   targetPanel: {fileID: 953340962}
   turnPanel: {fileID: 981860971083511696}
   overviewPanel: {fileID: 1389423993}
-  startOfBattle: 1
+  playerAction:
+    type: 0
+    moveName: 
+    itemName: 
+    targetStrings: []
+    nameUser: 
+  minionAction:
+    type: 0
+    moveName: 
+    itemName: 
+    targetStrings: []
+    nameUser: 
+  enemy1Action:
+    type: 0
+    moveName: 
+    itemName: 
+    targetStrings: []
+    nameUser: 
+  enemy2Action:
+    type: 0
+    moveName: 
+    itemName: 
+    targetStrings: []
+    nameUser: 
+  enemy3Action:
+    type: 0
+    moveName: 
+    itemName: 
+    targetStrings: []
+    nameUser: 
+  battleOverviewAvailable: 1
+  battleState:
+    view: 0
+    commandingMinion: 0
+    turnCount: 0
+    battleStarted: 0
+    selectedTarget: 
+  overview: {fileID: 0}
 --- !u!4 &1241773300
 Transform:
   m_ObjectHideFlags: 0
@@ -5054,10 +5090,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: SetActionTarget
-        m_Mode: 2
+        m_Mode: 5
         m_Arguments:
-          m_ObjectArgument: {fileID: 314126943}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Player
@@ -6169,7 +6205,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
-        m_MethodName: DoNextAction
+        m_MethodName: FinishNextAction
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8634,10 +8670,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1241773299}
         m_TargetAssemblyTypeName: BattleHandler, Assembly-CSharp
         m_MethodName: SetActionTarget
-        m_Mode: 2
+        m_Mode: 5
         m_Arguments:
-          m_ObjectArgument: {fileID: 183232435}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: Enemy3

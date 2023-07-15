@@ -12,10 +12,17 @@ public enum SaveFormat : int
     Quests = 2,
     Inventory = 3,
     NPCDictionary = 4,
-    Enemy1 = 5,
-    Enemy2 = 6,
-    Enemy3 = 7,
-    SaveFileLength = 8
+    Minion = 5,
+    Enemy1 = 6,
+    Enemy2 = 7,
+    Enemy3 = 8,
+    PlayerAction = 9,
+    MinionAction = 10,
+    Enemy1Action = 11,
+    Enemy2Action = 12,
+    Enemy3Action = 13,
+    CurrentBattleState = 14,
+    SaveFileLength = 15
 }
 
 public class SaveHandler : MonoBehaviour
@@ -33,14 +40,27 @@ public class SaveHandler : MonoBehaviour
     private QuestInventory quests;
     private Inventory inventory;
     private NPCDict npcDict;
-    
+
+    private BattleHandler battleHandler = null;
+
+    //NOTE: the reason why I keep local copies of the above and below is so that Loading/Saving battle state while in the pause menu and quitting keeps the state long enough to write
+    private GameObject minion = null;
     private GameObject enemy1 = null;
     private GameObject enemy2 = null;
     private GameObject enemy3 = null;
 
+    private Stats minionStats = null;
     private Stats enemy1Stats = null;
     private Stats enemy2Stats = null;
     private Stats enemy3Stats = null;
+
+    private BattleAction playerAction = null;
+    private BattleAction minionAction = null;
+    private BattleAction enemy1Action = null;
+    private BattleAction enemy2Action = null;
+    private BattleAction enemy3Action = null;
+
+    private BattleState currentBattleState = null;
     
     private string saveFilePath;
 
@@ -79,7 +99,7 @@ public class SaveHandler : MonoBehaviour
             //save current battle state
             playerInfo.inBattle = true;
             
-            TryGetCombatantsStats();
+            TryGetBattleHandler();
         }
         else
             playerInfo.inBattle = false;
@@ -89,11 +109,11 @@ public class SaveHandler : MonoBehaviour
         //create save folder
         Directory.CreateDirectory(saveDirectory);
 
+        string[] lines = CreateSaveFileText(playerInfo.inBattle);
+
         // Create a file to write to.
         using (StreamWriter sw = File.CreateText(saveFilePath))
         {
-            string[] lines = CreateSaveFileText();
-
             for(int i = 0; i < lines.Length; i++)
             {
                 sw.WriteLine(lines[i]);
@@ -106,7 +126,7 @@ public class SaveHandler : MonoBehaviour
     {
         if (File.Exists(saveFilePath))
         {
-            TryGetCombatantsStats();
+            TryGetBattleHandler();
 
             string[] fileLines = LoadSaveFileText();
             
@@ -126,17 +146,36 @@ public class SaveHandler : MonoBehaviour
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
             LoadNPCs();
-
-            //*
+            
+            if (fileLines[(int) SaveFormat.Minion] != "" && minionStats != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Minion], minionStats);
+            
             if (fileLines[(int) SaveFormat.Enemy1] != "" && enemy1Stats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy1], enemy1Stats);
-            
+
             if (fileLines[(int) SaveFormat.Enemy2] != "" && enemy2Stats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy2], enemy2Stats);
 
             if (fileLines[(int) SaveFormat.Enemy3] != "" && enemy3Stats != null)
                 JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy3], enemy3Stats);
-            //*/
+
+            if (fileLines[(int) SaveFormat.PlayerAction] != "" && playerAction != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PlayerAction], playerAction);
+
+            if (fileLines[(int) SaveFormat.MinionAction] != "" && minionAction != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.MinionAction], minionAction);
+
+            if (fileLines[(int) SaveFormat.Enemy1Action] != "" && enemy1Action != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy1Action], enemy1Action);
+
+            if (fileLines[(int) SaveFormat.Enemy2Action] != "" && enemy2Action != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy2Action], enemy2Action);
+
+            if (fileLines[(int) SaveFormat.Enemy3Action] != "" && enemy3Action != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Enemy3Action], enemy3Action);
+
+            if (fileLines[(int) SaveFormat.CurrentBattleState] != "" && currentBattleState != null)
+                JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.CurrentBattleState], currentBattleState);
         }
     }
 
@@ -183,25 +222,56 @@ public class SaveHandler : MonoBehaviour
         saveFilePath = Path.Combine(paths);
     }
 
-    private void TryGetCombatantsStats()
+    private void TryGetBattleHandler()
     {
-        enemy1 = GameObject.Find("Enemy1");
-        if (enemy1)  //enemy1 should always be active but just in case      
-            enemy1Stats = enemy1.GetComponent<Stats>();
+        GameObject handlerObj = GameObject.Find("BattleHandler");
+        if (handlerObj != null)
+            battleHandler = handlerObj.GetComponent<BattleHandler>();
         else
-            enemy1Stats = null;
+            battleHandler = null;
 
-        enemy2 = GameObject.Find("Enemy2");
-        if (enemy2)
-            enemy2Stats = enemy2.GetComponent<Stats>();
-        else
-            enemy2Stats = null;
+            minion = GameObject.Find("Minion");
+            if (minion)
+                minionStats = minion.GetComponent<Stats>();
+            else
+                minionStats = null;
 
-        enemy3 = GameObject.Find("Enemy3");
-        if (enemy3)
-            enemy3Stats = enemy3.GetComponent<Stats>();
-        else
-            enemy3Stats = null;
+            enemy1 = GameObject.Find("Enemy1");
+            if (enemy1)
+                enemy1Stats = enemy1.GetComponent<Stats>();
+            else
+                enemy1Stats = null;
+
+            enemy2 = GameObject.Find("Enemy2");
+            if (enemy2)
+                enemy2Stats = enemy2.GetComponent<Stats>();
+            else
+                enemy2Stats = null;
+
+            enemy3 = GameObject.Find("Enemy3");
+            if (enemy3)
+                enemy3Stats = enemy3.GetComponent<Stats>();
+            else
+                enemy3Stats = null;
+            
+            if (battleHandler != null)
+            {
+                playerAction = battleHandler.playerAction;
+                minionAction = battleHandler.minionAction;
+                enemy1Action = battleHandler.enemy1Action;
+                enemy2Action = battleHandler.enemy2Action;
+                enemy3Action = battleHandler.enemy3Action;
+                currentBattleState = battleHandler.battleState;
+            }
+            else
+            {
+                playerAction = null;
+                minionAction = null;
+                enemy1Action = null;
+                enemy2Action = null;
+                enemy3Action = null;
+                currentBattleState = null;
+            }
     }
 
     public string GetSceneToLoad()
@@ -212,8 +282,10 @@ public class SaveHandler : MonoBehaviour
             return playerInfo.scene;
     }
 
-    private string[] CreateSaveFileText()
+    private string[] CreateSaveFileText(bool keepOldBattleData)
     {
+        string[] oldSaveText = LoadSaveFileText();
+
         string[] saveText = new string[(int) SaveFormat.SaveFileLength];
         saveText[(int) SaveFormat.PlayerInfo] = JsonUtility.ToJson(playerInfo);
         saveText[(int) SaveFormat.PStats] = JsonUtility.ToJson(playerStats);
@@ -224,20 +296,56 @@ public class SaveHandler : MonoBehaviour
         npcDict.GetAll();
         saveText[(int) SaveFormat.NPCDictionary] = JsonUtility.ToJson(npcDict);
 
-        string enemy1Str = "";
-        if (enemy1Stats != null)
-            enemy1Str = JsonUtility.ToJson(enemy1Stats);
-        saveText[(int) SaveFormat.Enemy1] = enemy1Str;
 
-        string enemy2Str = "";
-        if (enemy2Stats != null)
-            enemy2Str = JsonUtility.ToJson(enemy2Stats);
-        saveText[(int) SaveFormat.Enemy2] = enemy2Str;
+        string statsStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Minion] : "";
+        if (battleHandler != null)
+            statsStr = JsonUtility.ToJson(minionStats);
+        saveText[(int) SaveFormat.Minion] = statsStr;
 
-        string enemy3Str = "";
-        if (enemy3Stats != null)
-            enemy3Str = JsonUtility.ToJson(enemy3Stats);
-        saveText[(int) SaveFormat.Enemy3] = enemy3Str;
+        statsStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy1] : "";
+        if (battleHandler != null)
+            statsStr = JsonUtility.ToJson(enemy1Stats);
+        saveText[(int) SaveFormat.Enemy1] = statsStr;
+
+        statsStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy2] : "";
+        if (battleHandler != null)
+            statsStr = JsonUtility.ToJson(enemy2Stats);
+        saveText[(int) SaveFormat.Enemy2] = statsStr;
+
+        statsStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy3] : "";
+        if (battleHandler != null)
+            statsStr = JsonUtility.ToJson(enemy3Stats);
+        saveText[(int) SaveFormat.Enemy3] = statsStr;
+
+        string actionStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.PlayerAction] : "";
+        if (battleHandler != null)
+            actionStr = JsonUtility.ToJson(playerAction);
+        saveText[(int) SaveFormat.PlayerAction] = actionStr;
+
+        actionStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.MinionAction] : "";
+        if (battleHandler != null)
+            actionStr = JsonUtility.ToJson(minionAction);
+        saveText[(int) SaveFormat.MinionAction] = actionStr;
+
+        actionStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy1Action] : "";
+        if (battleHandler != null)
+            actionStr = JsonUtility.ToJson(enemy1Action);
+        saveText[(int) SaveFormat.Enemy1Action] = actionStr;
+
+        actionStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy2Action] : "";
+        if (battleHandler != null)
+            actionStr = JsonUtility.ToJson(enemy2Action);
+        saveText[(int) SaveFormat.Enemy2Action] = actionStr;
+
+        actionStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.Enemy3Action] : "";
+        if (battleHandler != null)
+            actionStr = JsonUtility.ToJson(enemy3Action);
+        saveText[(int) SaveFormat.Enemy3Action] = actionStr;
+
+        string battleStateStr = (keepOldBattleData) ? oldSaveText[(int) SaveFormat.CurrentBattleState] : "";
+        if (battleHandler != null)
+            battleStateStr = JsonUtility.ToJson(currentBattleState);
+        saveText[(int) SaveFormat.CurrentBattleState] = battleStateStr;
         
         return saveText;
     }

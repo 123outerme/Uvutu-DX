@@ -12,17 +12,135 @@ public enum BattleActionType
     None
 }
 
+public enum BattleView
+{
+    SummonPrompt,
+    Command,
+    Attack,
+    Target,
+    UseItem,
+    TurnActions
+}
+
+[System.Serializable]
+public class BattleState
+{
+    public BattleView view;
+    public bool commandingMinion;
+    public int turnCount;
+    public bool battleStarted = false;
+    public string selectedTarget;
+
+    public BattleState()
+    {
+        view = BattleView.SummonPrompt;
+        commandingMinion = false;
+        turnCount = 0;
+        battleStarted = false;
+        selectedTarget = "";
+    }
+
+    public void IncrementTurn()
+    {
+        turnCount++;
+    }
+
+    public void StartBattle()
+    {
+        battleStarted = true;
+    }
+
+    public void SetSelectedTarget(GameObject target)
+    {
+        selectedTarget = target.name;
+    }
+}
+
+[System.Serializable]
 public class BattleAction
 {
     public BattleActionType type = BattleActionType.None;
+    
+    [System.NonSerialized]
     public Move move = null;
-    public List<GameObject> targets = new List<GameObject>();
+
+    public string moveName = "";
+
+    [System.NonSerialized]
     public InventorySlot item = null;
-    public GameObject user = null;
+
+    public string itemName = "";
+
+    public List<string> targetStrings = new List<string>();
+    private List<GameObject> targets = new List<GameObject>();
+    
+    public string nameUser = "";
+    private GameObject user = null;
 
     public BattleAction(GameObject actionUser)
     {
         user = actionUser;
+        nameUser = actionUser.name;
+    }
+
+    public void FetchMove()
+    {
+        if (moveName != "")
+            move = Resources.Load<Move>("Moves/" + moveName);
+    }
+
+    public void LoadItemSlot(InventorySlot slot)
+    {
+        item = slot;
+        itemName = slot.itemName;
+    }
+
+    public void FetchTargetsFromStrings()
+    {
+        targets = new List<GameObject>();
+        foreach(string s in targetStrings)
+        {
+            targets.Add(GameObject.Find(s));
+        }
+    }
+
+    public List<GameObject> GetTargetObjs()
+    {
+        return targets;
+    }
+
+    public void FetchUser()
+    {
+        if (nameUser != "")
+            user = GameObject.Find(nameUser);
+    }
+
+    public GameObject GetUser()
+    {
+        if (user == null && nameUser != "")
+            FetchUser();
+
+        return user;
+    }
+
+    public void FetchAll()
+    {
+        FetchMove();
+        FetchTargetsFromStrings();
+        FetchUser();
+    }
+
+    public void Clear()
+    {
+        type = BattleActionType.None;
+        move = null;
+        moveName = "";
+        item = null;
+        itemName = "";
+        targetStrings = new List<string>();
+        targets = new List<GameObject>();
+        nameUser = "";
+        user = null;
     }
 }
 
@@ -30,8 +148,8 @@ public class BattleActionPriorityComparer : PrioQueueComparer<BattleAction>
 {
     public int Compare(BattleAction x, BattleAction y)
     {
-        Stats sx = x.user.GetComponent<Stats>();
-        Stats sy = y.user.GetComponent<Stats>();
+        Stats sx = x.GetUser().GetComponent<Stats>();
+        Stats sy = y.GetUser().GetComponent<Stats>();
 
         if (sx.speed == sy.speed)
             return 0;
@@ -70,12 +188,18 @@ public class BattleHandler : MonoBehaviour
     public GameObject attackPanel;
     public GameObject targetPanel;
     public GameObject turnPanel;
-
     public GameObject overviewPanel;
 
-    public bool startOfBattle = true;
+    public BattleAction playerAction;
+    public BattleAction minionAction;
+    public BattleAction enemy1Action;
+    public BattleAction enemy2Action;
+    public BattleAction enemy3Action;
 
-    private bool commandingMinion = false;
+    public bool battleOverviewAvailable = true;
+
+    //[System.NonSerialized]
+    public BattleState battleState;
 
     private Stats playerStats;
     private Stats minionStats;
@@ -83,19 +207,16 @@ public class BattleHandler : MonoBehaviour
     private Stats enemy2Stats;
     private Stats enemy3Stats;
 
-    private BattleAction playerAction;
-    private BattleAction minionAction;
-    private BattleAction enemy1Action;
-    private BattleAction enemy2Action;
-    private BattleAction enemy3Action;
+    private Inventory playerInventory;
 
-    private PrioQueue<BattleAction, BattleAction> turnQueue;
+    private PrioQueue<BattleAction, BattleAction> turnQueue = new PrioQueue<BattleAction, BattleAction>(new BattleActionPriorityComparer());
+    public BattleAction currentTurn;
     private Dictionary<string, GameObject> nameToHealthPanelMap;
     private bool escaping = false;
 
     private string[] availableEnemyTypes; //TODO
 
-    private BattleOverview overview;
+    public BattleOverview overview;
 
     // Start is called before the first frame update
     void Start()
@@ -107,8 +228,6 @@ public class BattleHandler : MonoBehaviour
         nameToHealthPanelMap[enemy2.name] = enemy2HealthPanel;
         nameToHealthPanelMap[enemy3.name] = enemy3HealthPanel;
 
-        bool startFromLoad = false;
-
         bool playerActive = false, minionActive = false, enemy1Active = false, enemy2Active = false, enemy3Active = false;
 
         playerStats = player.GetComponent<Stats>();
@@ -118,22 +237,23 @@ public class BattleHandler : MonoBehaviour
         enemy2Stats = enemy2.GetComponent<Stats>();
         enemy3Stats = enemy3.GetComponent<Stats>();
 
+        playerInventory = player.GetComponent<Inventory>();
+
         overview = overviewPanel.GetComponent<BattleOverview>();
 
-        if (enemy1Stats.combatantStats.combatantName != "MissingNo.")
-            startFromLoad = true;
-
-        if (!startFromLoad)
+        if (!battleState.battleStarted)
         {
             //new battle
+            battleState = new BattleState();
+
              //TODO: decide upon selection of enemy types
-        List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
-        //randomly generate 1-3 enemies to fight
-        //TODO: weighted randomness, random level within appropriate range for location
-        int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
-        int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
-        int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
-        //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
+            List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
+            //randomly generate 1-3 enemies to fight
+            //TODO: weighted randomness, random level within appropriate range for location
+            int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
+            int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+            int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
+            //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
 
             playerActive = true;
             enemy1Active = true;
@@ -179,6 +299,51 @@ public class BattleHandler : MonoBehaviour
 
             if (!(enemy3Stats.combatantStats.combatantName == "MissingNo." || enemy3Stats.health <= 0))
                 enemy3Active = true;
+
+            if (playerAction != null)
+            {
+                playerAction.FetchAll();
+                if (playerAction.itemName != "")
+                {
+                    InventorySlot slot = playerInventory.GetItemSlot(playerAction.itemName);
+                    playerAction.LoadItemSlot(slot);
+                }
+                if (playerAction.targetStrings.Count > 0)
+                    turnQueue.Enqueue(playerAction, playerAction);
+            }
+            
+            if (minionAction != null)
+            {
+                minionAction.FetchAll();
+                if (minionAction.itemName != "")
+                {
+                    InventorySlot slot = playerInventory.GetItemSlot(minionAction.itemName);
+                    minionAction.LoadItemSlot(slot);
+                }
+
+                if (minionAction.targetStrings.Count > 0)
+                    turnQueue.Enqueue(minionAction, minionAction);
+            }
+            
+            if (enemy1Action != null)
+            {
+                enemy1Action.FetchAll();
+                if (enemy1Action.targetStrings.Count > 0)
+                    turnQueue.Enqueue(enemy1Action, enemy1Action);
+            }
+
+            if (enemy2Action != null)
+            {
+                enemy2Action.FetchAll();
+                if (enemy2Action.targetStrings.Count > 0)
+                    turnQueue.Enqueue(enemy2Action, enemy2Action);
+            }
+            if (enemy3Action != null)
+            {
+                enemy3Action.FetchAll();
+                if (enemy3Action.targetStrings.Count > 0)
+                    turnQueue.Enqueue(enemy3Action, enemy3Action);
+            }
         }
 
         UpdateHealthDisplay(player, playerActive);
@@ -186,7 +351,8 @@ public class BattleHandler : MonoBehaviour
         UpdateHealthDisplay(enemy1, enemy1Active);
         UpdateHealthDisplay(enemy2, enemy2Active);
         UpdateHealthDisplay(enemy3, enemy3Active);
-        SetCommandMenuUI();  //set command menu text for the first time
+        battleState.StartBattle();
+        UpdateView(battleState.view);  //setup & update battle view
     }
 
     // Update is called once per frame
@@ -198,11 +364,12 @@ public class BattleHandler : MonoBehaviour
     public void StartTurn()
     {
         //start a new turn, refreshing/updating all variables
-        turnCount++;
+        battleState.IncrementTurn();
 
-        commandingMinion = !player.activeSelf;  //if player is downed, then the minion is the only one to be commanded, otherwise the minion waits until the player's done
-        SetCommandMenuUI();
-        SetActionTarget(null);
+        battleState.commandingMinion = !player.activeSelf;  //if player is downed, then the minion is the only one to be commanded, otherwise the minion waits until the player's done
+        UpdateView(BattleView.Command);
+        SetBattleOverviewShowButton(true);  //re-enable the battle overview button
+        SetActionTarget("");
         playerAction = new BattleAction(player);
         minionAction = new BattleAction(minion);
         enemy1Action = new BattleAction(enemy1);
@@ -257,18 +424,19 @@ public class BattleHandler : MonoBehaviour
             UpdateHealthDisplay(minion, true);
         }
 
-        summonPanel.SetActive(false);
-        commandPanel.SetActive(true);
-
-        startOfBattle = false;
         overview.UpdateAllTabDetails();
         StartTurn();
     }
 
     public void ChooseAttack()
     {
+        UpdateView(BattleView.Attack);
+    }
+
+    public void LoadAttacksUI()
+    {
         Stats currentStats;
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
             currentStats = player.GetComponent<Stats>();
         else
             currentStats = minion.GetComponent<Stats>();
@@ -280,93 +448,89 @@ public class BattleHandler : MonoBehaviour
             buttonObj.transform.Find("Text (TMP)").GetComponent<TMP_Text>().text = currentStats.moveset[i];
             buttonObj.GetComponent<Button>().interactable = true;
         }
-
-        commandPanel.SetActive(false);
-        attackPanel.SetActive(true);
     }
 
     public void SelectAttack(int attackIndex)
     {
         //queue attack at player or minion's Stats.moveset[attackIndex]
-        string targetFor = "Minion";
-        string moveName = "Attack";
-        BattleAction action;
-        string selfName = "";
-        string allyName = "";
+        BattleAction action = minionAction;
+        Stats stats = minionStats;
 
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
         {
-            Debug.Log(playerStats.moveset[attackIndex]);
-            playerAction.move = Resources.Load<Move>("Moves/" + playerStats.moveset[attackIndex]);
-            moveName = playerAction.move.moveName;
-            targetFor = playerStats.combatantName;
             action = playerAction;
-            selfName = "Player";
-            allyName = "Minion";
+            stats = playerStats;
         }
-        else
-        {
-            Debug.Log("" + attackIndex + ", " + minionStats.moveset.Length);
-            Debug.Log(minionStats.moveset[attackIndex]);
-            minionAction.move = Resources.Load<Move>("Moves/" + minionStats.moveset[attackIndex]);
-            moveName = minionAction.move.moveName;
-            //targetFor already == "Minion"
-            action = minionAction;
-            selfName = "Minion";
-            allyName = "Player";
-        }
+
+        Debug.Log(playerAction);
+        action.moveName = stats.moveset[attackIndex];
+        action.FetchMove();
         action.type = BattleActionType.Move;
-
-        attackPanel.SetActive(false);
-
-        targetFor += "'s " + moveName;
-
-        List<string> curValidTargets = new List<string>();
-
-        if (action.move.validTargets == ValidBattleTarget.Self)
-            curValidTargets.Add(selfName);
-
-        if (action.move.validTargets == ValidBattleTarget.Ally || action.move.validTargets == ValidBattleTarget.Allies)
-            curValidTargets.Add(allyName);
-
-        if (action.move.validTargets == ValidBattleTarget.Enemy)
-        {
-            curValidTargets.Add("Enemy1");
-            curValidTargets.Add("Enemy2");
-            curValidTargets.Add("Enemy3");
-        }
 
         if (action.move.validTargets != ValidBattleTarget.AllAllies && action.move.validTargets != ValidBattleTarget.AllEnemies)
         {
-            SelectActionTarget(targetFor, curValidTargets.ToArray());
+            UpdateView(BattleView.Target);  //SelectActionTarget() will be called from this
         }
         else
         {
-            action.targets = new List<GameObject>();
+            action.targetStrings = new List<string>();
             if (action.move.validTargets == ValidBattleTarget.AllAllies)
             {
-                action.targets.Add(player);
-                action.targets.Add(minion);
+                action.targetStrings.Add("Player");
+                action.targetStrings.Add("Minion");
             }
             else
             {
                 //action.move.validTargets == ValidBattleTarget.AllEnemies
-                action.targets.Add(enemy1);
-                action.targets.Add(enemy2);
-                action.targets.Add(enemy3);
+                action.targetStrings.Add("Enemy1");
+                action.targetStrings.Add("Enemy2");
+                action.targetStrings.Add("Enemy3");
             }
             CompleteCommand();
         }
     }
 
-    public void SelectActionTarget(string targetFor, string[] validTargets)
+    public void SelectActionTarget()
     {
-        //NOTE: any panel active before this should be deactivated, and validTargets should be filled, before calling SelectActionTarget() since multiple types of actions & different target options
+        string targetFor = "";
+        BattleAction action = minionAction;
+        if (!battleState.commandingMinion)
+            action = playerAction;
+        else
+            action = minionAction;
         
+        targetFor += action.nameUser + "'s ";
+
+        if (action.type == BattleActionType.Move)
+            targetFor += action.moveName;
+        else
+            targetFor += action.itemName;
+
         TMP_Text targetForText = targetPanel.transform.Find("TargetForText").GetComponent<TMP_Text>();
         targetForText.text = "Select a target for " + targetFor + ":";
 
         //enable selection GUI for valid targets only
+        List<string> validTargets = new List<string>();
+
+        if (action.move.validTargets == ValidBattleTarget.Self)
+            validTargets.Add(action.nameUser);
+
+        if (action.move.validTargets == ValidBattleTarget.Ally || action.move.validTargets == ValidBattleTarget.Allies)
+        {
+            string allyName = "Minion";
+            if (battleState.commandingMinion)
+                allyName = "Player";
+
+            validTargets.Add(allyName);
+        }
+
+        if (action.move.validTargets == ValidBattleTarget.Enemy)
+        {
+            validTargets.Add("Enemy1");
+            validTargets.Add("Enemy2");
+            validTargets.Add("Enemy3");
+        }
+
         playerTargetSprite.SetActive(false);
         minionTargetSprite.SetActive(false);
         enemy1TargetSprite.SetActive(false);
@@ -390,34 +554,32 @@ public class BattleHandler : MonoBehaviour
             if (target == "Enemy3" && enemy3.activeSelf)
                 enemy3TargetSprite.SetActive(true);
         }
-
-        targetPanel.SetActive(true);
     }
 
     public void CancelSelectActionTarget()
     {
-        targetPanel.SetActive(false);
-        attackPanel.SetActive(true);
+        UpdateView(BattleView.Attack);
     }
 
-    public void SetActionTarget(GameObject target)
+    public void SetActionTarget(string target)
     {
         GameObject buttonObj = targetPanel.transform.Find("ConfirmButton").gameObject;
-        buttonObj.GetComponent<Button>().interactable = (target != null);  //true if target exists, false otherwise
+        buttonObj.GetComponent<Button>().interactable = (target != "");  //true if target exists, false otherwise
         TMP_Text targetText = targetPanel.transform.Find("TargetNameText").GetComponent<TMP_Text>();
-        if (target != null)
+        battleState.selectedTarget = target;
+        if (target != "")
         {
-            Stats targetStats = target.GetComponent<Stats>();
-            targetText.text = targetStats.combatantName + " (" + target.name + ")";
-            if (!commandingMinion)
+            Stats targetStats = GameObject.Find(target).GetComponent<Stats>();
+            targetText.text = targetStats.combatantName + " (" + target + ")";
+            if (!battleState.commandingMinion)
             {
-                playerAction.targets = new List<GameObject>();
-                playerAction.targets.Add(target);
+                playerAction.targetStrings = new List<string>();
+                playerAction.targetStrings.Add(target);
             }
             else
             {
-                minionAction.targets = new List<GameObject>();
-                minionAction.targets.Add(target);
+                minionAction.targetStrings = new List<string>();
+                minionAction.targetStrings.Add(target);
             }
         }
         else
@@ -426,7 +588,7 @@ public class BattleHandler : MonoBehaviour
 
     public void ConfirmTarget()
     {
-        targetPanel.SetActive(false);
+        //any other necessary target processing?
         CompleteCommand();
     }
 
@@ -438,58 +600,56 @@ public class BattleHandler : MonoBehaviour
     public void ChooseGuard()
     {
         //TODO
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
         {
             playerAction.move = Resources.Load<Move>("Moves/Guard");
-            playerAction.targets = new List<GameObject>();
-            playerAction.targets.Add(player);
+            playerAction.targetStrings = new List<string>();
+            playerAction.targetStrings.Add("Player");
             playerAction.type = BattleActionType.Move;
         }
         else
         {
             minionAction.move = Resources.Load<Move>("Moves/Guard");
-            minionAction.targets = new List<GameObject>();
-            minionAction.targets.Add(minion);
+            minionAction.targetStrings = new List<string>();
+            minionAction.targetStrings.Add("Minion");
             minionAction.type = BattleActionType.Move;
         }
-        commandPanel.SetActive(false);
+
         CompleteCommand();
     }
 
     public void ChooseEscape()
     {
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
             playerAction.type = BattleActionType.Escape;
         else
             minionAction.type = BattleActionType.Escape;
         
-        commandPanel.SetActive(false);
         CompleteCommand();
     }
 
     public void ChooseBackToPlayerCommand()
     {
-        commandingMinion = false;
+        battleState.commandingMinion = false;
         SetCommandMenuUI();
     }
 
-    public void ReturnToCommand(GameObject currentPanel)
+    public void ReturnToCommand()
     {
-        currentPanel.SetActive(false);
-        commandPanel.SetActive(true);
+        UpdateView(BattleView.Command);
     }
 
     public void CompleteCommand()
     {
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
         {
             //commanding player: if minion is present, command the minion and gray-out or hide some player-specific UI like items
             if (minion.activeSelf)
             {
-                commandingMinion = true;
+                battleState.commandingMinion = true;
+                battleState.selectedTarget = "";
                 
-                SetCommandMenuUI();
-                commandPanel.SetActive(true);
+                UpdateView(BattleView.Command);
             }
             else
             {
@@ -500,8 +660,7 @@ public class BattleHandler : MonoBehaviour
         else
         {
             //minion is done getting an action, so battle is certainly ready to proceed
-            commandingMinion = false;
-            SetCommandMenuUI();
+            battleState.commandingMinion = false;
             DoTurn();
         }
     }
@@ -513,7 +672,7 @@ public class BattleHandler : MonoBehaviour
 
         GameObject backButton = commandPanel.transform.Find("BackButton").gameObject;
 
-        if (!commandingMinion)
+        if (!battleState.commandingMinion)
         {
             string playerName = "yourself";
             if (playerStats.combatantName != "")
@@ -563,75 +722,12 @@ public class BattleHandler : MonoBehaviour
         }
 
         //finally: play out each action, updating statuses, etc.
-        turnPanel.SetActive(true);
+        UpdateView(BattleView.TurnActions);
         DoNextAction();
     }
 
     public void DoNextAction()
     {
-        if (escaping)
-        {
-            //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
-            EscapeBattle();
-            return;  //don't show the next turn starting in the UI
-        }
-
-        //handle combatants dying after losing all HP, and defeating either side
-        int downedPlayers = 0;
-        if (playerStats.health <= 0)
-        {
-            if (player.activeSelf)
-                UpdateHealthDisplay(player, false);
-            downedPlayers++;
-        }
-        
-        if (minionStats.health <= 0)
-        {
-            if (minion.activeSelf)
-                UpdateHealthDisplay(minion, false);
-            downedPlayers++;
-        }
-
-        if (downedPlayers == 2)
-        {
-            //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's position and stats
-            escaping = true;
-            UpdateTurnPanel("You have been defeated.");
-            return;
-        }
-
-        int downedEnemies = 0;
-        if (enemy1Stats.health <= 0)
-        {
-            if (enemy1.activeSelf)
-                UpdateHealthDisplay(enemy1, false);
-            downedEnemies++;
-        }
-
-        if (enemy2Stats.health <= 0)
-        {
-            if (enemy2.activeSelf)
-                UpdateHealthDisplay(enemy2, false);
-            downedEnemies++;
-        }
-
-        if (enemy3Stats.health <= 0)
-        {
-            if (enemy3.activeSelf)
-                UpdateHealthDisplay(enemy3, false);
-            downedEnemies++;
-        }
-
-        if (downedEnemies == 3)
-        {
-            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, then leave the battle
-            escaping = true;
-            UpdateTurnPanel("You defeated all the enemies!");
-            return;
-        }
-
-        overview.UpdateAllTabDetails();  //update in case any enemies were removed from battle
-
         //do next action, updating statuses, etc.
         //- if move, use the move on the intended target
         //- if item, use the item's effects on the intended target
@@ -639,72 +735,107 @@ public class BattleHandler : MonoBehaviour
         if (turnQueue.GetCount() > 0)
         {
             Stats userStats = null;
-            BattleAction action = null;
+            currentTurn = null;
             while(userStats == null)  //go until we find an action where the user isn't downed
             {
-                action = turnQueue.Dequeue();
+                currentTurn = turnQueue.Peek();
 
-                if (action == null)  //if the queue is empty
+                if (currentTurn == null)  //if the queue is empty
                 {
-                    CompleteTurnPanel();  // the turn is now over
+                    StartTurn();  // the turn is now over
                     return;
                 }
 
-                userStats = action.user.GetComponent<Stats>();  //get user's stats
+                userStats = currentTurn.GetUser().GetComponent<Stats>();  //get user's stats
 
                 if (userStats.health <= 0)  //if the user is downed
+                {
+                    turnQueue.Dequeue();  //dequeue the turn, removing it from the list
                     userStats = null;  //set stats to null, signaling to the while loop to keep going until we find one where a user isn't downed, or we completed the turn
+                }
+            }
+            currentTurn.FetchTargetsFromStrings();
+
+            Debug.Log("action " + currentTurn.type);
+            
+            if (currentTurn.type == BattleActionType.Move)
+            {
+                for(int i = 0; i < currentTurn.GetTargetObjs().Count; i++)
+                {
+                    if (currentTurn.GetTargetObjs()[i] != null)
+                    {
+                        Stats targetStats = currentTurn.GetTargetObjs()[i].GetComponent<Stats>();
+                        if (targetStats.health > 0)
+                        {                
+                            if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
+                            {
+                                int damage = GetCurrentTurnDamageOnTarget(targetStats);
+                                targetStats.health -= damage;
+                                Debug.Log(damage);
+                                UpdateHealthDisplay(currentTurn.GetTargetObjs()[i], true);
+                            }
+                            else
+                            {
+                                //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
+                                //TODO affect self/ally/allies
+                            }
+                        }
+                    }
+                }
+                userStats.RecieveMultipliers(currentTurn.move);
             }
 
-            Debug.Log("action " + action.type);
-            string actionText = userStats.combatantName + " passed.";
-            
-            if (action.type == BattleActionType.Move)
+            if (currentTurn.type == BattleActionType.UseItem)
             {
-                //TODO: use move on target(s)
+                //TODO: use item on target(s)
+            }
 
-                actionText = userStats.combatantName;
-                if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)
-                    actionText += " attacked with " + action.move.moveName;  //using a move on enemies
-                else
-                    actionText += " used " + action.move.moveName;  //using a move on self, allies
+            if (currentTurn.type == BattleActionType.Escape)
+            {
+                //TODO: calculate escape chances, generate a random number, compare for finding escape
+                escaping = true;  //in the meantime: 100% escape chance
+            }
 
-                if (action.move.attackPower > 0)
-                    actionText +=  ", dealing";  //dealt damage
-                else if (action.move.attackPower < 0)
-                    actionText += ", healing"; //healing damage
-                else
-                    actionText += "";  //TODO figure out what to say with buffs/debuffs
+            UpdateTurnActionText();
+        }
+        else
+            StartTurn();  //start a new turn
+    }
 
-                for(int i = 0; i < action.targets.Count; i++)
+    public void UpdateTurnActionText()
+    {
+        Stats userStats = currentTurn.GetUser().GetComponent<Stats>();  //get user's stats
+        string actionText = userStats.combatantName + " passed.";
+
+        if (currentTurn.type == BattleActionType.Move)
+        {   
+            actionText = userStats.combatantName;
+            if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)
+                actionText += " attacked with " + currentTurn.move.moveName;  //using a move on enemies
+            else
+                actionText += " used " + currentTurn.move.moveName;  //using a move on self, allies
+
+            if (currentTurn.move.attackPower > 0)
+                actionText +=  ", dealing";  //dealt damage
+            else if (currentTurn.move.attackPower < 0)
+                actionText += ", healing"; //healing damage
+            else
+                actionText += "";  //TODO figure out what to say with buffs/debuffs
+            for(int i = 0; i < currentTurn.GetTargetObjs().Count; i++)
+            {
+                if (currentTurn.GetTargetObjs()[i] != null)
                 {
-                    Stats targetStats = action.targets[i].GetComponent<Stats>();
+                    Stats targetStats = currentTurn.GetTargetObjs()[i].GetComponent<Stats>();
                     if (targetStats.health > 0)
                     {                
-                        if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
+                        if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
                         {
-                            float damage = action.move.attackPower;
-                            if (action.move.isMagic)
-                            {
-                                damage += userStats.magicAttack * userStats.magicAttackMultiplier;
-                            }
-                            else
-                            {
-                                damage += userStats.physAttack * userStats.physAttackMultiplier;
-                            }
-                            //TODO take into account target's resistance and resistance multiplier better
-                            damage -= targetStats.resistance * targetStats.resistanceMultiplier;
-
-                            damage = Mathf.Round(damage);  //finally, round up decimal points of damage
-                            targetStats.health -= (int) damage;
-                            Debug.Log(damage);
-                            UpdateHealthDisplay(action.targets[i], true);
-
                             //and update actionText for the full diplay of the turn details
+                            int damage = GetCurrentTurnDamageOnTarget(targetStats);
                             if (damage > 0)  //damage, not healing
-                                actionText += " " + ((int) damage) + " damage to " + targetStats.combatantName;
+                                actionText += " " + damage + " damage to " + targetStats.combatantName;
                             else
-                                actionText += " " + targetStats.combatantName + " by " + ((int) (-1 * damage)) + "HP";
+                                actionText += " " + targetStats.combatantName + " by " + (-1 * damage) + "HP";
                         }
                         else
                         {
@@ -719,79 +850,171 @@ public class BattleHandler : MonoBehaviour
                     else
                     {
                         //previous valid target has no health now
-                        if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //
+                        if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //
                         {
-                            actionText = " overkill damage to " + targetStats.combatantName;
+                            actionText += " overkill damage to " + targetStats.combatantName;
                         }
                         else
                         {
                             //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
-                            //TODO
                             actionText += ", but too little, too late for " + targetStats.combatantName;
                         }
                     }
-
-                    if (i < action.targets.Count - 1)
+                }
+                else
+                {
+                    if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //
                     {
-                        if (action.targets.Count > 2)
+                        actionText += " a wild blow to nothing";
+                    }
+                    else
+                    {
+                        //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
+                        actionText += ", but no one could receive it";
+                    }
+                }
+
+                if (i < currentTurn.GetTargetObjs().Count - 1)
+                {
+                    if (currentTurn.GetTargetObjs().Count > 2)
+                        actionText += ",";  //only add commas when there are 3+ targets
+                    actionText += " ";  //always add the space with more than one target
+
+                    if (i == currentTurn.GetTargetObjs().Count - 2)
+                        actionText += "and";  //if this is the second-to-last target, add an "and"
+                }
+            }
+
+            actionText += ".";
+
+            if (currentTurn.move.HasMultipliers())
+            {
+                actionText += " " + userStats.combatantName + " boosts ";
+                StatMultiplierText[] multipliers = currentTurn.move.GetMultipliers();
+
+                for(int i = 0; i < multipliers.Length; i++)
+                {
+                    actionText += multipliers[i].statName + " " + multipliers[i].multiplier + "x";
+                    if (i < multipliers.Length - 1)
+                    {
+                        if (multipliers.Length > 2)
                             actionText += ",";  //only add commas when there are 3+ targets
                         actionText += " ";  //always add the space with more than one target
 
-                        if (i == action.targets.Count - 2)
-                            actionText += "and";  //if this is the second-to-last target, add an "and"
+                        if (i == multipliers.Length - 2)
+                            actionText += "and ";  //if this is the second-to-last target, add an "and"
                     }
                 }
                 actionText += ".";
-                
-                userStats.RecieveMultipliers(action.move);
-
-                    if (action.move.HasMultipliers())
-                    {
-                        actionText += " " + userStats.combatantName + " boosts ";
-                        StatMultiplierText[] multipliers = action.move.GetMultipliers();
-
-                        for(int i = 0; i < multipliers.Length; i++)
-                        {
-                            actionText += multipliers[i].statName + " " + multipliers[i].multiplier + "x";
-                            if (i < multipliers.Length - 1)
-                            {
-                                if (multipliers.Length > 2)
-                                    actionText += ",";  //only add commas when there are 3+ targets
-                                actionText += " ";  //always add the space with more than one target
-
-                                if (i == multipliers.Length - 2)
-                                    actionText += "and ";  //if this is the second-to-last target, add an "and"
-                            }
-                        }
-                        actionText += ".";
-                    }
             }
-
-            if (action.type == BattleActionType.UseItem)
-            {
-                //TODO: use item on target(s)
-                actionText = userStats.combatantName + " used an item.";
-            }
-
-            if (action.type == BattleActionType.Escape)
-            {
-                //TODO: calculate escape chances, generate a random number, compare for finding escape
-                escaping = true;  //in the meantime: 100% escape chance
-
-                actionText = userStats.combatantName + " escaped the battle successfully!";
-            }
-
-            UpdateTurnPanel(actionText);
         }
-        else
-            CompleteTurnPanel();  //start a new turn
+        
+        if (currentTurn.type == BattleActionType.UseItem)
+        {
+            //TODO
+            actionText = userStats.combatantName + " used an item.";
+        }
+
+        if (currentTurn.type == BattleActionType.Escape)
+        {
+            //TODO
+            actionText = userStats.combatantName + " escaped the battle successfully!";
+        }
+
+        UpdateTurnPanel(actionText);
     }
 
-    private void CompleteTurnPanel()
+    public int GetCurrentTurnDamageOnTarget(Stats targetStats)
     {
-        turnPanel.SetActive(false);
-        commandPanel.SetActive(true);
-        StartTurn();
+        Stats userStats = currentTurn.GetUser().GetComponent<Stats>();
+        float damage = currentTurn.move.attackPower;
+        if (currentTurn.move.isMagic)
+        {
+            damage += userStats.magicAttack * userStats.magicAttackMultiplier;
+        }
+        else
+        {
+            damage += userStats.physAttack * userStats.physAttackMultiplier;
+        }
+        //TODO take into account target's resistance and resistance multiplier better
+        damage -= targetStats.resistance * targetStats.resistanceMultiplier;
+
+        return Mathf.RoundToInt(damage);  //finally, round up decimal points of damage
+    }
+
+    public void FinishNextAction()
+    {
+        turnQueue.Remove(currentTurn);
+        currentTurn.Clear(); //clear action so saving here won't repeat the same action again
+
+        if (escaping)
+        {
+            //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
+            EscapeBattle();
+            return;  //don't show the next turn starting in the UI
+        }
+
+        CheckCombatantsDefeated();
+
+        if (!escaping)
+            DoNextAction();
+    }
+
+    private void CheckCombatantsDefeated()
+    {
+        //handle combatants dying after losing all HP, and defeating either side
+        int downedPlayers = 0;
+        if (playerStats.health <= 0 || !player.activeSelf)
+        {
+            if (player.activeSelf)
+                UpdateHealthDisplay(player, false);
+            downedPlayers++;
+        }
+        
+        if (minionStats.health <= 0 || !minion.activeSelf)
+        {
+            if (minion.activeSelf)
+                UpdateHealthDisplay(minion, false);
+            downedPlayers++;
+        }
+
+        if (downedPlayers == 2)
+        {
+            //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's position and stats
+            escaping = true;
+            UpdateTurnPanel("You have been defeated.");
+        }
+
+        int downedEnemies = 0;
+        if (enemy1Stats.health <= 0 || !enemy1.activeSelf)
+        {
+            if (enemy1.activeSelf)
+                UpdateHealthDisplay(enemy1, false);
+            downedEnemies++;
+        }
+
+        if (enemy2Stats.health <= 0 || !enemy2.activeSelf)
+        {
+            if (enemy2.activeSelf)
+                UpdateHealthDisplay(enemy2, false);
+            downedEnemies++;
+        }
+
+        if (enemy3Stats.health <= 0 || !enemy3.activeSelf)
+        {
+            if (enemy3.activeSelf)
+                UpdateHealthDisplay(enemy3, false);
+            downedEnemies++;
+        }
+
+        if (downedEnemies == 3)
+        {
+            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, then leave the battle
+            escaping = true;
+            UpdateTurnPanel("You defeated all the enemies!");
+        }
+
+        overview.UpdateAllTabDetails();  //update in case any enemies were removed from battle
     }
 
     private void UpdateTurnPanel(string text)
@@ -828,77 +1051,121 @@ public class BattleHandler : MonoBehaviour
         //TEMP: testing AI, always uses a Move and randomly selects one from the list, then randomly selects a valid target
         enemyAction.type = BattleActionType.Move;
         int moveIndex = Mathf.RoundToInt(Random.Range(0, enemyStats.moveset.Length));
-        enemyAction.move = enemyStats.combatantStats.moveset[moveIndex];
-        GameObject[] targets = EnemyGetValidTargets(enemyAction);
+        enemyAction.moveName = enemyStats.moveset[moveIndex];
+        enemyAction.FetchMove();
+        string[] targets = EnemyGetValidTargets(enemyAction);
         
         if (enemyAction.move.validTargets == ValidBattleTarget.AllAllies || enemyAction.move.validTargets == ValidBattleTarget.AllEnemies)
         {
             //all-targeting moves
-            enemyAction.targets = new List<GameObject>();
-            enemyAction.targets.AddRange(targets);
+            enemyAction.targetStrings = new List<string>();
+            enemyAction.targetStrings.AddRange(targets);
         }
         else
         {
             //choose a single target
             int targetIndex = Mathf.RoundToInt(Random.Range(0, targets.Length));
-            enemyAction.targets = new List<GameObject>();
-            enemyAction.targets.Add(targets[targetIndex]);
+            enemyAction.targetStrings = new List<string>();
+            enemyAction.targetStrings.Add(targets[targetIndex]);
         }
     }
 
-    private GameObject[] EnemyGetValidTargets(BattleAction action)
+    private string[] EnemyGetValidTargets(BattleAction action)
     {
         if (action.move.validTargets == ValidBattleTarget.Enemy || action.move.validTargets == ValidBattleTarget.AllEnemies)  //any enemy
         {
-            List<GameObject> targets = new List<GameObject>();
+            List<string> targets = new List<string>();
             
             if (player.activeSelf)
-                targets.Add(player);
+                targets.Add("Player");
             if (minion.activeSelf)
-                targets.Add(minion);
+                targets.Add("Minion");
 
             return targets.ToArray();  
         }
         else
         {
             if (action.move.validTargets == ValidBattleTarget.Self)  //only self
-                return new GameObject[1] {action.user};
+                return new string[1] {action.nameUser};
 
             if (action.move.validTargets == ValidBattleTarget.Ally)  //non-self allies
             {
-                List<GameObject> targets = new List<GameObject>();
+                List<string> targets = new List<string>();
 
                 if (enemy1.activeSelf)
-                    targets.Add(enemy1);
+                    targets.Add("Enemy1");
                 if (enemy2.activeSelf)
-                    targets.Add(enemy2);
+                    targets.Add("Enemy2");
                 if (enemy3.activeSelf)
-                    targets.Add(enemy3);
+                    targets.Add("Enemy3");
 
-                targets.Remove(action.user);  //remove self from the list
+                targets.Remove(action.nameUser);  //remove self from the list
                 return targets.ToArray();
             }
 
             if (action.move.validTargets == ValidBattleTarget.Allies || action.move.validTargets == ValidBattleTarget.AllAllies)  //all allies, including self
             {
-                List<GameObject> targets = new List<GameObject>();
+                List<string> targets = new List<string>();
 
                 if (enemy1.activeSelf)
-                    targets.Add(enemy1);
+                    targets.Add("Enemy1");
                 if (enemy2.activeSelf)
-                    targets.Add(enemy2);
+                    targets.Add("Enemy2");
                 if (enemy3.activeSelf)
-                    targets.Add(enemy3);
+                    targets.Add("Enemy3");
 
                 return targets.ToArray();
             }
 
-            return new GameObject[0];  //default: no targets were calculated
+            return new string[0];  //default: no targets were calculated
         }
     }
 
     public void ToggleBattleOverviewPanel()
     {
-        overviewPanel.SetActive(!overviewPanel.activeSelf);
+        if (overviewPanel.activeSelf || battleOverviewAvailable)  //if overview panel is active already or it's not and we have the overview available
+        {
+            overviewPanel.SetActive(!overviewPanel.activeSelf);
+
+            SetBattleOverviewShowButton(battleOverviewAvailable);
+            battleOverviewAvailable = false;
+        }
+    }
+
+    public void SetBattleOverviewShowButton(bool active)
+    {
+        Button showButton = GameObject.Find("ShowBattleOverviewPanel").transform.Find("ShowButton").GetComponent<Button>();
+        showButton.interactable = active;  //set the button interactable state
+        battleOverviewAvailable = active;  //set the state tracker properly
+    }
+
+    public void UpdateView(BattleView view)
+    {
+        battleState.view = view;
+
+        summonPanel.SetActive((battleState.view == BattleView.SummonPrompt));
+
+        if (battleState.view == BattleView.Command)
+            SetCommandMenuUI();
+        commandPanel.SetActive((battleState.view == BattleView.Command));
+
+        if (battleState.view == BattleView.Attack)
+            LoadAttacksUI();
+        attackPanel.SetActive((battleState.view == BattleView.Attack));
+
+        if (battleState.view == BattleView.Target)
+        {
+            SelectActionTarget();
+            SetActionTarget(battleState.selectedTarget);
+        }
+        targetPanel.SetActive((battleState.view == BattleView.Target));
+
+        if (battleState.view == BattleView.TurnActions)
+        {
+            currentTurn = turnQueue.Peek();
+            UpdateTurnActionText();
+        }
+
+        turnPanel.SetActive((battleState.view == BattleView.TurnActions));
     }
 }

@@ -15,7 +15,7 @@ public class PlayerBattleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButton("Cancel") && battleHandler.startOfBattle)  //pause menu, default ESC, only at the VERY start of the battle, before a minion is summoned
+        if (Input.GetButton("Cancel"))  //pause menu, default ESC
         {
             GameObject loader = GameObject.Find("SceneLoader"); //get the scene loader
             if (loader != null)
