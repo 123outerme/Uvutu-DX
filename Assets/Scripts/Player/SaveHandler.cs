@@ -109,14 +109,20 @@ public class SaveHandler : MonoBehaviour
             TryGetCombatantsStats();
 
             string[] fileLines = LoadSaveFileText();
+            
             bool usePosition = playerInfo.usePosition;  //keep usePosition property as the scene demands
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PlayerInfo], playerInfo);                
             playerInfo.usePosition = usePosition;  //restore usePosition property after load
+            
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.PStats], playerStats);
+            playerStats.combatantStats = Resources.Load<Combatant>("Combatants/Player");  //load the player Combatant but do NOT overwrite the moveset or actual stats data (more for the sprite than anything)
+
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Quests], quests);
             quests.LoadAllQuestDetails();  //load all Quests (for the details) into each quest tracker that was just loaded from save file
+            
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.Inventory], inventory);
             inventory.LoadAllInventorySlots();
+            
             JsonUtility.FromJsonOverwrite(fileLines[(int) SaveFormat.NPCDictionary], npcDict);
             npcDict.SetAll();
             LoadNPCs();

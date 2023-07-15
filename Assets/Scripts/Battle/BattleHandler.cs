@@ -71,6 +71,8 @@ public class BattleHandler : MonoBehaviour
     public GameObject targetPanel;
     public GameObject turnPanel;
 
+    public GameObject overviewPanel;
+
     public bool startOfBattle = true;
 
     private bool commandingMinion = false;
@@ -93,6 +95,8 @@ public class BattleHandler : MonoBehaviour
 
     private string[] availableEnemyTypes; //TODO
 
+    private BattleOverview overview;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -113,6 +117,8 @@ public class BattleHandler : MonoBehaviour
         //Debug.Log(enemy1Stats.combatantStats.combatantName);
         enemy2Stats = enemy2.GetComponent<Stats>();
         enemy3Stats = enemy3.GetComponent<Stats>();
+
+        overview = overviewPanel.GetComponent<BattleOverview>();
 
         if (enemy1Stats.combatantStats.combatantName != "MissingNo.")
             startFromLoad = true;
@@ -255,6 +261,7 @@ public class BattleHandler : MonoBehaviour
         commandPanel.SetActive(true);
 
         startOfBattle = false;
+        overview.UpdateAllTabDetails();
         StartTurn();
     }
 
@@ -623,6 +630,8 @@ public class BattleHandler : MonoBehaviour
             return;
         }
 
+        overview.UpdateAllTabDetails();  //update in case any enemies were removed from battle
+
         //do next action, updating statuses, etc.
         //- if move, use the move on the intended target
         //- if item, use the item's effects on the intended target
@@ -886,5 +895,10 @@ public class BattleHandler : MonoBehaviour
 
             return new GameObject[0];  //default: no targets were calculated
         }
+    }
+
+    public void ToggleBattleOverviewPanel()
+    {
+        overviewPanel.SetActive(!overviewPanel.activeSelf);
     }
 }
