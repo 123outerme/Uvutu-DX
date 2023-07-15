@@ -170,7 +170,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 852, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &822628326448664807
 CanvasRenderer:
@@ -200,7 +200,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Item Type
+  m_text: Item Type Here
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
   m_sharedMaterial: {fileID: 3579496279039096208, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
@@ -579,6 +579,8 @@ MonoBehaviour:
     itemName: Unknown Item
     type: 4
     count: 1
+  parentPanel: {fileID: 0}
+  playerScene: 
 --- !u!1 &1338743577723023888
 GameObject:
   m_ObjectHideFlags: 0

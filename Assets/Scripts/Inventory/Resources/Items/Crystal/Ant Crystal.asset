@@ -15,6 +15,7 @@ MonoBehaviour:
   _ItemName: Ant Crystal
   _Description: The essence of Ant trapped within a crystal.
   _MaxCarryable: 5
-  _ScenesUnusableIn: []
   sprite: {fileID: -523388127, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  scenesUnusuableIn:
+  - Overworld
   minion: {fileID: 11400000, guid: 35448b66cd1ebb1478f7b86b581cef6e, type: 2}

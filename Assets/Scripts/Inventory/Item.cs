@@ -8,6 +8,7 @@ public enum ItemType : int
     Crystal = 2,
     Armor = 3,
     Weapon = 4,
+    StoryItem = 5,
     //TODO: come up with cool item types
     Other = 0
 }
@@ -21,17 +22,16 @@ public abstract class Item : ScriptableObject
     private string _Description;
 
     [SerializeField]
-    private int _MaxCarryable;
-
-    [SerializeField]
-    private string[] _ScenesUnusableIn = new string[0];
+    private int _MaxCarryable = 20;
 
     public string ItemName => _ItemName;
     public string Description => _Description;
-    public int MaxCarryable => _MaxCarryable; 
-    public string[] ScenesUnusuableIn => _ScenesUnusableIn;
 
     public virtual ItemType Type { get; private set; }
+
+    public int MaxCarryable => _MaxCarryable;
+
+    public virtual string[] ScenesUnusuableIn { get; set; }
 
     public Sprite sprite;
 
@@ -48,6 +48,9 @@ public abstract class Item : ScriptableObject
 
         if (type == ItemType.Weapon)
             return "Weapon";
+
+        if (type == ItemType.StoryItem)
+            return "Story Item";
 
         return "Other";
     }
