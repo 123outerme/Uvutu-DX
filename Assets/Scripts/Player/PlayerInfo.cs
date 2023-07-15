@@ -10,8 +10,9 @@ public class PlayerInfo : MonoBehaviour
     public string map = "TestMap";  //start map on new save
     public string underworldMap = "";  //procedurally-generated map L-System-like string
 
-    public int prestige = 0;  //how many times the player has New Game+'d
-    public int statPoints = 0;  //how many free stat points the player has
+    public int prestige = 0;  //how many times the player has New Game+'d (to start)
+    public int statPoints = 0;  //how many free stat points the player has (to start)
+    public int gold = 10;  //how much money the player has (to start)
 
     public string scene = "Overworld";  //start scene on new save; this is the current (unpaused) scene the player is in
 

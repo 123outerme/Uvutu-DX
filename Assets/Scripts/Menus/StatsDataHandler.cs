@@ -18,6 +18,7 @@ public class StatsDataHandler : MonoBehaviour
     public GameObject speedPanel;
     public GameObject statPtsText;
     public GameObject movesPanel;
+    public GameObject goldText;
 
     private Stats playerStats;
     private PlayerInfo playerInfo;
@@ -27,6 +28,7 @@ public class StatsDataHandler : MonoBehaviour
     {
         playerStats = player.GetComponent<Stats>();
         playerInfo = player.GetComponent<PlayerInfo>();
+        UpdateStatPts();
         UpdateName();
         UpdateHealth();
         UpdateExp();
@@ -35,7 +37,7 @@ public class StatsDataHandler : MonoBehaviour
         UpdateAffinity();
         UpdateResistance();
         UpdateSpeed();
-        UpdateStatPts();
+        UpdateGoldText();
         UpdateMovesPanel();
     }
 
@@ -104,6 +106,12 @@ public class StatsDataHandler : MonoBehaviour
         affinityPanel.transform.Find("StatIncreaseButton").GetComponent<Button>().interactable = (playerInfo.statPoints > 0);
         resistancePanel.transform.Find("StatIncreaseButton").GetComponent<Button>().interactable = (playerInfo.statPoints > 0);
         speedPanel.transform.Find("StatIncreaseButton").GetComponent<Button>().interactable = (playerInfo.statPoints > 0);
+    }
+
+    public void UpdateGoldText()
+    {
+        TMP_Text text = goldText.GetComponent<TMP_Text>();
+        text.text = "x" + playerInfo.gold;
     }
 
     public void UpdateMovesPanel()
