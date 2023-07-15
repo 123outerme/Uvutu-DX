@@ -15,7 +15,8 @@ MonoBehaviour:
   _ItemName: Rat Crystal
   _Description: The essence of Rat trapped within a crystal.
   _MaxCarryable: 4
-  _ScenesUnusableIn:
-  - Overworld
+  _ValidTargets: 6
   sprite: {fileID: -731449358, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
+  scenesUnusuableIn:
+  - Overworld
   minion: {fileID: 11400000, guid: 8f54339114551b44c8057b28e199462c, type: 2}

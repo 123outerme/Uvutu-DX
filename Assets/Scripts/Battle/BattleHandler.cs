@@ -4,150 +4,11 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public enum BattleActionType
-{
-    Move,
-    UseItem,
-    Escape,
-    None
-}
-
-public enum BattleView
-{
-    SummonPrompt,
-    Command,
-    Attack,
-    Target,
-    UseItem,
-    TurnActions
-}
-
-[System.Serializable]
-public class BattleState
-{
-    public BattleView view;
-    public bool commandingMinion;
-    public int turnCount;
-    public bool battleStarted = false;
-    public string selectedTarget;
-
-    public BattleState()
-    {
-        view = BattleView.SummonPrompt;
-        commandingMinion = false;
-        turnCount = 0;
-        battleStarted = false;
-        selectedTarget = "";
-    }
-
-    public void IncrementTurn()
-    {
-        turnCount++;
-    }
-
-    public void StartBattle()
-    {
-        battleStarted = true;
-    }
-
-    public void SetSelectedTarget(GameObject target)
-    {
-        selectedTarget = target.name;
-    }
-}
-
-[System.Serializable]
-public class BattleAction
-{
-    public BattleActionType type = BattleActionType.None;
-    
-    [System.NonSerialized]
-    public Move move = null;
-
-    public string moveName = "";
-
-    [System.NonSerialized]
-    public InventorySlot item = null;
-
-    public string itemName = "";
-
-    public List<string> targetStrings = new List<string>();
-    private List<GameObject> targets = new List<GameObject>();
-    
-    public string nameUser = "";
-    private GameObject user = null;
-
-    public BattleAction(GameObject actionUser)
-    {
-        user = actionUser;
-        nameUser = actionUser.name;
-    }
-
-    public void FetchMove()
-    {
-        if (moveName != "")
-            move = Resources.Load<Move>("Moves/" + moveName);
-    }
-
-    public void LoadItemSlot(InventorySlot slot)
-    {
-        item = slot;
-        itemName = slot.itemName;
-    }
-
-    public void FetchTargetsFromStrings()
-    {
-        targets = new List<GameObject>();
-        foreach(string s in targetStrings)
-        {
-            targets.Add(GameObject.Find(s));
-        }
-    }
-
-    public List<GameObject> GetTargetObjs()
-    {
-        return targets;
-    }
-
-    public void FetchUser()
-    {
-        if (nameUser != "")
-            user = GameObject.Find(nameUser);
-    }
-
-    public GameObject GetUser()
-    {
-        if (user == null && nameUser != "")
-            FetchUser();
-
-        return user;
-    }
-
-    public void FetchAll()
-    {
-        FetchMove();
-        FetchTargetsFromStrings();
-        FetchUser();
-    }
-
-    public void Clear()
-    {
-        type = BattleActionType.None;
-        move = null;
-        moveName = "";
-        item = null;
-        itemName = "";
-        targetStrings = new List<string>();
-        targets = new List<GameObject>();
-        nameUser = "";
-        user = null;
-    }
-}
-
 public class BattleActionPriorityComparer : PrioQueueComparer<BattleAction>
 {
     public int Compare(BattleAction x, BattleAction y)
     {
+        //speed stat comparison
         Stats sx = x.GetUser().GetComponent<Stats>();
         Stats sy = y.GetUser().GetComponent<Stats>();
 
@@ -189,14 +50,13 @@ public class BattleHandler : MonoBehaviour
     public GameObject targetPanel;
     public GameObject turnPanel;
     public GameObject overviewPanel;
+    public GameObject inventoryPanel;
 
     public BattleAction playerAction;
     public BattleAction minionAction;
     public BattleAction enemy1Action;
     public BattleAction enemy2Action;
     public BattleAction enemy3Action;
-
-    public bool battleOverviewAvailable = true;
 
     //[System.NonSerialized]
     public BattleState battleState;
@@ -216,7 +76,9 @@ public class BattleHandler : MonoBehaviour
 
     private string[] availableEnemyTypes; //TODO
 
-    public BattleOverview overview;
+    private BattleOverview overview;
+    
+    private InventoryPanel invPanelScript;
 
     // Start is called before the first frame update
     void Start()
@@ -240,6 +102,7 @@ public class BattleHandler : MonoBehaviour
         playerInventory = player.GetComponent<Inventory>();
 
         overview = overviewPanel.GetComponent<BattleOverview>();
+        invPanelScript = inventoryPanel.GetComponent<InventoryPanel>();
 
         if (!battleState.battleStarted)
         {
@@ -258,12 +121,6 @@ public class BattleHandler : MonoBehaviour
             playerActive = true;
             enemy1Active = true;
 
-            playerStats.ResetMultipliers();
-            minionStats.ResetMultipliers();
-            enemy1Stats.ResetMultipliers();
-            enemy2Stats.ResetMultipliers();
-            enemy3Stats.ResetMultipliers();
-
             enemy1Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy1Pick]);
             enemy1Stats.UpdateStats();
             
@@ -280,6 +137,12 @@ public class BattleHandler : MonoBehaviour
                 enemy3Stats.UpdateStats();
                 enemy3Active = true;
             }
+            
+            playerStats.ResetMultipliers();
+            minionStats.ResetMultipliers();
+            enemy1Stats.ResetMultipliers();
+            enemy2Stats.ResetMultipliers();
+            enemy3Stats.ResetMultipliers();
         }
         else
         {
@@ -344,6 +207,14 @@ public class BattleHandler : MonoBehaviour
                 if (enemy3Action.targetStrings.Count > 0)
                     turnQueue.Enqueue(enemy3Action, enemy3Action);
             }
+
+            SetBattleOverviewShowButton(battleState.battleOverviewAvailable);
+
+            if (battleState.view != BattleView.SummonPrompt)
+            {
+                invPanelScript.inBattleActions = true;
+                invPanelScript.ReloadInventoryDisplay();
+            }
         }
 
         UpdateHealthDisplay(player, playerActive);
@@ -380,49 +251,61 @@ public class BattleHandler : MonoBehaviour
     void UpdateHealthDisplay(GameObject spriteObj, bool enable)
     {
         GameObject healthPanel = nameToHealthPanelMap[spriteObj.name];
-        Stats stats = spriteObj.GetComponent<Stats>();
-        TMP_Text text = healthPanel.transform.Find("HealthText").GetComponent<TMP_Text>();
-
-        if (text != null && stats != null)
+        if (enable)
         {
-            if (stats.health < 0)
-                stats.health = 0;
+            //only bother updating the text if the combatant is enabled
+            Stats stats = spriteObj.GetComponent<Stats>();
+            TMP_Text text = healthPanel.transform.Find("HealthText").GetComponent<TMP_Text>();
 
-            text.text = "L" + stats.level + ": " + stats.health + "/" + stats.maxHealth;
+            if (text != null && stats != null)
+            {
+                if (stats.health > stats.maxHealth)
+                    stats.health = stats.maxHealth;  //cap health at max health
+
+                if (stats.health < 0)
+                    stats.health = 0;  //lower bound of health is non-negative (zero)
+
+                text.text = "L" + stats.level + ": " + stats.health + "/" + stats.maxHealth;
+            }
+            else
+                text.text = "L???: ????/????";
+
+            Vector2 preferredDims = text.GetPreferredValues(text.text);
+
+            RectTransform rt = healthPanel.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(preferredDims.x + 10, rt.sizeDelta.y);  //change the x dimensions to fit the string (with a bit of space on the left/right)
         }
-        else
-            text.text = "L???: ????/????";
-
-        Vector2 preferredDims = text.GetPreferredValues(text.text);
-
-        RectTransform rt = healthPanel.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(preferredDims.x + 10, rt.sizeDelta.y);  //change the x dimensions to fit the string (with a bit of space on the left/right)
-
         if (healthPanel.activeSelf != enable)
             healthPanel.SetActive(enable);
 
         if (spriteObj.activeSelf != enable)
             spriteObj.SetActive(enable);
-        
-        //Debug.Log(healthPanel.name + " " + healthPanel.activeSelf);
     }
 
     public void ChooseMinionSummon()
     {
         //TODO open choose summon menu, then once picked activate the command panel for player turn
-        
-        LoadMinionSummon("Rat");  //TEMP: testing summon feature
+        invPanelScript.typeToSortBy = ItemType.Crystal;
+        invPanelScript.lockSort = true;
+        ToggleInventoryPanel(true);
     }
 
-    public void LoadMinionSummon(string summonName)
+    public void LoadMinionSummon(string combatantName)
     {
-        if (summonName != "")
+        if (combatantName != "")
         {
-            minionStats.combatantStats = Resources.Load<Combatant>("Combatants/" + summonName);
+            minionStats.combatantStats = Resources.Load<Combatant>("Combatants/" + combatantName);
             minionStats.UpdateStats();
 
             UpdateHealthDisplay(minion, true);
+
+            //reset inventory panel's sorting
+            invPanelScript.typeToSortBy = ItemType.All;
+            invPanelScript.lockSort = false;
         }
+        //after this, Use item => use as turn action
+        invPanelScript.inBattleActions = true;
+        invPanelScript.ReloadInventoryDisplay();
 
         overview.UpdateAllTabDetails();
         StartTurn();
@@ -511,11 +394,19 @@ public class BattleHandler : MonoBehaviour
 
         //enable selection GUI for valid targets only
         List<string> validTargets = new List<string>();
+        
+        ValidBattleTarget actionTargets = ValidBattleTarget.None;
+        
+        if (action.type == BattleActionType.Move)
+            actionTargets = action.move.validTargets;
 
-        if (action.move.validTargets == ValidBattleTarget.Self)
+        if (action.type == BattleActionType.UseItem)
+            actionTargets = action.item.item.ValidTargets;
+
+        if (actionTargets == ValidBattleTarget.Self)
             validTargets.Add(action.nameUser);
 
-        if (action.move.validTargets == ValidBattleTarget.Ally || action.move.validTargets == ValidBattleTarget.Allies)
+        if (actionTargets == ValidBattleTarget.Ally)
         {
             string allyName = "Minion";
             if (battleState.commandingMinion)
@@ -524,7 +415,13 @@ public class BattleHandler : MonoBehaviour
             validTargets.Add(allyName);
         }
 
-        if (action.move.validTargets == ValidBattleTarget.Enemy)
+        if (actionTargets == ValidBattleTarget.Allies)
+        {
+            validTargets.Add("Player");
+            validTargets.Add("Minion");
+        }
+
+        if (actionTargets == ValidBattleTarget.Enemy)
         {
             validTargets.Add("Enemy1");
             validTargets.Add("Enemy2");
@@ -595,6 +492,7 @@ public class BattleHandler : MonoBehaviour
     public void ChooseItems()
     {
         //TODO
+        ToggleInventoryPanel(true);
     }
 
     public void ChooseGuard()
@@ -631,6 +529,16 @@ public class BattleHandler : MonoBehaviour
     public void ChooseBackToPlayerCommand()
     {
         battleState.commandingMinion = false;
+
+        if (playerAction.type == BattleActionType.UseItem)
+        {
+            //if player was about to use an item on their turn
+            if (playerAction.item.item.Consumable)
+            {
+                playerAction.item.AddItem();  //refund consumable usage before going back to player command
+            }
+        }
+
         SetCommandMenuUI();
     }
 
@@ -757,8 +665,16 @@ public class BattleHandler : MonoBehaviour
             currentTurn.FetchTargetsFromStrings();
 
             Debug.Log("action " + currentTurn.type);
-            
+
+            ValidBattleTarget actionTargets = ValidBattleTarget.None;
+        
             if (currentTurn.type == BattleActionType.Move)
+                actionTargets = currentTurn.move.validTargets;
+
+            if (currentTurn.type == BattleActionType.UseItem)
+                actionTargets = currentTurn.item.item.ValidTargets;
+            
+            if (currentTurn.type == BattleActionType.Move || currentTurn.type == BattleActionType.UseItem)
             {
                 for(int i = 0; i < currentTurn.GetTargetObjs().Count; i++)
                 {
@@ -766,28 +682,49 @@ public class BattleHandler : MonoBehaviour
                     {
                         Stats targetStats = currentTurn.GetTargetObjs()[i].GetComponent<Stats>();
                         if (targetStats.health > 0)
-                        {                
-                            if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
+                        {   
+                            if (actionTargets == ValidBattleTarget.Enemy || actionTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
                             {
-                                int damage = GetCurrentTurnDamageOnTarget(targetStats);
-                                targetStats.health -= damage;
-                                Debug.Log(damage);
-                                UpdateHealthDisplay(currentTurn.GetTargetObjs()[i], true);
+                                if (currentTurn.type == BattleActionType.Move)
+                                {
+                                    int damage = GetCurrentTurnDamageOnTarget(targetStats);
+                                    targetStats.health -= damage;
+                                    Debug.Log(damage);
+                                    UpdateHealthDisplay(currentTurn.GetTargetObjs()[i], true);
+                                }
+
+                                if (currentTurn.type == BattleActionType.UseItem)
+                                {
+                                    //TODO offense-based items
+                                }
                             }
                             else
                             {
                                 //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
-                                //TODO affect self/ally/allies
+                                if (currentTurn.type == BattleActionType.Move)
+                                {
+                                    //TODO moves that affect self/ally/allies
+                                }
+
+                                if (currentTurn.type == BattleActionType.UseItem)
+                                {
+                                    if (currentTurn.item.type == ItemType.Healing)
+                                    {
+                                        Healing healItem = (Healing) currentTurn.item.item;
+                                        
+                                        targetStats.health += healItem.healthHealedBy;
+                                        UpdateHealthDisplay(currentTurn.GetTargetObjs()[i], true);
+                                    }
+
+                                    //TODO other self/ally/allies items
+                                }
                             }
                         }
                     }
                 }
-                userStats.RecieveMultipliers(currentTurn.move);
-            }
 
-            if (currentTurn.type == BattleActionType.UseItem)
-            {
-                //TODO: use item on target(s)
+                if (currentTurn.type == BattleActionType.Move)
+                    userStats.RecieveMultipliers(currentTurn.move);
             }
 
             if (currentTurn.type == BattleActionType.Escape)
@@ -807,52 +744,104 @@ public class BattleHandler : MonoBehaviour
         Stats userStats = currentTurn.GetUser().GetComponent<Stats>();  //get user's stats
         string actionText = userStats.combatantName + " passed.";
 
+        ValidBattleTarget actionTargets = ValidBattleTarget.None;
+        
         if (currentTurn.type == BattleActionType.Move)
-        {   
-            actionText = userStats.combatantName;
-            if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)
-                actionText += " attacked with " + currentTurn.move.moveName;  //using a move on enemies
-            else
-                actionText += " used " + currentTurn.move.moveName;  //using a move on self, allies
+            actionTargets = currentTurn.move.validTargets;
 
-            if (currentTurn.move.attackPower > 0)
-                actionText +=  ", dealing";  //dealt damage
-            else if (currentTurn.move.attackPower < 0)
-                actionText += ", healing"; //healing damage
-            else
-                actionText += "";  //TODO figure out what to say with buffs/debuffs
+        if (currentTurn.type == BattleActionType.UseItem)
+            actionTargets = currentTurn.item.item.ValidTargets;
+
+        if (currentTurn.type == BattleActionType.Move || currentTurn.type == BattleActionType.UseItem)
+        {
+            if (currentTurn.type == BattleActionType.Move)
+            {
+                actionText = userStats.combatantName;
+                if (actionTargets == ValidBattleTarget.Enemy || actionTargets == ValidBattleTarget.AllEnemies)
+                    actionText += " attacked with " + currentTurn.move.moveName;  //using a move on enemies
+                else
+                    actionText += " used " + currentTurn.move.moveName;  //using a move on self, allies
+
+                if (currentTurn.move.attackPower > 0)
+                    actionText +=  ", dealing";  //dealt damage
+                else if (currentTurn.move.attackPower < 0)
+                    actionText += ", healing"; //healing damage
+                else
+                    actionText += "";  //TODO figure out what to say with buffs/debuffs
+            }
+
+            if (currentTurn.type == BattleActionType.UseItem)
+            {
+                actionText = userStats.combatantName + " used a " + currentTurn.item.itemName;
+                
+                if (currentTurn.item.type == ItemType.Healing)
+                    actionText += "! Healed ";
+
+                //TODO specifics text for other types of items besides healing
+            }
+
             for(int i = 0; i < currentTurn.GetTargetObjs().Count; i++)
             {
                 if (currentTurn.GetTargetObjs()[i] != null)
                 {
                     Stats targetStats = currentTurn.GetTargetObjs()[i].GetComponent<Stats>();
+
                     if (targetStats.health > 0)
-                    {                
-                        if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //damage on an enemy
+                    {
+                        if (actionTargets == ValidBattleTarget.Enemy || actionTargets == ValidBattleTarget.AllEnemies)  //effects an enemy(s)
                         {
-                            //and update actionText for the full diplay of the turn details
-                            int damage = GetCurrentTurnDamageOnTarget(targetStats);
-                            if (damage > 0)  //damage, not healing
-                                actionText += " " + damage + " damage to " + targetStats.combatantName;
-                            else
-                                actionText += " " + targetStats.combatantName + " by " + (-1 * damage) + "HP";
+                            if (currentTurn.type == BattleActionType.Move)
+                            {
+                                int damage = GetCurrentTurnDamageOnTarget(targetStats);
+                                if (damage > 0)  //damage, not healing
+                                    actionText += " " + damage + " damage to " + targetStats.combatantName;
+                                else
+                                    actionText += " " + targetStats.combatantName + " by " + (-1 * damage) + "HP";
+                            }
+
+                            if (currentTurn.type == BattleActionType.UseItem)
+                            {
+                                //TODO offense-based items
+                            }
                         }
                         else
                         {
-                            //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
-                            //TODO
-                            if (targetStats.combatantName != userStats.combatantName)  //if target is NOT self
-                                actionText += ", buffing " + targetStats.combatantName;
-                            else
-                                actionText += " on self";
+                            //effects self/ally/allies/all allies
+                            if (currentTurn.type == BattleActionType.Move)
+                            {
+                                if (targetStats.combatantName != userStats.combatantName)  //if target is NOT self
+                                    actionText += ", buffing " + targetStats.combatantName;
+                                else
+                                    actionText += " on self";
+                            }
+
+                            if (currentTurn.type == BattleActionType.UseItem)
+                            {
+                                if (targetStats.combatantName != userStats.combatantName)  //if target is NOT self
+                                    actionText += "self";
+                                else
+                                    actionText += targetStats.combatantName;
+                                
+                                if (currentTurn.item.type == ItemType.Healing)
+                                {
+                                    Healing healItem = (Healing) currentTurn.item.item;
+                                    actionText += " for " + healItem.healthHealedBy + " HP";
+                                }
+
+                                //TODO other self/ally/allies items
+                            }
                         }
                     }
                     else
                     {
                         //previous valid target has no health now
-                        if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //
+                        if (actionTargets == ValidBattleTarget.Enemy || actionTargets == ValidBattleTarget.AllEnemies)  //
                         {
-                            actionText += " overkill damage to " + targetStats.combatantName;
+                            if (currentTurn.type == BattleActionType.Move)
+                                actionText += " overkill damage to " + targetStats.combatantName;
+
+                            if (currentTurn.type == BattleActionType.UseItem)
+                                actionText += ", dealing insult to injury on " + targetStats.combatantName;
                         }
                         else
                         {
@@ -863,31 +852,25 @@ public class BattleHandler : MonoBehaviour
                 }
                 else
                 {
-                    if (currentTurn.move.validTargets == ValidBattleTarget.Enemy || currentTurn.move.validTargets == ValidBattleTarget.AllEnemies)  //
+                    if (actionTargets == ValidBattleTarget.Enemy || actionTargets == ValidBattleTarget.AllEnemies)  //valid targets == enemy or all enemies
                     {
-                        actionText += " a wild blow to nothing";
+                        if (currentTurn.type == BattleActionType.Move)
+                            actionText += " a wild blow to nothing";
+
+                        if (currentTurn.type == BattleActionType.UseItem)
+                            actionText += " a wild throw that hit nobody";
                     }
                     else
                     {
                         //valid targets == self, ally, allies, or all allies ; benefits to a self/ally/allies
-                        actionText += ", but no one could receive it";
+                        actionText += ", but it missed";
                     }
-                }
-
-                if (i < currentTurn.GetTargetObjs().Count - 1)
-                {
-                    if (currentTurn.GetTargetObjs().Count > 2)
-                        actionText += ",";  //only add commas when there are 3+ targets
-                    actionText += " ";  //always add the space with more than one target
-
-                    if (i == currentTurn.GetTargetObjs().Count - 2)
-                        actionText += "and";  //if this is the second-to-last target, add an "and"
                 }
             }
 
             actionText += ".";
 
-            if (currentTurn.move.HasMultipliers())
+            if (currentTurn.type == BattleActionType.Move && currentTurn.move.HasMultipliers())
             {
                 actionText += " " + userStats.combatantName + " boosts ";
                 StatMultiplierText[] multipliers = currentTurn.move.GetMultipliers();
@@ -908,17 +891,13 @@ public class BattleHandler : MonoBehaviour
                 actionText += ".";
             }
         }
-        
-        if (currentTurn.type == BattleActionType.UseItem)
-        {
-            //TODO
-            actionText = userStats.combatantName + " used an item.";
-        }
 
         if (currentTurn.type == BattleActionType.Escape)
         {
-            //TODO
-            actionText = userStats.combatantName + " escaped the battle successfully!";
+            if (escaping)
+                actionText = userStats.combatantName + " escaped the battle successfully!";
+            else
+                actionText = userStats.combatantName + " could not get away!";
         }
 
         UpdateTurnPanel(actionText);
@@ -980,7 +959,7 @@ public class BattleHandler : MonoBehaviour
 
         if (downedPlayers == 2)
         {
-            //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's position and stats
+            //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's stats and/or position
             escaping = true;
             UpdateTurnPanel("You have been defeated.");
         }
@@ -1123,12 +1102,12 @@ public class BattleHandler : MonoBehaviour
 
     public void ToggleBattleOverviewPanel()
     {
-        if (overviewPanel.activeSelf || battleOverviewAvailable)  //if overview panel is active already or it's not and we have the overview available
+        if (overviewPanel.activeSelf || battleState.battleOverviewAvailable)  //if overview panel is active already or it's not and we have the overview available
         {
             overviewPanel.SetActive(!overviewPanel.activeSelf);
 
-            SetBattleOverviewShowButton(battleOverviewAvailable);
-            battleOverviewAvailable = false;
+            SetBattleOverviewShowButton(battleState.battleOverviewAvailable);
+            battleState.battleOverviewAvailable = false;
         }
     }
 
@@ -1136,7 +1115,41 @@ public class BattleHandler : MonoBehaviour
     {
         Button showButton = GameObject.Find("ShowBattleOverviewPanel").transform.Find("ShowButton").GetComponent<Button>();
         showButton.interactable = active;  //set the button interactable state
-        battleOverviewAvailable = active;  //set the state tracker properly
+        battleState.battleOverviewAvailable = active;  //set the state tracker properly
+    }
+
+    public void ToggleInventoryPanel(bool active)
+    {
+        if (active)
+            invPanelScript.ReloadInventoryDisplay();
+        inventoryPanel.SetActive(active);
+    }
+
+    public void HandleInventoryUseItem(InventorySlot slot)
+    {
+        //InventorySlot slot = playerInventory.GetItemSlot(itemName);
+        inventoryPanel.SetActive(false);
+        Debug.Log(slot.itemName + ". in command? " + (battleState.view == BattleView.Command));
+        if (battleState.view == BattleView.SummonPrompt)
+        {
+            //summon from crystal
+            Crystal summonCrystal = (Crystal) slot.item;
+            Debug.Log(summonCrystal.minion.combatantName);
+            LoadMinionSummon(summonCrystal.minion.combatantName);
+            return;
+        }
+        
+        if (battleState.view == BattleView.Command)
+        {
+            //use item as action
+            BattleAction action = minionAction;
+            if (!battleState.commandingMinion)
+                action = playerAction;
+            
+            action.LoadItemSlot(slot);  //sets action type as item too
+            UpdateView(BattleView.Target);
+            return;
+        }
     }
 
     public void UpdateView(BattleView view)
@@ -1165,7 +1178,6 @@ public class BattleHandler : MonoBehaviour
             currentTurn = turnQueue.Peek();
             UpdateTurnActionText();
         }
-
         turnPanel.SetActive((battleState.view == BattleView.TurnActions));
     }
 }

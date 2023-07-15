@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class ItemSlotPanel : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class ItemSlotPanel : MonoBehaviour
     private TMP_Text itemTypeText = null;
     private TMP_Text countText = null;
     private Button useButton = null;
+    private Button trashButton = null;
 
     void Start()
     {
@@ -44,6 +46,9 @@ public class ItemSlotPanel : MonoBehaviour
 
         if (useButton == null)
             useButton = transform.Find("UseButton").GetComponent<Button>();
+
+        if (trashButton == null)
+            trashButton = transform.Find("TrashButton").GetComponent<Button>();
     }
 
     public void UpdateFromItemSlot()
@@ -55,18 +60,24 @@ public class ItemSlotPanel : MonoBehaviour
         itemTypeText.text = Item.ItemTypeToString(itemSlot.type);
         countText.text = "x" + itemSlot.count;
 
-        useButton.interactable = itemSlot.IsUseAvailable(parentPanel.playerInfo.scene);
+        useButton.interactable = (!parentPanel.disableUseButtonOverride && itemSlot.IsUseAvailable(parentPanel.playerInfo.scene, parentPanel.inBattle, parentPanel.inBattleActions));
+        trashButton.interactable = itemSlot.item.Consumable;
     }
 
     public void UseItem()
     {
         //TODO
+        parentPanel.useItemCallback.Invoke(itemSlot);
+        TrashItem();
     }
 
     public void TrashItem()
     {
         //TODO instead bring up a confirmation, then trash an item if Yes
-        itemSlot.TrashItem();
-        parentPanel.ReloadInventoryDisplay();
+        if (itemSlot.item.Consumable)
+        {
+            itemSlot.TrashItem();
+            parentPanel.ReloadInventoryDisplay();
+        }
     }
 }

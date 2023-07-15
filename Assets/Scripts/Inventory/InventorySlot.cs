@@ -47,16 +47,30 @@ public class InventorySlot
 
     public void TrashItem()
     {
-        if (count > 0)
+        if (count > 0 && item.Consumable)
             count--;
     }
 
-    public bool IsUseAvailable(string scene)
+    public bool IsUseAvailable(string scene, bool inBattle, bool inBattleActions)
     {
-        foreach(string s in item.ScenesUnusuableIn)
+        if (inBattleActions && item.ValidTargets == ValidBattleTarget.None)  //if it can't be used
+            return false;
+
+        if (!inBattle)
         {
-            if (s == scene)
-                return false;
+            foreach(string s in item.ScenesUnusuableIn)
+            {
+                if (s == scene)
+                    return false;
+            }
+        }
+        else
+        {
+            foreach(string s in item.ScenesUnusuableIn)
+            {
+                if (s == "Battle")
+                    return false;
+            }
         }
 
         return true;

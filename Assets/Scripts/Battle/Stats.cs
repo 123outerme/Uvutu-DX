@@ -47,10 +47,16 @@ public class Stats : MonoBehaviour
                 spr.sprite = combatantStats.sprite;
 
             combatantName = combatantStats.combatantName;
+
             level = combatantStats.level;
-            if (health == -1)
-                health = combatantStats.maxHealth;
+            
             maxHealth = combatantStats.maxHealth;
+            if (health == -1)
+            {
+                //Debug.Log(combatantName + health + " / " + maxHealth);
+                health = combatantStats.maxHealth;
+            }
+
             physAttack = combatantStats.physAttack;
             magicAttack = combatantStats.magicAttack;
             affinity = combatantStats.affinity;

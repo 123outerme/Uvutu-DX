@@ -10,7 +10,8 @@ public enum ItemType : int
     Weapon = 4,
     StoryItem = 5,
     //TODO: come up with cool item types
-    Other = 0
+    Other = 0,
+    All = -1  //NOTE: not a type, used for inventory sorting
 }
 
 public abstract class Item : ScriptableObject
@@ -24,12 +25,22 @@ public abstract class Item : ScriptableObject
     [SerializeField]
     private int _MaxCarryable = 20;
 
+    [SerializeField]
+    private bool _Consumable = true;
+
+    [SerializeField]
+    private ValidBattleTarget _ValidTargets = ValidBattleTarget.Allies;
+
     public string ItemName => _ItemName;
     public string Description => _Description;
 
     public virtual ItemType Type { get; private set; }
 
     public int MaxCarryable => _MaxCarryable;
+
+    public bool Consumable => _Consumable;
+
+    public ValidBattleTarget ValidTargets => _ValidTargets;
 
     public virtual string[] ScenesUnusuableIn { get; set; }
 

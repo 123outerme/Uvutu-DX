@@ -15,6 +15,8 @@ MonoBehaviour:
   _ItemName: Test Story Item
   _Description: This is a test of story items.
   _MaxCarryable: 1
+  _Consumable: 0
+  _ValidTargets: 6
   sprite: {fileID: -1704361730, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   scenesUnusuableIn:
   - Overworld

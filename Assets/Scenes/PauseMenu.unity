@@ -1713,6 +1713,7 @@ MonoBehaviour:
   statsPanel: {fileID: 93994678}
   inventoryPanel: {fileID: 503722321}
   questsPanel: {fileID: 2143123050}
+  player: {fileID: 1201379868}
 --- !u!4 &838378276
 Transform:
   m_ObjectHideFlags: 0
@@ -2955,7 +2956,6 @@ MonoBehaviour:
   scene: 
   inBattle: 0
   exitingBattle: 0
-  turnCount: 0
   loaded: 0
 --- !u!4 &1201379870
 Transform:
@@ -3303,6 +3303,38 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1654659466}
     m_Modifications:
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1201379868}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 838378275}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: UseItem
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PauseMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069780544570286707, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3677796644462375090, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -3390,6 +3422,38 @@ PrefabInstance:
     - target: {fileID: 3677796644462375101, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
       propertyPath: m_Name
       value: InventoryPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1201379868}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 838378275}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: UseItem
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PauseMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5656961066371190893, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
+      propertyPath: useItemCallback.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 6731323063659860444, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

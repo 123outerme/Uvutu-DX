@@ -15,7 +15,8 @@ public enum ValidBattleTarget
     Allies,  //all units on the allied side are a valid target (single-target)
     AllAllies,  //all allies are targeted (multi-target)
     Enemy,  //only valid target is any 1 enemy
-    AllEnemies  //all enemies are targeted (multi-target)
+    AllEnemies,  //all enemies are targeted (multi-target)
+    None  //no combatants are targetable (for items, as a fail-safe)
 }
 
 public class StatMultiplierText

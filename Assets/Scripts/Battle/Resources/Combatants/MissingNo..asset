@@ -15,9 +15,7 @@ MonoBehaviour:
   combatantName: MissingNo.
   sprite: {fileID: 68806785, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   level: 1
-  exp: 0
-  health: 0
-  maxHealth: 1
+  maxHealth: -1
   physAttack: 0
   magicAttack: 0
   affinity: 0

@@ -9,6 +9,10 @@ public class PauseMenu : MonoBehaviour
     public GameObject statsPanel;
     public GameObject inventoryPanel;
     public GameObject questsPanel;
+    public GameObject player;
+
+    private InventoryPanel invPanelScript;
+    private PlayerInfo playerInfo;
 
     List<AsyncOperation> scenesToLoad = new List<AsyncOperation>();
 
@@ -17,6 +21,8 @@ public class PauseMenu : MonoBehaviour
     void Start()
     {
         saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
+        playerInfo = player.GetComponent<PlayerInfo>();
+        invPanelScript = inventoryPanel.GetComponent<InventoryPanel>();
     }
 
     // Update is called once per frame
@@ -38,6 +44,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ShowInventory(bool setting)
     {   
+        invPanelScript.disableUseButtonOverride = playerInfo.inBattle;  //disable usage of items in the pause menu while in battle (they can be used as an action instead)
         inventoryPanel.SetActive(setting);
     }
 
@@ -60,5 +67,10 @@ public class PauseMenu : MonoBehaviour
     {
         SaveGame();
         scenesToLoad.Add(SceneManager.LoadSceneAsync("MainMenu"));
+    }
+
+    public void UseItem(InventorySlot slot)
+    {
+        //Use item in pause menu
     }
 }
