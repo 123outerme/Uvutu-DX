@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ItemType
+public enum ItemType : int
 {
-    Healing,
-    Crystal,
-    Armor,
-    Weapon,
+    Healing  = 1,
+    Crystal = 2,
+    Armor = 3,
+    Weapon = 4,
     //TODO: come up with cool item types
-    Other
+    Other = 0
 }
 
 public abstract class Item : ScriptableObject
@@ -23,9 +23,13 @@ public abstract class Item : ScriptableObject
     [SerializeField]
     private int _MaxCarryable;
 
+    [SerializeField]
+    private string[] _ScenesUnusableIn = new string[0];
+
     public string ItemName => _ItemName;
     public string Description => _Description;
     public int MaxCarryable => _MaxCarryable; 
+    public string[] ScenesUnusuableIn => _ScenesUnusableIn;
 
     public virtual ItemType Type { get; private set; }
 

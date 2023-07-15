@@ -10,10 +10,13 @@ public class ItemSlotPanel : MonoBehaviour
 
     public InventoryPanel parentPanel = null;
 
+    public string playerScene;
+
     private Image itemImage = null;
     private TMP_Text itemNameText = null;
     private TMP_Text itemTypeText = null;
     private TMP_Text countText = null;
+    private Button useButton = null;
 
     void Start()
     {
@@ -39,6 +42,9 @@ public class ItemSlotPanel : MonoBehaviour
         
         if (countText == null)
             countText = transform.Find("CountText").GetComponent<TMP_Text>();
+
+        if (useButton == null)
+            useButton = transform.Find("UseButton").GetComponent<Button>();
     }
 
     public void UpdateFromItemSlot()
@@ -49,6 +55,8 @@ public class ItemSlotPanel : MonoBehaviour
         itemNameText.text = itemSlot.itemName;
         itemTypeText.text = Item.ItemTypeToString(itemSlot.type);
         countText.text = "x" + itemSlot.count;
+
+        useButton.interactable = itemSlot.IsUseAvailable(parentPanel.playerInfo.scene);
     }
 
     public void UseItem()

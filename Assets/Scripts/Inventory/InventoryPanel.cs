@@ -7,14 +7,17 @@ public class InventoryPanel : MonoBehaviour
     public GameObject itemSlotPanelPrefab;
     public GameObject itemListContent;
 
-    private GameObject player;
-    private Inventory inventory;
+    [System.NonSerialized]
+    public PlayerInfo playerInfo = null;
+    private Inventory inventory = null;
+    
 
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.Find("Player");
+        GameObject player = GameObject.Find("Player");
         inventory = player.GetComponent<Inventory>();
+        playerInfo = player.GetComponent<PlayerInfo>();
 
         ReloadInventoryDisplay();
     }

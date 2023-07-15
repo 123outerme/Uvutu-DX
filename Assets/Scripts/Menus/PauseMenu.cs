@@ -27,6 +27,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ResumeGame()
     {
+        SaveGame();
         scenesToLoad.Add(SceneManager.LoadSceneAsync(saver.GetSceneToLoad()));
     }
 
@@ -36,7 +37,7 @@ public class PauseMenu : MonoBehaviour
     }
 
     public void ShowInventory(bool setting)
-    {
+    {   
         inventoryPanel.SetActive(setting);
     }
 

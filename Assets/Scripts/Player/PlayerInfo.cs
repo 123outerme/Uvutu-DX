@@ -13,7 +13,7 @@ public class PlayerInfo : MonoBehaviour
     public int prestige = 0;  //how many times the player has New Game+'d
     public int statPoints = 0;  //how many free stat points the player has
 
-    public string scene = "Overworld";  //start scene on new save
+    public string scene = "Overworld";  //start scene on new save; this is the current (unpaused) scene the player is in
 
     public bool inBattle = false;
     public bool exitingBattle = false;

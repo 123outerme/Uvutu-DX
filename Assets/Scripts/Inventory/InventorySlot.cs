@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class InventorySlot
 {
-    //[System.NonSerialized]  //the below field does not get serialized
+    [System.NonSerialized]  //the below field does not get serialized
     public Item item;
 
     public string itemName;
@@ -49,5 +49,16 @@ public class InventorySlot
     {
         if (count > 0)
             count--;
+    }
+
+    public bool IsUseAvailable(string scene)
+    {
+        foreach(string s in item.ScenesUnusuableIn)
+        {
+            if (s == scene)
+                return false;
+        }
+
+        return true;
     }
 }
