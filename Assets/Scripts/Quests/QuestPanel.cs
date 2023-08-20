@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class QuestPanel : MonoBehaviour
 {
@@ -50,6 +51,15 @@ public class QuestPanel : MonoBehaviour
                 questSlotPanel.quest = q;
                 questSlotPanel.UpdateFromQuestTracker();
             }
+        }
+
+        foreach (Transform child in filterPanel.transform)
+        {
+            Image buttonImage = child.GetComponent<Image>();
+            if (QuestInventory.QuestStatusToString(statusToFilterBy).Replace(" ", "") + "FilterButton" == child.name)
+                buttonImage.color = new Color(0.678f, 0.847f, 0.902f, 1.0f);  // ADD8E6, 100% alpha - tab's selected color
+            else
+                buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);  // white, 100% alpha - tab's normal color
         }
     }
 

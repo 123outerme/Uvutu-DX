@@ -51,7 +51,7 @@ public class BattleOverview : MonoBehaviour
                 if (options[selectedCombatant] == option)
                     panelImg.color = new Color(0.0f, 0.015f, 1.0f, 0.392f);  // 004EFF, 0x64 alpha (100 decimal) - tab's selected color 
                 else
-                    panelImg.color = new Color (1.0f, 1.0f, 1.0f, 0.392f);  //white, 0x64 alpha (100 decimal) - tab's standard color
+                    panelImg.color = new Color(1.0f, 1.0f, 1.0f, 0.392f);  //white, 0x64 alpha (100 decimal) - tab's standard color
 
                 Image icon = combatantTabPanel.transform.Find("CombatantIcon").GetComponent<Image>();
                 icon.sprite = stats.combatantStats.sprite;

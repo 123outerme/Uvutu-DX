@@ -80,20 +80,26 @@ public class InventoryPanel : MonoBehaviour
         
         foreach (Transform child in filterPanel.transform)
         {
-            Button sortButton = child.GetComponent<Button>();
+            Button filterButton = child.GetComponent<Button>();
+            Image buttonImage = child.GetComponent<Image>();
 
-            sortButton.interactable = false;
+            filterButton.interactable = false;
             foreach(ItemType t in includedTypes)
             {
                 if (Item.ItemTypeToString(t).Replace(" ", "") + "FilterButton" == child.name || child.name == "AllFilterButton")
                 {
-                    sortButton.interactable = true;
+                    filterButton.interactable = true;
                     break;
                 }
             }
 
-            if (sortButton.interactable)
-                sortButton.interactable = !lockFilter;
+            if (filterButton.interactable)
+                filterButton.interactable = !lockFilter;
+
+            if (Item.ItemTypeToString(typeToFilterBy).Replace(" ", "") + "FilterButton" == child.name)
+                buttonImage.color = new Color(0.678f, 0.847f, 0.902f, 1.0f);  // ADD8E6, 100% alpha - tab's selected color
+            else
+                buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);  // white, 100% alpha - tab's normal color
         }
     }
 

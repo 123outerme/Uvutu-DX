@@ -134,4 +134,27 @@ public class QuestInventory : MonoBehaviour
             q.LoadDetailsByName(q.name);
         }
     }
+
+    public static string QuestStatusToString(QuestStatus q)
+    {
+        if (q == QuestStatus.All)
+            return "All";
+
+        if (q == QuestStatus.Incomplete)
+            return "Incomplete";
+
+        if (q == QuestStatus.NotStarted)
+            return "Not Started";
+
+        if (q == QuestStatus.InProgress)
+            return "In Progress";
+
+        if (q == QuestStatus.ReadyToTurnInStep)
+            return "Ready To Turn In";
+
+        if (q == QuestStatus.Completed)
+            return "Completed";
+
+        return "";
+    }
 }
