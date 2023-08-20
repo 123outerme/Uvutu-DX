@@ -19,7 +19,7 @@ MonoBehaviour:
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
-  resistanceMultiplier: 1.5
+  resistanceMultiplier: 1.25
   speedMultiplier: 1
   appliedCondition: 0
   conditionChance: 0

@@ -83,10 +83,10 @@ public class Stats : MonoBehaviour
 
     public void RecieveMultipliers(Move m)
     {
-        physAttackMultiplier *= m.physAttackMultiplier;
-        magicAttackMultiplier *= m.magicAttackMultiplier;
-        affinityMultiplier *= affinityMultiplier;
-        resistanceMultiplier *= resistanceMultiplier;
-        speedMultiplier *= speedMultiplier;
+        physAttackMultiplier += (m.physAttackMultiplier - 1.0f);
+        magicAttackMultiplier += (m.magicAttackMultiplier - 1.0f);
+        affinityMultiplier += (m.affinityMultiplier - 1.0f);
+        resistanceMultiplier += (m.resistanceMultiplier - 1.0f);
+        speedMultiplier += (m.speedMultiplier - 1.0f);
     }
 }

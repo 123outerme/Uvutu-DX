@@ -12,7 +12,13 @@ public class BattleOverview : MonoBehaviour
     public GameObject enemy2;
     public GameObject enemy3;
 
-    public GameObject detailsPanel;
+    public GameObject healthPanel;
+    public GameObject physAtkPanel;
+    public GameObject magicAtkPanel;
+    public GameObject affinityPanel;
+    public GameObject resistancePanel;
+    public GameObject speedPanel;
+    public GameObject conditionPanel;
 
     public int selectedCombatant = 0;
 
@@ -65,8 +71,14 @@ public class BattleOverview : MonoBehaviour
 
     public void UpdateShownCombatantDetails()
     {
-        GameObject detailsPanel = transform.Find("DetailsPanel").gameObject;
-        //TODO
+        GameObject[] combatants = {player, minion, enemy1, enemy2, enemy3};
+        Stats s = combatants[selectedCombatant].GetComponent<Stats>();
+        UpdateHealth(s);
+        UpdatePhysAtk(s);
+        UpdateMagicAtk(s);
+        UpdateAffinity(s);
+        UpdateResistance(s);
+        UpdateSpeed(s);
     }
 
     public void SelectCombatant(int combatantIndex)
@@ -74,5 +86,76 @@ public class BattleOverview : MonoBehaviour
         selectedCombatant = combatantIndex;
         UpdateAllTabDetails();
         UpdateShownCombatantDetails();
+    }
+
+    private void UpdateHealth(Stats s)
+    {
+        TMP_Text text = healthPanel.transform.Find("StatText").GetComponent<TMP_Text>();
+        text.text = s.health + "/" + s.maxHealth;
+    }
+
+    private void UpdatePhysAtk(Stats s)
+    {
+        Transform textObj = physAtkPanel.transform.Find("StatText");
+        TMP_Text text = textObj.GetComponent<TMP_Text>();
+        text.text = "" + s.physAttack;
+
+        GameObject multiplier = textObj.Find("MultiplierText").gameObject;
+        UpdateMultiplier(s.physAttackMultiplier, multiplier);
+    }
+
+    private void UpdateMagicAtk(Stats s)
+    {
+        Transform textObj = magicAtkPanel.transform.Find("StatText");
+        TMP_Text text = textObj.GetComponent<TMP_Text>();
+        text.text = "" + s.magicAttack;
+
+        GameObject multiplier = textObj.Find("MultiplierText").gameObject;
+        UpdateMultiplier(s.magicAttackMultiplier, multiplier);
+    }
+
+    private void UpdateAffinity(Stats s)
+    {
+        Transform textObj = affinityPanel.transform.Find("StatText");
+        TMP_Text text = textObj.GetComponent<TMP_Text>();
+        text.text = "" + s.affinity;
+
+        GameObject multiplier = textObj.Find("MultiplierText").gameObject;
+        UpdateMultiplier(s.affinityMultiplier, multiplier);
+    }
+
+    private void UpdateResistance(Stats s)
+    {
+        Transform textObj = resistancePanel.transform.Find("StatText");
+        TMP_Text text = textObj.GetComponent<TMP_Text>();
+        text.text = "" + s.resistance;
+
+        GameObject multiplier = textObj.Find("MultiplierText").gameObject;
+        UpdateMultiplier(s.resistanceMultiplier, multiplier);
+    }
+
+    private void UpdateSpeed(Stats s)
+    {
+        Transform textObj = speedPanel.transform.Find("StatText");
+        TMP_Text text = textObj.GetComponent<TMP_Text>();
+        text.text = "" + s.speed;
+
+        GameObject multiplier = textObj.Find("MultiplierText").gameObject;
+        UpdateMultiplier(s.speedMultiplier, multiplier);
+    }
+
+    private void UpdateMultiplier(float value, GameObject multiplier)
+    {
+        TMP_Text multiplierText = multiplier.GetComponent<TMP_Text>();
+        
+        if (Mathf.Abs(value - 1.0f) > 0.00001f)
+        {
+            multiplierText.text = (value > 0.0f) ? "+" : "-";
+            multiplierText.text += Mathf.Floor(Mathf.Abs(value * 100.0f));
+            multiplierText.text += "%";
+            multiplier.SetActive(true);
+        }
+        else
+            multiplier.SetActive(false);
     }
 }
