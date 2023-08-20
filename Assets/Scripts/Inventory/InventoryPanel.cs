@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class InventoryPanel : MonoBehaviour
 {
@@ -17,11 +18,15 @@ public class InventoryPanel : MonoBehaviour
 
     public GameObject player;
 
+    public GameObject sortPanel;
+
     [System.NonSerialized]
     public PlayerInfo playerInfo = null;
     private Inventory inventory = null;
 
     public UnityEvent<InventorySlot> useItemCallback;
+
+    public List<ItemType> includedTypes = new List<ItemType>();
 
     // Start is called before the first frame update
     void Start()
@@ -44,6 +49,7 @@ public class InventoryPanel : MonoBehaviour
             playerInfo = player.GetComponent<PlayerInfo>();
 
         InventorySlot[] items = inventory.GetItems();
+        includedTypes = new List<ItemType>();
 
         //destroy each child object in the list to start adding the refreshed list
         foreach(Transform child in itemListContent.transform)
@@ -65,6 +71,29 @@ public class InventoryPanel : MonoBehaviour
                 itemSlotPanel.itemSlot = items[i];
                 itemSlotPanel.UpdateFromItemSlot();
             }
+
+
+            if (!includedTypes.Contains(items[i].type))
+                includedTypes.Add(items[i].type);
+        }
+
+        
+        foreach (Transform child in sortPanel.transform)
+        {
+            Button sortButton = child.GetComponent<Button>();
+
+            sortButton.interactable = false;
+            foreach(ItemType t in includedTypes)
+            {
+                if (Item.ItemTypeToString(t).Replace(" ", "") + "SortButton" == child.name)
+                {
+                    sortButton.interactable = true;
+                    break;
+                }
+            }
+
+            if (sortButton.interactable)
+                sortButton.interactable = !lockSort;
         }
     }
 

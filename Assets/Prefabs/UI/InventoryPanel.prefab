@@ -1174,9 +1174,11 @@ MonoBehaviour:
   inBattle: 0
   inBattleActions: 0
   player: {fileID: 0}
+  sortPanel: {fileID: 3932667127359955549}
   useItemCallback:
     m_PersistentCalls:
       m_Calls: []
+  includedTypes: 
 --- !u!1 &3932667127359955549
 GameObject:
   m_ObjectHideFlags: 0

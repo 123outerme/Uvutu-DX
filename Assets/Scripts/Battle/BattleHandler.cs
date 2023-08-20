@@ -298,11 +298,11 @@ public class BattleHandler : MonoBehaviour
             minionStats.UpdateStats();
 
             UpdateHealthDisplay(minion, true);
-
-            //reset inventory panel's sorting
-            invPanelScript.typeToSortBy = ItemType.All;
-            invPanelScript.lockSort = false;
         }
+        //reset inventory panel's sorting
+        invPanelScript.typeToSortBy = ItemType.All;
+        invPanelScript.lockSort = false;
+
         //after this, Use item => use as turn action
         invPanelScript.inBattleActions = true;
         invPanelScript.ReloadInventoryDisplay();
@@ -491,7 +491,6 @@ public class BattleHandler : MonoBehaviour
 
     public void ChooseItems()
     {
-        //TODO
         ToggleInventoryPanel(true);
     }
 

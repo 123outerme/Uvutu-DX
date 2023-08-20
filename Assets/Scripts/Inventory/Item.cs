@@ -48,6 +48,9 @@ public abstract class Item : ScriptableObject
 
     public static string ItemTypeToString(ItemType type)
     {
+        if (type == ItemType.All)
+            return "All";
+
         if (type == ItemType.Healing)
             return "Healing";
 
