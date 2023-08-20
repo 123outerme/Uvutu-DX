@@ -73,4 +73,10 @@ public class InventoryPanel : MonoBehaviour
         typeToSortBy = type;
         ReloadInventoryDisplay();
     }
+
+    public void ClickSortByType(int typeId)
+    {
+        ItemType t = (ItemType) typeId;
+        SortByType(t);
+    }
 }
