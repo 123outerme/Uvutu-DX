@@ -46,14 +46,14 @@ public class QuestTracker
 
     public bool IsCurrentStepCompleted()
     {
-        QuestStep curStep = GetCurrentStepInfo();
+        QuestStep curStep = GetCurrentStep();
         if (curStep == null)
             return true;
 
         return (GetCurrentStepProgress() >= curStep.count);
     }
 
-    public QuestStep GetCurrentStepInfo()
+    public QuestStep GetCurrentStep()
     {
         if (currentStep < 0 || currentStep >= stepProgressCounts.Length)
             return null;
@@ -73,6 +73,34 @@ public class QuestTracker
             stepProgressCounts[currentStep] = amount;
 
         //Debug.Log(stepProgressCounts[currentStep]);
+    }
+
+    public string GetShortStepDetail()
+    {
+        QuestStep step = GetCurrentStep();
+        if (step == null)  //if step is completed
+        {
+            step = quest.steps[quest.steps.Length - 1];
+            return "Turned in to " + step.turnInName + ".";
+        } 
+
+        if (IsCurrentStepCompleted())
+            return "Turn in to " + step.turnInName + "!";
+
+        string s = "";
+
+        if (step.type == QuestType.Talk)
+            s = "Talk to";
+
+        if (step.type == QuestType.CollectItem)
+            s = "Collect";
+
+        if (step.type == QuestType.DefeatMonster)
+            s = "Defeat";
+
+        s += " " + step.objectiveName + " (" + GetCurrentStepProgress() + " / " + step.count + ")!";
+
+        return s;
     }
 
     public void LoadDetailsFromQuest(Quest q)

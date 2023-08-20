@@ -80,7 +80,7 @@ public class NPCDialogue : MonoBehaviour
 
                         if (questsInventory.GetQuestStatus(q.name) == QuestStatus.InProgress)
                         {
-                            QuestStep curStep = questsInventory.GetQuestByName(q.name).GetCurrentStepInfo();
+                            QuestStep curStep = questsInventory.GetQuestByName(q.name).GetCurrentStep();
                             //getting from quest handler so we can get the updated quest details
                             if (curStep != null)
                                 curDialogueList.AddRange(curStep.inProgressDialogue); //add in-progress dialogue from currently active quest

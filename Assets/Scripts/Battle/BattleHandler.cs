@@ -285,8 +285,8 @@ public class BattleHandler : MonoBehaviour
     public void ChooseMinionSummon()
     {
         //TODO open choose summon menu, then once picked activate the command panel for player turn
-        invPanelScript.typeToSortBy = ItemType.Crystal;
-        invPanelScript.lockSort = true;
+        invPanelScript.typeToFilterBy = ItemType.Crystal;
+        invPanelScript.lockFilter = true;
         ToggleInventoryPanel(true);
     }
 
@@ -300,8 +300,8 @@ public class BattleHandler : MonoBehaviour
             UpdateHealthDisplay(minion, true);
         }
         //reset inventory panel's sorting
-        invPanelScript.typeToSortBy = ItemType.All;
-        invPanelScript.lockSort = false;
+        invPanelScript.typeToFilterBy = ItemType.All;
+        invPanelScript.lockFilter = false;
 
         //after this, Use item => use as turn action
         invPanelScript.inBattleActions = true;

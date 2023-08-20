@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 548407063137146400}
   - component: {fileID: 9064094735579932052}
   m_Layer: 5
-  m_Name: HealingSortButton
+  m_Name: HealingFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,7 +33,7 @@ RectTransform:
   m_Children:
   - {fileID: 944922976026941442}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -124,7 +124,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: 6279841992820040324}
   - component: {fileID: 2747442065402018267}
   m_Layer: 5
-  m_Name: OtherButton
+  m_Name: OtherFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -302,7 +302,7 @@ RectTransform:
   m_Children:
   - {fileID: 8547772768755202914}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -393,7 +393,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -686,7 +686,7 @@ GameObject:
   - component: {fileID: 804998816191681572}
   - component: {fileID: 7633320877084540416}
   m_Layer: 5
-  m_Name: AllSortButton
+  m_Name: AllFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -706,7 +706,7 @@ RectTransform:
   m_Children:
   - {fileID: 8784394050678480027}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 0
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -797,7 +797,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -820,7 +820,7 @@ GameObject:
   - component: {fileID: 441636642164056371}
   - component: {fileID: 1843968460349162367}
   m_Layer: 5
-  m_Name: WeaponSortButton
+  m_Name: WeaponFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -840,7 +840,7 @@ RectTransform:
   m_Children:
   - {fileID: 7576666143743194838}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -931,7 +931,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1168,13 +1168,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemSlotPanelPrefab: {fileID: 822628327066677331, guid: ec6d6d0d9b6e59846a0e2b3f144c55fb, type: 3}
   itemListContent: {fileID: 6731323065299963652}
-  typeToSortBy: -1
-  lockSort: 0
+  typeToFilterBy: -1
+  lockFilter: 0
   disableUseButtonOverride: 0
   inBattle: 0
   inBattleActions: 0
   player: {fileID: 0}
-  sortPanel: {fileID: 3932667127359955549}
+  filterPanel: {fileID: 3932667127359955549}
   useItemCallback:
     m_PersistentCalls:
       m_Calls: []
@@ -1191,7 +1191,7 @@ GameObject:
   - component: {fileID: 7441982056505121407}
   - component: {fileID: 1058865889752149113}
   m_Layer: 5
-  m_Name: SortPanel
+  m_Name: FilterPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1209,13 +1209,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2319263388010336022}
   - {fileID: 7613177060396637422}
   - {fileID: 9217248059487669177}
   - {fileID: 1010834437170030471}
   - {fileID: 8835299437615765027}
   - {fileID: 6759036603658741921}
   - {fileID: 2859171428780939106}
+  - {fileID: 2319263388010336022}
   m_Father: {fileID: 6731323064453320270}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1271,7 +1271,7 @@ GameObject:
   - component: {fileID: 3716405464255611367}
   - component: {fileID: 1105958894752641330}
   m_Layer: 5
-  m_Name: StoryItemSortButton
+  m_Name: StoryItemFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1291,7 +1291,7 @@ RectTransform:
   m_Children:
   - {fileID: 6540413707819155030}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -1382,7 +1382,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2575,7 +2575,7 @@ GameObject:
   - component: {fileID: 678367990007867520}
   - component: {fileID: 8759749087315519818}
   m_Layer: 5
-  m_Name: CrystalSortButton
+  m_Name: CrystalFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2595,7 +2595,7 @@ RectTransform:
   m_Children:
   - {fileID: 8613312224535065175}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -2686,7 +2686,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2709,7 +2709,7 @@ GameObject:
   - component: {fileID: 4193374852737597341}
   - component: {fileID: 6012288887907033183}
   m_Layer: 5
-  m_Name: ArmorSortButton
+  m_Name: ArmorFilterButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2729,7 +2729,7 @@ RectTransform:
   m_Children:
   - {fileID: 6827462910964624903}
   m_Father: {fileID: 6333164793765055957}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -2820,7 +2820,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5656961066371190893}
         m_TargetAssemblyTypeName: InventoryPanel, Assembly-CSharp
-        m_MethodName: ClickSortByType
+        m_MethodName: ClickFilterByType
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

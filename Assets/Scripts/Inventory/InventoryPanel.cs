@@ -9,8 +9,8 @@ public class InventoryPanel : MonoBehaviour
     public GameObject itemSlotPanelPrefab;
     public GameObject itemListContent;
 
-    public ItemType typeToSortBy = ItemType.All;
-    public bool lockSort = false;
+    public ItemType typeToFilterBy = ItemType.All;
+    public bool lockFilter = false;
     public bool disableUseButtonOverride = false;
 
     public bool inBattle = false;
@@ -18,7 +18,7 @@ public class InventoryPanel : MonoBehaviour
 
     public GameObject player;
 
-    public GameObject sortPanel;
+    public GameObject filterPanel;
 
     [System.NonSerialized]
     public PlayerInfo playerInfo = null;
@@ -63,7 +63,7 @@ public class InventoryPanel : MonoBehaviour
             if (inBattle && !items[i].IsUseAvailable(playerInfo.scene, inBattle, inBattleActions))
                 battleFiltered = true;
 
-            if ((typeToSortBy == ItemType.All || items[i].type == typeToSortBy) && !battleFiltered)
+            if ((typeToFilterBy == ItemType.All || items[i].type == typeToFilterBy) && !battleFiltered)
             {
                 GameObject panelObj = Instantiate(itemSlotPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, itemListContent.transform);
                 ItemSlotPanel itemSlotPanel = panelObj.GetComponent<ItemSlotPanel>();
@@ -78,14 +78,14 @@ public class InventoryPanel : MonoBehaviour
         }
 
         
-        foreach (Transform child in sortPanel.transform)
+        foreach (Transform child in filterPanel.transform)
         {
             Button sortButton = child.GetComponent<Button>();
 
             sortButton.interactable = false;
             foreach(ItemType t in includedTypes)
             {
-                if (Item.ItemTypeToString(t).Replace(" ", "") + "SortButton" == child.name)
+                if (Item.ItemTypeToString(t).Replace(" ", "") + "FilterButton" == child.name || child.name == "AllFilterButton")
                 {
                     sortButton.interactable = true;
                     break;
@@ -93,19 +93,19 @@ public class InventoryPanel : MonoBehaviour
             }
 
             if (sortButton.interactable)
-                sortButton.interactable = !lockSort;
+                sortButton.interactable = !lockFilter;
         }
     }
 
-    public void SortByType(ItemType type)
+    public void FilterByType(ItemType type)
     {
-        typeToSortBy = type;
+        typeToFilterBy = type;
         ReloadInventoryDisplay();
     }
 
-    public void ClickSortByType(int typeId)
+    public void ClickFilterByType(int typeId)
     {
         ItemType t = (ItemType) typeId;
-        SortByType(t);
+        FilterByType(t);
     }
 }

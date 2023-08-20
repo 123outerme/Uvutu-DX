@@ -55,6 +55,9 @@ public class ItemSlotPanel : MonoBehaviour
     {
         GetComponentReferences();
 
+        if (itemSlot == null)
+            return;
+
         itemImage.sprite = itemSlot.item.sprite;
         itemNameText.text = itemSlot.itemName;
         itemTypeText.text = Item.ItemTypeToString(itemSlot.type);

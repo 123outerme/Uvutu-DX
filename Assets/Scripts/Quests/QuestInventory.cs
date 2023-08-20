@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum QuestStatus
+public enum QuestStatus : int
 {
-    NotStarted,
-    InProgress,
-    ReadyToTurnInStep,
-    Completed
+    All = -2, //for quest filtering only
+    Incomplete = -1,  //for quest filtering only
+    NotStarted = 0,
+    InProgress = 1,
+    ReadyToTurnInStep = 2,
+    Completed = 3
 }
 
 public class QuestInventory : MonoBehaviour
@@ -53,7 +55,7 @@ public class QuestInventory : MonoBehaviour
             return QuestStatus.NotStarted;
 
         int step = entry.GetCurrentStepProgress();
-        if (step >= 0)  //GetCurrentStep() returns null if quest is complete
+        if (step >= 0)  //GetCurrentStepProgress() returns -1 if quest is complete
         {
             if (entry.IsCurrentStepCompleted())  //if the current step has completed progress, that means the player hasn't turned it in yet
                 return QuestStatus.ReadyToTurnInStep;
@@ -67,7 +69,7 @@ public class QuestInventory : MonoBehaviour
     public bool SetQuestStepProgress(string questName, QuestType type, string objectiveName, int accomplishedCount)
     {
         QuestTracker q = GetQuestByName(questName);
-        QuestStep step = q.GetCurrentStepInfo();
+        QuestStep step = q.GetCurrentStep();
         if (step.type == type && step.objectiveName == objectiveName)
         {
             q.SetProgressForCurrentStep(accomplishedCount);
@@ -82,7 +84,7 @@ public class QuestInventory : MonoBehaviour
         List<QuestAndStepPair> pairs = new List<QuestAndStepPair>();  //create a list of quest & quest-step pairs (for completing the quest step, telling the quest to go to the next step)
         foreach(QuestTracker curQuest in quests)  //for each quest we have
         {
-            QuestStep step = curQuest.GetCurrentStepInfo();
+            QuestStep step = curQuest.GetCurrentStep();
             if (step != null && step.turnInName == turnInName && curQuest.IsCurrentStepCompleted())  //if this step turns in to the NPC we are checking for, and it is completed
             {
                 pairs.Add(new QuestAndStepPair(step, curQuest.quest));  //add to the list of steps that are about to be turned in
@@ -94,7 +96,7 @@ public class QuestInventory : MonoBehaviour
     public void TurnInCurrentQuestStep(string questName)
     {
         QuestTracker q = GetQuestByName(questName);
-        QuestStep step = q.GetCurrentStepInfo();
+        QuestStep step = q.GetCurrentStep();
         if (step != null)
         {
             //TODO: reward player for quest step completion
@@ -117,7 +119,7 @@ public class QuestInventory : MonoBehaviour
     {
         foreach(QuestTracker curQuest in quests)
         {
-            QuestStep step = curQuest.GetCurrentStepInfo();
+            QuestStep step = curQuest.GetCurrentStep();
             if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName && !curQuest.IsCurrentStepCompleted())
             {
                 curQuest.AddProgressToCurrentStep(1);  //add 1 instance of talking as progress!
