@@ -598,6 +598,7 @@ public class BattleHandler : MonoBehaviour
     public void DoTurn()
     {
         Debug.Log("do turn");
+        SetBattleOverviewShowButton(false);  //disable battle overview button even if enabled, until end of turn process
 
         //TODO: simulate whole turn based on player's desired action(s)
         //first: generate enemy actions and targets based on their "tendencies" and the battle status
