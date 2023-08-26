@@ -9,6 +9,7 @@ public class PlayerInfo : MonoBehaviour
     
     public string map = "TestMap";  //start map on new save
     public string underworldMap = "";  //procedurally-generated map L-System-like string
+    public int underworldDepth = 0;  //how deep in the underworld (in number of maps from start state) the player is
 
     public int prestige = 0;  //how many times the player has New Game+'d (to start)
     public int statPoints = 0;  //how many free stat points the player has (to start)

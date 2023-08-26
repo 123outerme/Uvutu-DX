@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.12107873, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -487,8 +487,10 @@ MonoBehaviour:
   usePosition: 1
   map: TestMap
   underworldMap: 
+  underworldDepth: 0
   prestige: 0
   statPoints: 0
+  gold: 10
   scene: 
   inBattle: 0
   exitingBattle: 0
@@ -560,6 +562,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1426036526}
     m_Modifications:
+    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5216746890708783459, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
       propertyPath: m_RootOrder
       value: 0
