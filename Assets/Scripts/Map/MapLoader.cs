@@ -55,6 +55,11 @@ public class MapLoader : MonoBehaviour
         exitDict.Add(")S", "E");
         exitDict.Add(")E", "N");
         exitDict.Add(")W", "S");
+        //180 rotation of direction (abbrev -> abbrev)
+        exitDict.Add("@N", "W");
+        exitDict.Add("@S", "E");
+        exitDict.Add("@E", "N");
+        exitDict.Add("@W", "S");
 
         LoadMap();
     }
@@ -125,7 +130,7 @@ public class MapLoader : MonoBehaviour
 
             List<CavernChunkGenerated> chunkPrefabs = new List<CavernChunkGenerated>();
 
-            string[] exitPrefixes = {"!", "(", ")"};
+            string[] exitPrefixes = {"!", "(", ")", "@"};
             foreach(string prefix in exitPrefixes)
             {
                 string opEx = exitDict[prefix + exit];
@@ -156,6 +161,9 @@ public class MapLoader : MonoBehaviour
                 if (generatedChunk.dictPrefix == ")")
                     degreesRotation = 90.0f;
 
+                if (generatedChunk.dictPrefix == "@")
+                    degreesRotation = 180.0f;
+
                 string oppositeExit = exitDict[generatedChunk.newExitAbbr];  //get full name of opposite abbreviation
                 Transform chunkExit = newChunk.transform.Find(oppositeExit);
                 //Transform chunkBox = chunk.transform.Find("BoundingBox");
@@ -175,9 +183,9 @@ public class MapLoader : MonoBehaviour
                 float x = exitDims.position.x - chunkExit.position.x;
                 float y = exitDims.position.y - chunkExit.position.y;
 
-                newChunk.transform.Translate(x, y, 0.0f);
-                newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);
-                newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);
+                newChunk.transform.Translate(x, y, 0.0f);  //move exits to be on top of each other
+                newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);  //rotate to have new chunk's exit go "outwards" from old chunk's
+                newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
                 
                 curChunkScript.exits.Add(exit, newChunk);
                 
