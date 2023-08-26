@@ -562,18 +562,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1426036526}
     m_Modifications:
-    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
-      propertyPath: m_BackGroundColor.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
-      propertyPath: m_BackGroundColor.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5216746890708783456, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
-      propertyPath: m_BackGroundColor.r
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5216746890708783459, guid: 1cd9b53e7f2fc0d4bbcc20eb8138f955, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -770,6 +758,10 @@ MonoBehaviour:
   grid: {fileID: 799660635}
   PlayerInfoParent: {fileID: 1426036523}
   disable: 0
+  cavernChunks:
+  - {fileID: 7366680821851561862, guid: b7666720f87634ce88a8f9daa6d872b5, type: 3}
+  - {fileID: 7366680821851561862, guid: e39d12367038b3cdebbca05ac7fa09c0, type: 3}
+  - {fileID: 7366680821851561862, guid: 5bb601ad0df35f98689631d11292268b, type: 3}
 --- !u!4 &1696662600
 Transform:
   m_ObjectHideFlags: 0

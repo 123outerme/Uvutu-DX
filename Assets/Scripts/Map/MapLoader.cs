@@ -8,6 +8,8 @@ public class MapLoader : MonoBehaviour
     public GameObject PlayerInfoParent;
     public bool disable = false;
 
+    public List<GameObject> cavernChunks;
+
     private PlayerInfo playerInfo;
 
     private SaveHandler saver;
@@ -76,46 +78,53 @@ public class MapLoader : MonoBehaviour
 
     private void LoadCavernMap()
     {
-        string startString = "A,N2S2E2W2";
-        GameObject startMap = LoadCavernMapObj(startString);
+        GameObject startMap = LoadCavernChunk(cavernChunks[0]);
 
-        LoadNextCavernMap(startMap, startString, 1);
+        LoadNextCavernChunk(startMap, 0, playerInfo.underworldDepth + 3);
     }
 
-    private void LoadNextCavernMap(GameObject curMap, string curString, int depth)
+    private void LoadNextCavernChunk(GameObject curChunk, int depth, int maxDepth)
     {
-        if (depth == 0)
+        if (depth >= maxDepth)
             return;
+
+        CavernChunk curChunkScript = curChunk.transform.Find("BoundingBox").GetComponent<CavernChunk>();
 
         List<string> exits = new List<string>();
         string[] possibleExits = {"N", "S", "E", "W"};
         foreach(string ex in possibleExits)
         {
-            if (curString.Contains(ex))
+            GameObject tempOutObj;
+            if (curChunk.name.Contains(ex) && !curChunkScript.exits.TryGetValue(ex, out tempOutObj))
                 exits.Add(ex);
         }
 
         foreach(string exit in exits)
         {
-            Transform exitDims = curMap.transform.Find(exitDict[exit]);
-            //Transform mapBox = curMap.transform.Find("BoundingBox");
+            Debug.Log(curChunk.name + ": exit " + exit);
+            Transform exitDims = curChunk.transform.Find(exitDict[exit]);
+            string oppositeExitAbbr = exitDict["!" + exit];
+            //Transform mapBox = curChunk.transform.Find("BoundingBox");
 
-            string chunkStr = null;
+            GameObject chunkPrefab = null;
 
-            //TODO: search Cavern directory for compatible resources
-            if (exit == "N" || exit == "S")
-                chunkStr = "A,N2S2";
-
-            if (exit == "E" || exit == "W")
-                chunkStr = "A,E2W2";
+            foreach(GameObject prefab in cavernChunks)
+            {
+                if (prefab.name.Contains(oppositeExitAbbr) && prefab.name != curChunk.name.Split("(Clone)")[0])
+                {
+                    //if the prefab contains the exit we need to pair and it isn't a prefab version of the current chunk 
+                    chunkPrefab = prefab;
+                    break;
+                }
+            }
             
-            if (chunkStr != null)
+            if (chunkPrefab != null)
             {
                 int xAxisDelta = 0, yAxisDelta = 0;
 
-                GameObject chunk = LoadCavernMapObj(chunkStr);
+                GameObject newChunk = LoadCavernChunk(chunkPrefab);
                 string oppositeExit = exitDict["!~" + exit];
-                Transform chunkExit = chunk.transform.Find(oppositeExit);
+                Transform chunkExit = newChunk.transform.Find(oppositeExit);
                 //Transform chunkBox = chunk.transform.Find("BoundingBox");
 
                 if (exit == "N")
@@ -133,17 +142,23 @@ public class MapLoader : MonoBehaviour
                 float x = exitDims.position.x - chunkExit.position.x + xAxisDelta;
                 float y = exitDims.position.y - chunkExit.position.y + yAxisDelta;
 
-                chunk.transform.Translate(x, y, 0.0f);
-                LoadNextCavernMap(chunk, chunkStr, depth - 1);
+                newChunk.transform.Translate(x, y, 0.0f);
+                
+                curChunkScript.exits.Add(exit, newChunk);
+                
+                CavernChunk newChunkScript = newChunk.transform.Find("BoundingBox").GetComponent<CavernChunk>();
+                newChunkScript.depth = depth + 1;
+                newChunkScript.exits.Add(oppositeExitAbbr, curChunk);
+
+                LoadNextCavernChunk(newChunk, depth + 1, maxDepth);
             }
         }
     }
 
-    private GameObject LoadCavernMapObj(string prefabName)
+    private GameObject LoadCavernChunk(GameObject chunkPrefab)
     {
-        GameObject mapPrefab = Resources.Load<GameObject>("Cavern/" + prefabName);
-        GameObject map = GameObject.Instantiate(mapPrefab) as GameObject;
-        map.transform.SetParent(grid.transform, false);
-        return map;
+        GameObject chunk = GameObject.Instantiate(chunkPrefab) as GameObject;
+        chunk.transform.SetParent(grid.transform, false);
+        return chunk;
     }
 }

@@ -5350,6 +5350,7 @@ GameObject:
   - component: {fileID: 6010371912242115503}
   - component: {fileID: 3041363199469125234}
   - component: {fileID: 2385884934007412355}
+  - component: {fileID: 5577506094817672209}
   m_Layer: 0
   m_Name: BoundingBox
   m_TagString: Untagged
@@ -5439,5 +5440,20 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 21, y: 16}
   m_EdgeRadius: 0
+--- !u!114 &5577506094817672209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8743785212021087633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 731ced41128adf27486fe51951b12814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  depth: 0
+  player: {fileID: 0}
+  maploader: {fileID: 0}
