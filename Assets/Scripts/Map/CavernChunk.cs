@@ -27,10 +27,15 @@ public class CavernChunk : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         Debug.Log("enter chunk at depth " + depth);
-        if (player != null && maploader != null)
+        if (player != null)
         {
             PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
             playerInfo.underworldDepth = depth;
+        }
+
+        if (maploader != null && maploader.maxDepth < depth + 2)
+        {
+            maploader.LoadMoreDepth(depth);
         }
     }
 }

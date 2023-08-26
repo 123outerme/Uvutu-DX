@@ -23,7 +23,12 @@ public class MapLoader : MonoBehaviour
 
     public List<GameObject> cavernChunks;
 
+    public int maxDepth = 0;
+
     private PlayerInfo playerInfo;
+    private string newCavernMap = "";
+    private int cavernMapStrPosition = 0;
+    private Dictionary<int, List<GameObject>> siblingChunks = new Dictionary<int, List<GameObject>>();
 
     private SaveHandler saver;
 
@@ -99,14 +104,26 @@ public class MapLoader : MonoBehaviour
         }
     }
 
-    private void LoadCavernMap()
+    public void LoadMoreDepth(int depth)
     {
-        GameObject startMap = LoadCavernChunk(cavernChunks[0]);
-
-        LoadNextCavernChunk(startMap, 0, playerInfo.underworldDepth + 3);
+        maxDepth = maxDepth + 2;
+        foreach(GameObject chunk in siblingChunks[depth])
+            LoadNextCavernChunk(chunk, depth);
     }
 
-    private void LoadNextCavernChunk(GameObject curChunk, int depth, int maxDepth)
+    private void LoadCavernMap()
+    {
+        //TODO: pick start state better
+        GameObject startPrefab = cavernChunks[0];
+        cavernMapStrPosition = 0;
+        GameObject startMap = LoadCavernChunk(startPrefab);
+
+        maxDepth = playerInfo.underworldDepth + 3;
+        LoadNextCavernChunk(startMap, 0);
+        playerInfo.underworldMap = newCavernMap;
+    }
+
+    private void LoadNextCavernChunk(GameObject curChunk, int depth)
     {
         if (depth >= maxDepth)
             return;
@@ -128,7 +145,7 @@ public class MapLoader : MonoBehaviour
             Transform exitDims = curChunk.transform.Find(exitDict[exit]);
             //Transform mapBox = curChunk.transform.Find("BoundingBox");
 
-            List<CavernChunkGenerated> chunkPrefabs = new List<CavernChunkGenerated>();
+            List<CavernChunkGenerated> chunksGenned = new List<CavernChunkGenerated>();
 
             string[] exitPrefixes = {"!", "(", ")", "@"};
             foreach(string prefix in exitPrefixes)
@@ -139,17 +156,25 @@ public class MapLoader : MonoBehaviour
                     if (prefab.name.Contains(opEx) && prefab.name != curChunk.name.Split("(Clone)")[0])
                     {
                         //if the prefab contains the exit we need to pair and it isn't a prefab version of the current chunk 
-                        chunkPrefabs.Add(new CavernChunkGenerated(prefab, opEx, prefix));
+                        chunksGenned.Add(new CavernChunkGenerated(prefab, opEx, prefix));
                         break;
                     }
                 }
             }
             
-            if (chunkPrefabs.Count > 0)
+            if (chunksGenned.Count > 0)
             {
                 //TODO: pick a prefab better
-                CavernChunkGenerated generatedChunk = chunkPrefabs[Random.Range(0, chunkPrefabs.Count - 1)];
-
+                CavernChunkGenerated generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count - 1)];
+                //*
+                foreach(CavernChunkGenerated prefab in chunksGenned)
+                {
+                    //if there is already data on what map this should be and it is in the list of chunks that can be used
+                    if (playerInfo.underworldMap.Length > cavernMapStrPosition && prefab.chunkPrefab.name.Split(",")[0] == playerInfo.underworldMap.Split(",")[cavernMapStrPosition])
+                        generatedChunk = prefab;  //set the chunk to be what is saved
+                }
+                //*/
+                
                 int xAxisDelta = 0, yAxisDelta = 0;
 
                 GameObject newChunk = LoadCavernChunk(generatedChunk.chunkPrefab);
@@ -193,7 +218,17 @@ public class MapLoader : MonoBehaviour
                 newChunkScript.depth = depth + 1;
                 newChunkScript.exits.Add(generatedChunk.newExitAbbr, curChunk);
 
-                LoadNextCavernChunk(newChunk, depth + 1, maxDepth);
+                List<GameObject> siblings = null;
+                siblingChunks.TryGetValue(depth, out siblings);
+
+                if (siblings == null)
+                    siblings = new List<GameObject>();
+                siblings.Add(newChunk);
+                siblingChunks.Add(depth, siblings);
+                
+                cavernMapStrPosition++;
+
+                LoadNextCavernChunk(newChunk, depth + 1);
             }
         }
     }
@@ -202,6 +237,7 @@ public class MapLoader : MonoBehaviour
     {
         GameObject chunk = GameObject.Instantiate(chunkPrefab) as GameObject;
         chunk.transform.SetParent(grid.transform, false);
+        newCavernMap += chunkPrefab.name.Split(",")[0] + ",";  //add the chunk's name to the map save string
         return chunk;
     }
 }

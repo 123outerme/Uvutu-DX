@@ -2319,7 +2319,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2800040417735119918}
   m_Layer: 0
-  m_Name: A,N2S2
+  m_Name: B,N2S2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
