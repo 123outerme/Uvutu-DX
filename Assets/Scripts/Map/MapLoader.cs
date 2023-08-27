@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class CavernChunkGenerated {
+class CavernChunkCandidate {
     public GameObject chunkPrefab;
     public string newExitAbbr;
     public string dictPrefix;
 
-    public CavernChunkGenerated(GameObject prefab, string exitAbbr, string prefix)
+    public CavernChunkCandidate(GameObject prefab, string exitAbbr, string prefix)
     {
         chunkPrefab = prefab;
         newExitAbbr = exitAbbr;
@@ -23,12 +23,10 @@ public class MapLoader : MonoBehaviour
 
     public List<GameObject> cavernChunks;
 
-    public int maxDepth = 0;
-
     private PlayerInfo playerInfo;
-    private string newCavernMap = "";
-    private int cavernMapStrPosition = 0;
-    private Dictionary<int, List<GameObject>> siblingChunks = new Dictionary<int, List<GameObject>>();
+    private Queue<GameObject> chunkQueue = new Queue<GameObject>();
+    private GameObject rootChunk = null;
+    private int nextDebugId = 1;
 
     private SaveHandler saver;
 
@@ -92,7 +90,16 @@ public class MapLoader : MonoBehaviour
 
             if (playerInfo.underworldMap != null && playerInfo.underworldMap.Length > 0)
             {
-                LoadCavernMap();
+                if (playerInfo.underworldMap == "new")
+                {
+                    //TODO: pick start state better
+                    GameObject startPrefab = cavernChunks[0];
+                    LoadCavernMap(startPrefab);
+                }
+                else
+                {
+                    RestoreCavernMapFromString();
+                }
             }
             else
             {
@@ -104,48 +111,137 @@ public class MapLoader : MonoBehaviour
         }
     }
 
-    public void LoadMoreDepth(int depth)
+    public void RestoreCavernMapFromString()
     {
-        maxDepth = maxDepth + 2;
-        foreach(GameObject chunk in siblingChunks[depth])
-            LoadNextCavernChunk(chunk, depth);
+        //TODO traverse playerInfo.underworldMap string and convert it back to map chunks
     }
 
-    private void LoadCavernMap()
+    public void WriteCavernMapString()
     {
-        //TODO: pick start state better
-        GameObject startPrefab = cavernChunks[0];
-        cavernMapStrPosition = 0;
-        GameObject startMap = LoadCavernChunk(startPrefab);
+        chunkQueue.Clear();
+        chunkQueue.Enqueue(rootChunk);
+        string cavernMapString = "";
 
-        maxDepth = playerInfo.underworldDepth + 3;
-        LoadNextCavernChunk(startMap, 0);
-        playerInfo.underworldMap = newCavernMap;
+        int rootCount = GetChunkScript(rootChunk).timesPrintingVisited;
+
+        while(chunkQueue.Count > 0)
+        {
+            //Debug.Log("do while: " + chunkQueue.Count);
+            GameObject chunk = chunkQueue.Dequeue();
+            CavernChunk chunkScript = GetChunkScript(chunk);
+            if (chunk != null && chunkScript != null)
+            {
+                chunkScript.timesPrintingVisited = rootCount + 1;
+                cavernMapString += chunkScript.rotationPrefix + chunk.name.Split(",")[0];
+
+                string[] possibleExits = {"N", "S", "E", "W"};
+                foreach(string exit in possibleExits)
+                {
+                    GameObject childChunk = null;
+                    bool success = chunkScript.exits.TryGetValue(exit, out childChunk);
+
+                    if (success)
+                    {
+                        if (childChunk != null)
+                        {
+                            CavernChunk childChunkScript = GetChunkScript(childChunk);
+
+                            if (childChunkScript.timesPrintingVisited <= rootCount)
+                            {
+                                chunkQueue.Enqueue(childChunk);
+                                Debug.Log(chunk.name.Split(",")[0] + " (" + chunkScript.debugId + ") has " + exit + " exit: " + childChunk.name + " (" + childChunkScript.debugId + ")");
+                            }
+                            /*
+                            else
+                                Debug.Log("already visited " + childChunk.name + " (" + childChunkScript.debugId + ") to the " + exit);
+                            //else, this has already been visited for this string generation  */
+                        }
+                        /*
+                        else
+                            Debug.Log(chunk.name.Split(",")[0] + " (" + chunkScript.debugId + ") has no " + exit + " exit");    
+                        //else, do not enqueue anything else (this chunk does not have this exit direction!) */
+                    }
+                    /*
+                    else
+                        Debug.Log(chunk.name.Split(",")[0] + " (" + chunkScript.debugId + ") has undefined " + exit + " exit");
+                    //if exit direction exists but is unconnected (not defined in the exits dictionary), enqueue NULL to record no exit connected */
+                }
+            }
+
+            if (chunkQueue.Count > 0)
+                cavernMapString += ",";
+        }
+        Debug.Log(cavernMapString);
+
+        playerInfo.underworldMap = cavernMapString;
     }
 
-    private void LoadNextCavernChunk(GameObject curChunk, int depth)
+    public bool ShouldLoadMoreCavern(int depth, int localMaxDepth)
     {
-        if (depth >= maxDepth)
+        return depth + 2 > localMaxDepth;  //if there are less than 2 more chunks until the current "frontier"
+    }
+
+    public void LoadMoreCavern(GameObject chunk)
+    {
+        Debug.Log("load more cavern / " + chunk.name);
+        CavernChunk chunkScript = GetChunkScript(chunk);
+
+        string[] exits = {"N", "S", "E", "W"};
+        //NOTE: if ShouldLoadMoreCavern(int) changes, the logic here to put the chunks that are at the end of the "tree" should change 
+        foreach(string exit in exits)
+        {
+            GameObject childChunk = null;
+            bool found = chunkScript.exits.TryGetValue(exit, out childChunk);
+            if (found && childChunk != null)
+            {
+                GetChunkScript(childChunk).localMaxDepth = chunkScript.localMaxDepth + 2;  //generate 2 more chunks from the current local maximum
+                chunkQueue.Enqueue(childChunk);
+            }
+        }
+
+        if (chunkQueue.Count > 0)
+        {
+            chunkScript.localMaxDepth += 2;  //if any children were found, increase the local max depth to prevent processing happening again
+            LoadNextCavernChunk();  //start loading next chunk
+            WriteCavernMapString();  //export the representative string after generation completes
+        }
+    }
+
+    private void LoadCavernMap(GameObject startPrefab)
+    {
+        rootChunk = LoadCavernChunk(startPrefab);
+        CavernChunk rootChunkScript = GetChunkScript(rootChunk);
+        rootChunkScript.rotationPrefix = "!";  //hard-coded to not rotate - TODO when picking a first map make this random as well!
+
+        rootChunkScript.localMaxDepth = playerInfo.underworldDepth + 3;
+        chunkQueue.Enqueue(rootChunk);
+        LoadNextCavernChunk();
+        WriteCavernMapString();
+    }
+
+    private void LoadNextCavernChunk()
+    {
+        //Debug.Log("load; queue size " + chunkQueue.Count);
+
+        if (chunkQueue.Count == 0)
             return;
 
-        CavernChunk curChunkScript = curChunk.transform.Find("BoundingBox").GetComponent<CavernChunk>();
+        GameObject curChunk = chunkQueue.Dequeue();
 
-        List<string> exits = new List<string>();
-        string[] possibleExits = {"N", "S", "E", "W"};
-        foreach(string ex in possibleExits)
-        {
-            GameObject tempOutObj;
-            if (curChunk.name.Contains(ex) && !curChunkScript.exits.TryGetValue(ex, out tempOutObj))
-                exits.Add(ex);
-        }
+        CavernChunk curChunkScript = GetChunkScript(curChunk);
+
+        if (curChunkScript == null || curChunkScript.depth >= curChunkScript.localMaxDepth)
+            return;
+
+        List<string> exits = GetPossibleExitsForChunk(curChunk, curChunkScript);
 
         foreach(string exit in exits)
         {
-            Debug.Log(curChunk.name + ": exit " + exit);
+            //Debug.Log(curChunk.name + ": exit " + exit);
             Transform exitDims = curChunk.transform.Find(exitDict[exit]);
             //Transform mapBox = curChunk.transform.Find("BoundingBox");
 
-            List<CavernChunkGenerated> chunksGenned = new List<CavernChunkGenerated>();
+            List<CavernChunkCandidate> chunksGenned = new List<CavernChunkCandidate>();
 
             string[] exitPrefixes = {"!", "(", ")", "@"};
             foreach(string prefix in exitPrefixes)
@@ -156,7 +252,7 @@ public class MapLoader : MonoBehaviour
                     if (prefab.name.Contains(opEx) && prefab.name != curChunk.name.Split("(Clone)")[0])
                     {
                         //if the prefab contains the exit we need to pair and it isn't a prefab version of the current chunk 
-                        chunksGenned.Add(new CavernChunkGenerated(prefab, opEx, prefix));
+                        chunksGenned.Add(new CavernChunkCandidate(prefab, opEx, prefix));
                         break;
                     }
                 }
@@ -165,79 +261,110 @@ public class MapLoader : MonoBehaviour
             if (chunksGenned.Count > 0)
             {
                 //TODO: pick a prefab better
-                CavernChunkGenerated generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count - 1)];
-                //*
-                foreach(CavernChunkGenerated prefab in chunksGenned)
+                CavernChunkCandidate generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count - 1)];
+                /*
+                foreach(CavernChunkCandidate prefab in chunksGenned)
                 {
                     //if there is already data on what map this should be and it is in the list of chunks that can be used
-                    if (playerInfo.underworldMap.Length > cavernMapStrPosition && prefab.chunkPrefab.name.Split(",")[0] == playerInfo.underworldMap.Split(",")[cavernMapStrPosition])
+                    if ()
                         generatedChunk = prefab;  //set the chunk to be what is saved
                 }
                 //*/
-                
-                int xAxisDelta = 0, yAxisDelta = 0;
+                GameObject newChunk = AttachCavernChunk(generatedChunk, exit, curChunk, curChunkScript, exitDims);
 
-                GameObject newChunk = LoadCavernChunk(generatedChunk.chunkPrefab);
-                
-                float degreesRotation = 0.0f;
-                if (generatedChunk.dictPrefix == "(")
-                    degreesRotation = -90.0f;
+                if (curChunkScript.depth + 1 < curChunkScript.localMaxDepth)
+                    chunkQueue.Enqueue(newChunk);
 
-                if (generatedChunk.dictPrefix == ")")
-                    degreesRotation = 90.0f;
-
-                if (generatedChunk.dictPrefix == "@")
-                    degreesRotation = 180.0f;
-
-                string oppositeExit = exitDict[generatedChunk.newExitAbbr];  //get full name of opposite abbreviation
-                Transform chunkExit = newChunk.transform.Find(oppositeExit);
-                //Transform chunkBox = chunk.transform.Find("BoundingBox");
-
-                if (exitDict[generatedChunk.dictPrefix + exit] == "S")
-                    yAxisDelta = -1;
-                
-                if (exitDict[generatedChunk.dictPrefix + exit] == "N")
-                    yAxisDelta = 1;
-
-                if (exitDict[generatedChunk.dictPrefix + exit] == "W")
-                    xAxisDelta = -1;
-
-                if (exitDict[generatedChunk.dictPrefix + exit] == "E")
-                    xAxisDelta = 1;
-
-                float x = exitDims.position.x - chunkExit.position.x;
-                float y = exitDims.position.y - chunkExit.position.y;
-
-                newChunk.transform.Translate(x, y, 0.0f);  //move exits to be on top of each other
-                newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);  //rotate to have new chunk's exit go "outwards" from old chunk's
-                newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
-                
-                curChunkScript.exits.Add(exit, newChunk);
-                
-                CavernChunk newChunkScript = newChunk.transform.Find("BoundingBox").GetComponent<CavernChunk>();
-                newChunkScript.depth = depth + 1;
-                newChunkScript.exits.Add(generatedChunk.newExitAbbr, curChunk);
-
-                List<GameObject> siblings = null;
-                siblingChunks.TryGetValue(depth, out siblings);
-
-                if (siblings == null)
-                    siblings = new List<GameObject>();
-                siblings.Add(newChunk);
-                siblingChunks.Add(depth, siblings);
-                
-                cavernMapStrPosition++;
-
-                LoadNextCavernChunk(newChunk, depth + 1);
+                //Debug.Log("loaded; queue size " + chunkQueue.Count);
             }
         }
+
+        LoadNextCavernChunk();
+    }
+
+    private GameObject AttachCavernChunk(CavernChunkCandidate generatedChunk, string exit, GameObject curChunk, CavernChunk curChunkScript, Transform existingExit)
+    {
+        int xAxisDelta = 0, yAxisDelta = 0;
+
+        GameObject newChunk = LoadCavernChunk(generatedChunk.chunkPrefab);
+            
+        float degreesRotation = 0.0f;
+        if (generatedChunk.dictPrefix == "(")
+            degreesRotation = -90.0f;
+
+        if (generatedChunk.dictPrefix == ")")
+            degreesRotation = 90.0f;
+
+        if (generatedChunk.dictPrefix == "@")
+            degreesRotation = 180.0f;
+
+        string oppositeExit = exitDict[generatedChunk.newExitAbbr];  //get full name of opposite abbreviation
+        Transform chunkExit = newChunk.transform.Find(oppositeExit);
+        //Transform chunkBox = chunk.transform.Find("BoundingBox");
+
+        if (exitDict[generatedChunk.dictPrefix + exit] == "S")
+            yAxisDelta = -1;
+        
+        if (exitDict[generatedChunk.dictPrefix + exit] == "N")
+            yAxisDelta = 1;
+
+        if (exitDict[generatedChunk.dictPrefix + exit] == "W")
+            xAxisDelta = -1;
+
+        if (exitDict[generatedChunk.dictPrefix + exit] == "E")
+            xAxisDelta = 1;
+
+        float x = existingExit.position.x - chunkExit.position.x;
+        float y = existingExit.position.y - chunkExit.position.y;
+
+        newChunk.transform.Translate(x, y, 0.0f);  //move exits to be on top of each other
+        newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);  //rotate to have new chunk's exit go "outwards" from old chunk's
+        newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
+            
+        curChunkScript.exits.TryAdd(exit, newChunk);
+        curChunkScript.PresentDictionary();
+            
+        CavernChunk newChunkScript = GetChunkScript(newChunk);
+        newChunkScript.depth = curChunkScript.depth + 1;
+        newChunkScript.exits.TryAdd(generatedChunk.newExitAbbr, curChunk);
+        newChunkScript.PresentDictionary();
+        newChunkScript.debugId = nextDebugId;
+        nextDebugId++;
+
+        newChunkScript.rotationPrefix = generatedChunk.dictPrefix;
+        newChunkScript.localMaxDepth = curChunkScript.localMaxDepth;  //copy local max depth from parent to child
+
+        return newChunk;
     }
 
     private GameObject LoadCavernChunk(GameObject chunkPrefab)
     {
         GameObject chunk = GameObject.Instantiate(chunkPrefab) as GameObject;
         chunk.transform.SetParent(grid.transform, false);
-        newCavernMap += chunkPrefab.name.Split(",")[0] + ",";  //add the chunk's name to the map save string
         return chunk;
+    }
+
+    private List<string> GetPossibleExitsForChunk(GameObject curChunk, CavernChunk curChunkScript)
+    {
+        List<string> exits = new List<string>();
+        string[] possibleExits = {"N", "S", "E", "W"};
+        foreach(string ex in possibleExits)
+        {
+            GameObject childChunk;
+            bool foundChild = curChunkScript.exits.TryGetValue(ex, out childChunk); 
+            
+            if (curChunk.name.Contains(ex) && (!foundChild || childChunk == null))
+                exits.Add(ex);
+        }
+
+        return exits;
+    }
+    
+    CavernChunk GetChunkScript(GameObject chunk)
+    {
+        if (chunk == null)
+            return null;
+
+        return chunk.transform.Find("BoundingBox").GetComponent<CavernChunk>();
     }
 }
