@@ -53,9 +53,9 @@ public class CavernChunk : MonoBehaviour
             playerInfo.underworldDepth = depth;
         }
 
-        if (maploader != null && maploader.ShouldLoadMoreCavern(depth, localMaxDepth))
+        if (maploader != null && maploader.proceduralGenerator.ShouldLoadMoreCavern(depth, localMaxDepth))
         {
-            maploader.LoadMoreCavern(transform.parent.gameObject);
+            maploader.proceduralGenerator.LoadMoreCavern(transform.parent.gameObject);
         }
     }
 
