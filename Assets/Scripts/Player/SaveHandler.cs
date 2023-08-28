@@ -106,6 +106,8 @@ public class SaveHandler : MonoBehaviour
 
         playerInfo.exitingBattle = false;  //disable the exitingBattle flag no matter what, so the state doesn't mess up future saving
 
+        playerInfo.TrySaveUnderworldMap();
+
         //create save folder
         Directory.CreateDirectory(saveDirectory);
 

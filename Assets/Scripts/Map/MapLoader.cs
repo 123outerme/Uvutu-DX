@@ -48,7 +48,7 @@ public class MapLoader : MonoBehaviour
                 if (playerInfo.underworldMap == "new")
                     proceduralGenerator.LoadCavernMap();
                 else
-                    proceduralGenerator.RestoreCavernMapFromString();
+                    proceduralGenerator.RestoreCavernMapFromString(playerInfo.underworldMap);
             }
             else
             {

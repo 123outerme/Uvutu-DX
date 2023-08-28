@@ -37,4 +37,14 @@ public class PlayerInfo : MonoBehaviour
         if (usePosition)
             transform.position = position;
     }
+
+    public void TrySaveUnderworldMap()
+    {
+        GameObject maploader = GameObject.Find("MapLoader");
+        if (maploader != null)
+        {
+            MapLoader loaderScript = maploader.GetComponent<MapLoader>();
+            loaderScript.proceduralGenerator.WriteCavernMapString();
+        }
+    }
 }

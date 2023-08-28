@@ -15,6 +15,21 @@ class CavernChunkCandidate {
     }
 }
 
+class RestoringCavernExit {
+    public GameObject chunk;
+    public string exitAbbr;
+    public string nextChunkStr;
+    public int nextChunkDepth;
+
+    public RestoringCavernExit(GameObject restoringChunk, string exit, string nextChunk, int depth)
+    {
+        chunk = restoringChunk;
+        exitAbbr = exit;
+        nextChunkStr = nextChunk;
+        nextChunkDepth = depth;
+    }
+}
+
 public class ProceduralGenerator : MonoBehaviour
 {
     public GameObject grid;
@@ -28,37 +43,14 @@ public class ProceduralGenerator : MonoBehaviour
     private int nextDebugId = 1;
 
     private Dictionary<string, string> exitDict = new Dictionary<string, string>();
+    private bool dictLoaded = false;
 
     // Start is called before the first frame update
     void Start()
     {
         playerInfo = playerInfoParent.GetComponent<PlayerInfo>();
 
-        //abbreviations to full names
-        exitDict.Add("N", "North");
-        exitDict.Add("S", "South");
-        exitDict.Add("E", "East");
-        exitDict.Add("W", "West");
-        //inversion of direction (abbrev -> abbrev)
-        exitDict.Add("!N", "S");
-        exitDict.Add("!S", "N");
-        exitDict.Add("!E", "W");
-        exitDict.Add("!W", "E");
-        //rotation CW of direction (abbrev -> abbrev)
-        exitDict.Add("(N", "E");
-        exitDict.Add("(S", "W");
-        exitDict.Add("(E", "S");
-        exitDict.Add("(W", "N");
-        //rotation CCW of direction (abbrev -> abbrev)
-        exitDict.Add(")N", "W");
-        exitDict.Add(")S", "E");
-        exitDict.Add(")E", "N");
-        exitDict.Add(")W", "S");
-        //180 rotation of direction (abbrev -> abbrev)
-        exitDict.Add("@N", "W");
-        exitDict.Add("@S", "E");
-        exitDict.Add("@E", "N");
-        exitDict.Add("@W", "S");
+        PopulateExitDict();
     }
 
     // Update is called once per frame
@@ -67,44 +59,51 @@ public class ProceduralGenerator : MonoBehaviour
         
     }
 
-
-
-    public void RestoreCavernMapFromString()
+    private void PopulateExitDict()
     {
-        //TODO traverse playerInfo.underworldMap string and convert it back to map chunks
-        GameObject startPrefab = null;
-        string startStr = playerInfo.underworldMap.Split(",")[0];
-
-        foreach(GameObject prefab in cavernChunks)
-        {
-            if (prefab.name.Split(",")[0] == startStr.Substring(1))
-            {
-                startPrefab = prefab;
-                break;
-            }
-        }
-
-        rootChunk = LoadCavernChunk(startPrefab);
-
-        float degreesRotation = 0.0f;
-        if (startStr.Substring(0, 1) == "(")
-            degreesRotation = -90.0f;
-
-        if (startStr.Substring(0, 1) == ")")
-            degreesRotation = 90.0f;
-
-        if (startStr.Substring(0, 1) == "@")
-            degreesRotation = 180.0f;
-
-        rootChunk.transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0.0f, 0.0f, 1.0f), degreesRotation);
+        if (dictLoaded)
+            return;
         
-        CavernChunk rootChunkScript = GetChunkScript(rootChunk);
-        rootChunkScript.rotationPrefix = startStr.Substring(0, 1);
-        rootChunkScript.localMaxDepth = 3;
+        //abbreviations to full names
+        exitDict.Add("N", "North");
+        exitDict.Add("S", "South");
+        exitDict.Add("E", "East");
+        exitDict.Add("W", "West");
+        //from here onwards: mapping exit on one side to compatible exit on the other
+        //requiring 0 degree rotation of map (abbrev -> abbrev)
+        exitDict.Add("!N", "S");
+        exitDict.Add("!S", "N");
+        exitDict.Add("!E", "W");
+        exitDict.Add("!W", "E");
+        //requiring rotation CW of map (abbrev -> abbrev)
+        exitDict.Add("(N", "E");
+        exitDict.Add("(S", "W");
+        exitDict.Add("(E", "S");
+        exitDict.Add("(W", "N");
+        //requiring rotation CCW of map (abbrev -> abbrev)
+        exitDict.Add(")N", "W");
+        exitDict.Add(")S", "E");
+        exitDict.Add(")E", "N");
+        exitDict.Add(")W", "S");
+        //requiring 180 degree rotation of map (abbrev -> abbrev)
+        exitDict.Add("@N", "N");
+        exitDict.Add("@S", "S");
+        exitDict.Add("@E", "E");
+        exitDict.Add("@W", "W");
+        //from here onwards: mapping each rotation prefix to its inverse rotation operation prefix (prefix -> prefix)
+        exitDict.Add("!", "@");
+        exitDict.Add("(", ")");
+        exitDict.Add(")", "(");
+        exitDict.Add("@", "!");
+        
+        dictLoaded = true;
     }
 
     public void WriteCavernMapString()
     {
+        if (rootChunk == null)
+            return;
+
         chunkQueue.Clear();
         chunkQueue.Enqueue(rootChunk);
         string cavernMapString = "";
@@ -126,6 +125,7 @@ public class ProceduralGenerator : MonoBehaviour
                 {
                     GameObject childChunk = null;
                     bool success = chunkScript.exits.TryGetValue(exit, out childChunk);
+                    //Debug.Log(chunkScript.debugId + ": " + exit + " - " + success + ", " + (childChunk != null));
 
                     if (success)
                     {
@@ -158,6 +158,8 @@ public class ProceduralGenerator : MonoBehaviour
                     //*/
                 }
             }
+            else
+                cavernMapString += "";
             
             cavernMapString += ",";
         }
@@ -167,9 +169,82 @@ public class ProceduralGenerator : MonoBehaviour
         playerInfo.underworldMap = cavernMapString;
     }
 
-    private void CreateNextCavernChunk(int order)
+    public void RestoreCavernMapFromString(string cavernMap)
     {
+        Debug.Log(cavernMap);
+        PopulateExitDict();
+        string[] loadedChunks = cavernMap.Split(",");
         
+        GameObject rootChunkPrefab = LoadFindNextChunkPrefab(loadedChunks[0]);
+        rootChunk = LoadCavernChunk(rootChunkPrefab);
+        CavernChunk rootChunkScript = GetChunkScript(rootChunk);
+        string prefix = loadedChunks[0].Substring(0,1);
+
+        float degreesRotation = 0.0f;  //if "!" prefix, then exits line up without rotation
+        if (prefix == "(")
+            degreesRotation = -90.0f;  //if CCW rotation (match up with opposite of CW rotation) then rotate CCW
+
+        if (prefix == ")")
+            degreesRotation = 90.0f;  //if CW rotation (match up with opposite of CW rotation) then rotate CW
+
+        if (prefix == "@")
+            degreesRotation = 180.0f;  //if "@" prefix, then to match up equal cardinal directions, 180 degree rotation must occur
+
+        rootChunk.transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0.0f, 0.0f, 1.0f), degreesRotation);
+        rootChunkScript.rotationPrefix = prefix;
+        rootChunkScript.timesPrintingVisited = 1;  //we have visited the root chunk for creating its children now
+
+        int index = 1;
+        rootChunkScript.localMaxDepth = 3;
+        
+        List<string> chunkExits = GetPossibleExitsForChunk(rootChunk, rootChunkScript);
+
+        Queue<RestoringCavernExit> loadQueue = new Queue<RestoringCavernExit>();
+        foreach(string exit in chunkExits)
+        {
+            if (index < loadedChunks.Length && loadedChunks[index] != "")
+                loadQueue.Enqueue(new RestoringCavernExit(rootChunk, exit, loadedChunks[index], 1));
+            index++;
+        }
+
+        while(loadQueue.Count > 0)
+        {
+            RestoringCavernExit loadExit = loadQueue.Dequeue();
+            CavernChunk chunkScript = GetChunkScript(loadExit.chunk);
+            //Debug.Log(chunkScript.debugId + ": " + loadExit.chunk.name.Split(",")[0] + " / " + loadExit.exitAbbr + " ; " + loadExit.nextChunkStr + " | " + loadExit.nextChunkDepth);
+            chunkScript.timesPrintingVisited = 1;  //we have visited this chunk now for creating its children chunks
+            GameObject newChunkPrefab = LoadFindNextChunkPrefab(loadExit.nextChunkStr);
+
+            Transform exitDims = loadExit.chunk.transform.Find(exitDict[loadExit.exitAbbr]);
+            prefix = loadExit.nextChunkStr.Substring(0, 1);
+
+            string inversePrefix = exitDict[prefix];  //get the inverse rotation prefix of the applied rotation prefix from the dictionary
+            string newExitAbbr = exitDict[inversePrefix + exitDict["!" + loadExit.exitAbbr]];  //take the opposite direction of the current exit and do the inverse of the rotation operation applied to the map
+
+            GameObject newChunk = AttachCavernChunk(new CavernChunkCandidate(newChunkPrefab, newExitAbbr, prefix), loadExit.exitAbbr, loadExit.chunk, GetChunkScript(loadExit.chunk), exitDims);
+            CavernChunk newChunkScript = GetChunkScript(newChunk);
+            newChunkScript.localMaxDepth += ((loadExit.nextChunkDepth == chunkScript.localMaxDepth) ? 2 : 0);  //update localMaxDepth if it is too low for current depth
+            
+            chunkExits = GetPossibleExitsForChunk(newChunk, newChunkScript);  //get all unfilled exits for this chunk
+            foreach(string exit in chunkExits)
+            {
+                //if there are still more chunks to load, and the chunk to load is not "undefined", and this algorithm has not visited it yet
+                if (index < loadedChunks.Length && loadedChunks[index] != "")
+                    loadQueue.Enqueue(new RestoringCavernExit(newChunk, exit, loadedChunks[index], loadExit.nextChunkDepth + 1));
+                index++;
+            }
+        }
+    }
+
+    private GameObject LoadFindNextChunkPrefab(string chunkStr)
+    {
+        foreach(GameObject prefab in cavernChunks)
+        {
+            if (prefab.name.Split(",")[0] == chunkStr.Substring(1))
+                return prefab;
+        }
+
+        return null;
     }
 
     public bool ShouldLoadMoreCavern(int depth, int localMaxDepth)
@@ -198,8 +273,7 @@ public class ProceduralGenerator : MonoBehaviour
         if (chunkQueue.Count > 0)
         {
             chunkScript.localMaxDepth += 2;  //if any children were found, increase the local max depth to prevent processing happening again
-            CreateNextCavernChunk();  //start loading next chunk
-            WriteCavernMapString();  //export the representative string after generation completes
+            CreateCavernChunks();  //start loading next chunk
         }
     }
 
@@ -213,71 +287,60 @@ public class ProceduralGenerator : MonoBehaviour
 
         rootChunkScript.localMaxDepth = 3;  //hard-coded generate 3 more chunks in each direction
         chunkQueue.Enqueue(rootChunk);
-        CreateNextCavernChunk();
-        WriteCavernMapString();
+        CreateCavernChunks();
     }
 
-    private void CreateNextCavernChunk()
+    private void CreateCavernChunks()
     {
         //Debug.Log("load; queue size " + chunkQueue.Count);
-
-        if (chunkQueue.Count == 0)
-            return;
-
-        GameObject curChunk = chunkQueue.Dequeue();
-
-        CavernChunk curChunkScript = GetChunkScript(curChunk);
-
-        if (curChunkScript == null || curChunkScript.depth >= curChunkScript.localMaxDepth)
-            return;
-
-        List<string> exits = GetPossibleExitsForChunk(curChunk, curChunkScript);
-
-        foreach(string exit in exits)
+        while(chunkQueue.Count > 0)
         {
-            //Debug.Log(curChunk.name + ": exit " + exit);
-            Transform exitDims = curChunk.transform.Find(exitDict[exit]);
-            //Transform mapBox = curChunk.transform.Find("BoundingBox");
+            GameObject curChunk = chunkQueue.Dequeue();
 
-            List<CavernChunkCandidate> chunksGenned = new List<CavernChunkCandidate>();
+            CavernChunk curChunkScript = GetChunkScript(curChunk);
 
-            string[] exitPrefixes = {"!", "(", ")", "@"};
-            foreach(string prefix in exitPrefixes)
+            if (curChunkScript == null || curChunkScript.depth >= curChunkScript.localMaxDepth)
+                return;
+
+            List<string> exits = GetPossibleExitsForChunk(curChunk, curChunkScript);
+
+            foreach(string exit in exits)
             {
-                string opEx = exitDict[prefix + exit];
-                foreach(GameObject prefab in cavernChunks)
+                //Debug.Log(curChunk.name + ": exit " + exit + " / " + exitDict[exit]);
+                Transform exitDims = curChunk.transform.Find(exitDict[exit]);
+                //Transform mapBox = curChunk.transform.Find("BoundingBox");
+
+                List<CavernChunkCandidate> chunksGenned = new List<CavernChunkCandidate>();
+
+                string[] exitPrefixes = {"!", "(", ")", "@"};  //requires {0 degree turn, CW 90 deg turn, CCW 90 deg turn, 180 deg turn}
+                foreach(string prefix in exitPrefixes)
                 {
-                    if (prefab.name.Contains(opEx) && prefab.name != curChunk.name.Split("(Clone)")[0])
+                    string opEx = exitDict[prefix + exit];
+                    foreach(GameObject prefab in cavernChunks)
                     {
-                        //if the prefab contains the exit we need to pair and it isn't a prefab version of the current chunk 
-                        chunksGenned.Add(new CavernChunkCandidate(prefab, opEx, prefix));
-                        break;
+                        if (prefab.name.Contains(opEx) && prefab.name != curChunk.name.Split("(Clone)")[0])
+                        {
+                            //if the prefab contains the exit we need to pair and it isn't a prefab version of the current chunk
+                            chunksGenned.Add(new CavernChunkCandidate(prefab, opEx, prefix));
+                            break;
+                        }
                     }
                 }
-            }
-            
-            if (chunksGenned.Count > 0)
-            {
-                //TODO: pick a prefab better
-                CavernChunkCandidate generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count - 1)];
-                /*
-                foreach(CavernChunkCandidate prefab in chunksGenned)
+                
+                if (chunksGenned.Count > 0)
                 {
-                    //if there is already data on what map this should be and it is in the list of chunks that can be used
-                    if ()
-                        generatedChunk = prefab;  //set the chunk to be what is saved
+                    //TODO: pick a prefab better
+                    CavernChunkCandidate generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count)];
+
+                    GameObject newChunk = AttachCavernChunk(generatedChunk, exit, curChunk, curChunkScript, exitDims);
+
+                    if (curChunkScript.depth + 1 < curChunkScript.localMaxDepth)
+                        chunkQueue.Enqueue(newChunk);
+
+                    //Debug.Log("loaded; queue size " + chunkQueue.Count);
                 }
-                //*/
-                GameObject newChunk = AttachCavernChunk(generatedChunk, exit, curChunk, curChunkScript, exitDims);
-
-                if (curChunkScript.depth + 1 < curChunkScript.localMaxDepth)
-                    chunkQueue.Enqueue(newChunk);
-
-                //Debug.Log("loaded; queue size " + chunkQueue.Count);
             }
         }
-
-        CreateNextCavernChunk();
     }
 
     private GameObject AttachCavernChunk(CavernChunkCandidate generatedChunk, string exit, GameObject curChunk, CavernChunk curChunkScript, Transform existingExit)
@@ -286,31 +349,31 @@ public class ProceduralGenerator : MonoBehaviour
 
         GameObject newChunk = LoadCavernChunk(generatedChunk.chunkPrefab);
             
-        float degreesRotation = 0.0f;
+        float degreesRotation = 0.0f;  //if "!" prefix, then exits line up without rotation
         if (generatedChunk.dictPrefix == "(")
-            degreesRotation = -90.0f;
+            degreesRotation = -90.0f;  //exit lines up with 90 degree CW rotation
 
         if (generatedChunk.dictPrefix == ")")
-            degreesRotation = 90.0f;
+            degreesRotation = 90.0f;  //exit lines up with 90 degree CCW rotation
 
         if (generatedChunk.dictPrefix == "@")
-            degreesRotation = 180.0f;
+            degreesRotation = 180.0f;  //exit lines up with 180 degree rotation
 
         string oppositeExit = exitDict[generatedChunk.newExitAbbr];  //get full name of opposite abbreviation
         Transform chunkExit = newChunk.transform.Find(oppositeExit);
         //Transform chunkBox = chunk.transform.Find("BoundingBox");
 
         if (exitDict[generatedChunk.dictPrefix + exit] == "S")
-            yAxisDelta = -1;
+            yAxisDelta = -1;  //lining up a new south exit to an old north one: move 1 unit down
         
         if (exitDict[generatedChunk.dictPrefix + exit] == "N")
-            yAxisDelta = 1;
+            yAxisDelta = 1;  //lining up a new north exit to an old south one: move 1 unit up
 
         if (exitDict[generatedChunk.dictPrefix + exit] == "W")
-            xAxisDelta = -1;
+            xAxisDelta = -1;  //lining up a new west exit to an old east one: move 1 unit left
 
         if (exitDict[generatedChunk.dictPrefix + exit] == "E")
-            xAxisDelta = 1;
+            xAxisDelta = 1;  //lining up a new east exit to an old west one: move 1 unit right
 
         float x = existingExit.position.x - chunkExit.position.x;
         float y = existingExit.position.y - chunkExit.position.y;
@@ -348,10 +411,10 @@ public class ProceduralGenerator : MonoBehaviour
         string[] possibleExits = {"N", "S", "E", "W"};
         foreach(string ex in possibleExits)
         {
-            GameObject childChunk;
+            GameObject childChunk = null;
             bool foundChild = curChunkScript.exits.TryGetValue(ex, out childChunk); 
             
-            if (curChunk.name.Contains(ex) && (!foundChild || childChunk == null))
+            if (curChunk.name.Contains(ex) && !foundChild)
                 exits.Add(ex);
         }
 
