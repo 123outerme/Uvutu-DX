@@ -63,8 +63,16 @@ public class QuestTracker
     public void SetProgressForCurrentStep(int amount)
     {
         if (currentStep >= 0 && currentStep < stepProgressCounts.Length)
-            stepProgressCounts[currentStep] = amount;
+        {
+            int maxCount = GetCurrentStep().count;
+            int count = amount;
+            if (amount > maxCount)
+                count = maxCount;
 
+            stepProgressCounts[currentStep] = count;
+        }
+
+        
         //Debug.Log(stepProgressCounts[currentStep]);
     }
 

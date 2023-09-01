@@ -7,6 +7,7 @@ public class QuestPanel : MonoBehaviour
 {
     public GameObject questSlotPanelPrefab;
     public GameObject questListContent;
+    public GameObject questDetailsPanel;
 
     public QuestStatus statusToFilterBy = QuestStatus.Incomplete;
 
