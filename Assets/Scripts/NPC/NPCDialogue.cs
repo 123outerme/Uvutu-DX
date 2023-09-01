@@ -58,7 +58,7 @@ public class NPCDialogue : MonoBehaviour
                 if (!inDialogue && readyDialogue)  //If the NPC is not yet speaking but ready to speak, start dialogue
                 {
                     //tell quest handler to add progress to quest steps that involve talking to this NPC (so progress can be checked below on self-referencing talk quests)
-                    questsInventory.ProgressTalkQuest(gameObject.name);
+                    questsInventory.ProgressQuest(gameObject.name, QuestType.Talk, 1);
 
                     //get all quest steps that are being turned in
                     turningInQuestSteps = questsInventory.GetQuestStepsForTurnIn(gameObject.name);                

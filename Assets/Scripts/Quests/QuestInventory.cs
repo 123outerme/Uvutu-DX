@@ -115,17 +115,19 @@ public class QuestInventory : MonoBehaviour
         return true;
     }
 
-    public void ProgressTalkQuest(string npcName)
+    public void ProgressQuest(string targetName, QuestType type, int count)
     {
         foreach(QuestTracker curQuest in quests)
         {
             QuestStep step = curQuest.GetCurrentStep();
-            if (step != null && step.type == QuestType.Talk && step.objectiveName == npcName && !curQuest.IsCurrentStepCompleted())
+            if (step != null && step.type == type && step.objectiveName == targetName && !curQuest.IsCurrentStepCompleted())
             {
-                curQuest.AddProgressToCurrentStep(1);  //add 1 instance of talking as progress!
+                curQuest.AddProgressToCurrentStep(count);  //add progress!
             }
         }
     }
+
+
 
     public void LoadAllQuestDetails()
     {

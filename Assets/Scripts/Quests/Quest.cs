@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum QuestType
+{
+    Talk,
+    CollectItem,
+    DefeatMonster,
+}
+
 [System.Serializable]
 public class QuestStep
 {

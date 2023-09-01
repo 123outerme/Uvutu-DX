@@ -2,13 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum QuestType
-{
-    Talk,
-    CollectItem,
-    DefeatMonster,
-}
-
 public struct QuestAndStepPair
 {
     public QuestStep step;

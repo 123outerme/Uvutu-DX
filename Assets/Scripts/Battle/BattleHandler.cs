@@ -988,9 +988,21 @@ public class BattleHandler : MonoBehaviour
 
         if (downedEnemies == 3)
         {
-            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, then leave the battle
+            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, update quests, then leave the battle
             escaping = true;
             UpdateTurnPanel("You defeated all the enemies!");
+
+            QuestInventory qInv = player.GetComponent<QuestInventory>();
+
+            //progress defeat quests on the 3 enemy types
+            if (enemy1Stats.combatantStats.combatantName != "MissingNo.")
+                qInv.ProgressQuest(enemy1Stats.combatantStats.combatantName, QuestType.DefeatMonster, 1);
+
+            if (enemy2Stats.combatantStats.combatantName != "MissingNo.")
+                qInv.ProgressQuest(enemy1Stats.combatantStats.combatantName, QuestType.DefeatMonster, 1);
+
+            if (enemy3Stats.combatantStats.combatantName != "MissingNo.")
+                qInv.ProgressQuest(enemy1Stats.combatantStats.combatantName, QuestType.DefeatMonster, 1);
         }
 
         overview.UpdateAllTabDetails();  //update in case any enemies were removed from battle
