@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 class CavernChunkCandidate {
     public GameObject chunkPrefab;
@@ -34,10 +35,19 @@ public class ProceduralGenerator : MonoBehaviour
 {
     public GameObject grid;
     public List<GameObject> cavernChunks;
+    public GameObject cavernBaseMapPrefab;
+    public ContactFilter2D boundsCheckingFilter;
 
     public GameObject playerInfoParent;
     private PlayerInfo playerInfo;
     
+    private GameObject cavernBaseMap = null;
+    
+    private Tilemap baseBackground = null;
+    private Tilemap baseMidground = null;
+    private Tilemap baseForeground = null;
+    private Tilemap baseCollision = null;
+
     private Queue<GameObject> chunkQueue = new Queue<GameObject>();
     private GameObject rootChunk = null;
     private int nextDebugId = 1;
@@ -57,6 +67,17 @@ public class ProceduralGenerator : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void LoadCavernBaseMap()
+    {
+        cavernBaseMap = GameObject.Instantiate(cavernBaseMapPrefab) as GameObject;
+        cavernBaseMap.transform.SetParent(grid.transform);
+
+        baseBackground = cavernBaseMap.transform.Find("Background").GetComponent<Tilemap>();
+        baseMidground = cavernBaseMap.transform.Find("Midground").GetComponent<Tilemap>();
+        baseForeground = cavernBaseMap.transform.Find("Foreground").GetComponent<Tilemap>();
+        baseCollision = cavernBaseMap.transform.Find("Collision").GetComponent<Tilemap>();
     }
 
     private void PopulateExitDict()
@@ -281,12 +302,18 @@ public class ProceduralGenerator : MonoBehaviour
     {
         //TODO: pick start state better
         GameObject startPrefab = cavernChunks[0];
+        string rotationPrefix = "!";  //hard-coded to not rotate - TODO when picking a first map make this random as well!
+
+        CavernChunkCandidate rootCandidate = new CavernChunkCandidate(startPrefab, "", rotationPrefix);
+
         rootChunk = LoadCavernChunk(startPrefab);
+        CopyChunkToBaseMap(rootCandidate, null);
         CavernChunk rootChunkScript = GetChunkScript(rootChunk);
-        rootChunkScript.rotationPrefix = "!";  //hard-coded to not rotate - TODO when picking a first map make this random as well!
+        rootChunkScript.rotationPrefix = rotationPrefix;
 
         rootChunkScript.localMaxDepth = 3;  //hard-coded generate 3 more chunks in each direction
         chunkQueue.Enqueue(rootChunk);
+        PopulateExitDict();
         CreateCavernChunks();
     }
 
@@ -332,12 +359,17 @@ public class ProceduralGenerator : MonoBehaviour
                     //TODO: pick a prefab better
                     CavernChunkCandidate generatedChunk = chunksGenned[Random.Range(0, chunksGenned.Count)];
 
+                    bool canPlace = CheckNextCavernChunk(generatedChunk, exit, curChunk, exitDims);
+                    if (!canPlace)
+                        Debug.Log(generatedChunk.chunkPrefab.name + " / " + generatedChunk.newExitAbbr + " / " + generatedChunk.dictPrefix + " | " + exit + " : " + curChunk.name + " (" + curChunkScript.debugId + ")");
+
                     GameObject newChunk = AttachCavernChunk(generatedChunk, exit, curChunk, curChunkScript, exitDims);
 
                     if (curChunkScript.depth + 1 < curChunkScript.localMaxDepth)
                         chunkQueue.Enqueue(newChunk);
 
                     //Debug.Log("loaded; queue size " + chunkQueue.Count);
+                    chunkQueue.Clear();
                 }
             }
         }
@@ -345,8 +377,6 @@ public class ProceduralGenerator : MonoBehaviour
 
     private GameObject AttachCavernChunk(CavernChunkCandidate generatedChunk, string exit, GameObject curChunk, CavernChunk curChunkScript, Transform existingExit)
     {
-        int xAxisDelta = 0, yAxisDelta = 0;
-
         GameObject newChunk = LoadCavernChunk(generatedChunk.chunkPrefab);
             
         float degreesRotation = 0.0f;  //if "!" prefix, then exits line up without rotation
@@ -363,6 +393,7 @@ public class ProceduralGenerator : MonoBehaviour
         Transform chunkExit = newChunk.transform.Find(oppositeExit);
         //Transform chunkBox = chunk.transform.Find("BoundingBox");
 
+        int xAxisDelta = 0, yAxisDelta = 0;
         if (exitDict[generatedChunk.dictPrefix + exit] == "S")
             yAxisDelta = -1;  //lining up a new south exit to an old north one: move 1 unit down
         
@@ -381,6 +412,8 @@ public class ProceduralGenerator : MonoBehaviour
         newChunk.transform.Translate(x, y, 0.0f);  //move exits to be on top of each other
         newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);  //rotate to have new chunk's exit go "outwards" from old chunk's
         newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
+
+        CopyChunkToBaseMap(generatedChunk, newChunk);
             
         curChunkScript.exits.TryAdd(exit, newChunk);
         curChunkScript.PresentDictionary();
@@ -390,6 +423,7 @@ public class ProceduralGenerator : MonoBehaviour
         newChunkScript.exits.TryAdd(generatedChunk.newExitAbbr, curChunk);
         newChunkScript.PresentDictionary();
         newChunkScript.debugId = nextDebugId;
+        newChunk.name += "" + nextDebugId;
         nextDebugId++;
 
         newChunkScript.rotationPrefix = generatedChunk.dictPrefix;
@@ -398,11 +432,133 @@ public class ProceduralGenerator : MonoBehaviour
         return newChunk;
     }
 
+    private void CopyChunkToBaseMap(CavernChunkCandidate generatedChunk, GameObject newChunk)
+    {
+        bool reoriented = (generatedChunk.dictPrefix == "(" || generatedChunk.dictPrefix == ")");  //if X -> Y and Y -> X (i.e. 90 rotate)
+
+        Transform chunkPrefabTransform = generatedChunk.chunkPrefab.transform;
+
+        RectTransform boundingBox = chunkPrefabTransform.Find("BoundingBox").GetComponent<RectTransform>();
+        float w = boundingBox.rect.width;
+        float h = boundingBox.rect.height;
+        //Debug.Log(generatedChunk.chunkPrefab.name + " / " + w + ", " + h);
+        
+        //Vector2 v2 = new Vector2(v1.x + ((reoriented) ? h : w), v1.y + ((reoriented) ? w : h));
+        Tilemap[] prefabTilemaps = {
+                chunkPrefabTransform.Find("Background").GetComponent<Tilemap>(),
+                chunkPrefabTransform.Find("Midground").GetComponent<Tilemap>(),
+                chunkPrefabTransform.Find("Foreground").GetComponent<Tilemap>(),
+                chunkPrefabTransform.Find("Collision").GetComponent<Tilemap>()
+        };
+        Tilemap[] baseTilemaps = { baseBackground, baseMidground, baseForeground, baseCollision };
+
+        float offsetX = 0;
+        float offsetY = 0;
+
+        if (newChunk != null)
+        {
+            offsetX = newChunk.transform.position.x;
+            offsetY = newChunk.transform.position.y;
+        }
+        
+        for(int i = 0; i < prefabTilemaps.Length; i++)
+        {
+            for(int y = (int) boundingBox.offsetMin.y; y < boundingBox.offsetMax.y; y++)
+            {
+                for(int x = (int) boundingBox.offsetMin.x; x < boundingBox.offsetMax.x; x++)
+                {
+                    int destX = (int) (offsetX) + x;
+                    int destY = (int) (offsetY) + y;
+
+                    int transformedX = 0;
+                    int transformedY = 0;
+
+                    if (generatedChunk.dictPrefix == "(")
+                    {
+                        transformedX = ((int) h - 1) - destY;
+                        transformedY = destX;
+                    }
+
+                    if (generatedChunk.dictPrefix == ")")
+                    {
+                        transformedX = destY;
+                        transformedY = ((int) w - 1) - destX;
+                    }
+
+                    if (generatedChunk.dictPrefix == "@")
+                    {
+                        //180 degree rotation, NOT mirroring
+                        transformedX = ((int) w - 1) - destX;
+                        transformedY = ((int) h - 1) - destY;
+                    }
+                    //copy tile @ x, y to transformed destX, destY (if one has been placed there)
+
+                    TileBase tile = prefabTilemaps[i].GetTile(new Vector3Int(x, y, 0));
+                    if (tile != null)
+                        baseTilemaps[i].SetTile(new Vector3Int(destX, destY, 0), tile);
+                }
+            }
+        }
+    }
+
+    private bool CheckNextCavernChunk(CavernChunkCandidate generatedChunk, string exit, GameObject curChunk, Transform existingExit)
+    {
+        bool reoriented = (generatedChunk.dictPrefix == "(" || generatedChunk.dictPrefix == ")");  //if X -> Y and Y -> X (i.e. 90 rotate)
+
+        string oppositeExit = exitDict[generatedChunk.newExitAbbr];  //get full name of opposite abbreviation
+        Transform chunkExit = generatedChunk.chunkPrefab.transform.Find(oppositeExit);
+        //Transform chunkBox = chunk.transform.Find("BoundingBox");
+
+        int xAxisDelta = 0, yAxisDelta = 0;
+        if (exitDict[generatedChunk.dictPrefix + exit] == "S")
+            yAxisDelta = -1;  //lining up a new south exit to an old north one: move 1 unit down
+        
+        if (exitDict[generatedChunk.dictPrefix + exit] == "N")
+            yAxisDelta = 1;  //lining up a new north exit to an old south one: move 1 unit up
+
+        if (exitDict[generatedChunk.dictPrefix + exit] == "W")
+            xAxisDelta = -1;  //lining up a new west exit to an old east one: move 1 unit left
+
+        if (exitDict[generatedChunk.dictPrefix + exit] == "E")
+            xAxisDelta = 1;  //lining up a new east exit to an old west one: move 1 unit right
+
+        Vector2 v1 = new Vector2(existingExit.position.x - chunkExit.position.x + xAxisDelta, existingExit.position.y - chunkExit.position.y + yAxisDelta);
+
+        RectTransform boundingBox = generatedChunk.chunkPrefab.transform.Find("BoundingBox").GetComponent<RectTransform>();
+        float w = boundingBox.rect.width;
+        float h = boundingBox.rect.height;
+        
+        Vector2 v2 = new Vector2(v1.x + ((reoriented) ? h : w), v1.y + ((reoriented) ? w : h));
+        
+        List<Collider2D> colliders = new List<Collider2D>();
+        int count = Physics2D.OverlapArea(v1, v2, boundsCheckingFilter, colliders);
+        
+        if (count > 0)
+            Debug.Log(v1.x + ", " + v1.y + " / " + v2.x + ", " + v2.y);
+        
+        return (count == 0);
+    }
+
     private GameObject LoadCavernChunk(GameObject chunkPrefab)
     {
-        GameObject chunk = GameObject.Instantiate(chunkPrefab) as GameObject;
-        chunk.transform.SetParent(grid.transform, false);
-        return chunk;
+        GameObject chunkRoot = GameObject.Instantiate(new GameObject());
+        chunkRoot.name = chunkPrefab.name + "(Clone)";  //mimick instantiating the prefab
+        chunkRoot.transform.SetParent(grid.transform, false);
+
+        foreach(Transform t in chunkPrefab.transform)
+        {
+            if (!(t.gameObject.name == "Background" || t.gameObject.name == "Midground" || t.gameObject.name == "Foreground" || t.gameObject.name == "Collision"))
+            {
+                //don't instantiate tilemaps (those will be copied over separately)
+                GameObject chunkPiece = GameObject.Instantiate(t.gameObject);
+                chunkPiece.name = chunkPiece.name.Split("(Clone)")[0];  //yield the name without the clone indicator
+                chunkPiece.transform.SetParent(chunkRoot.transform);
+            }
+        }
+
+        //GameObject chunk = GameObject.Instantiate(chunkPrefab) as GameObject;
+        //chunk.transform.SetParent(grid.transform, false);
+        return chunkRoot;
     }
 
     private List<string> GetPossibleExitsForChunk(GameObject curChunk, CavernChunk curChunkScript)

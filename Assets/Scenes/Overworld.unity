@@ -792,6 +792,21 @@ MonoBehaviour:
   - {fileID: 7366680821851561862, guid: b7666720f87634ce88a8f9daa6d872b5, type: 3}
   - {fileID: 7366680821851561862, guid: e39d12367038b3cdebbca05ac7fa09c0, type: 3}
   - {fileID: 7366680821851561862, guid: 5bb601ad0df35f98689631d11292268b, type: 3}
+  cavernBaseMapPrefab: {fileID: 7366680821851561862, guid: d96418848b3f7dc4692e8e017de9e064, type: 3}
+  boundsCheckingFilter:
+    useTriggers: 1
+    useLayerMask: 1
+    useDepth: 0
+    useOutsideDepth: 0
+    useNormalAngle: 0
+    useOutsideNormalAngle: 0
+    layerMask:
+      serializedVersion: 2
+      m_Bits: 64
+    minDepth: 0
+    maxDepth: 0
+    minNormalAngle: 0
+    maxNormalAngle: 0
   playerInfoParent: {fileID: 1426036523}
 --- !u!1 &2076778814
 GameObject:
