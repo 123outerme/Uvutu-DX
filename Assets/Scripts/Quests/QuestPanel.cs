@@ -69,4 +69,10 @@ public class QuestPanel : MonoBehaviour
         statusToFilterBy = (QuestStatus) typeId;
         ReloadQuestsDisplay();
     }
+
+    public void OpenQuestDetails(QuestTracker quest)
+    {
+        questDetailsPanel.SetActive(true);
+        questDetailsPanel.GetComponent<QuestDetailsPanel>().ViewQuestDetails(quest);
+    }
 }

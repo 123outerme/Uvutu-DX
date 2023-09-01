@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Talk to Coconut Head
   m_EditorClassIdentifier: 
   name: Talk to Coconut Head
-  description: He wants to talk to you.
+  description: Give him a little talking!
   steps:
   - name: Talkative Man
-    description: Give him a little talking!
+    description: Talk to the man they call Coconut Head, he wants to speak with you.
+      His silly little quest involves speaking multiple times. This is to test the
+      quests system and quest tracking.
     type: 0
     count: 2
     objectiveName: Coconut Head

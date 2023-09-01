@@ -37,6 +37,29 @@ public class QuestTracker
         return stepProgressCounts[currentStep];
     }
 
+    public int GetStepProgress(QuestStep step)
+    {
+        int index = GetQuestStepIndex(step);
+
+        if (index == -1)
+            return 0;
+
+        return stepProgressCounts[index];
+    }
+
+    public bool IsStepCompleted(QuestStep step)
+    {
+        if (step == null) 
+            return false;
+
+        int index = GetQuestStepIndex(step);
+
+        if (index == -1)
+            return false;
+
+        return (stepProgressCounts[index] >= step.count);
+    }
+
     public bool IsCurrentStepCompleted()
     {
         QuestStep curStep = GetCurrentStep();
@@ -46,10 +69,31 @@ public class QuestTracker
         return (GetCurrentStepProgress() >= curStep.count);
     }
 
+    public bool IsStepAchieved(QuestStep step)
+    {
+        if (step == null)  //if a null quest is passed, what is the QuestTracker supposed to do with this?
+            return false;
+
+        if (GetCurrentStepProgress() == -1)  //if we have completed the whole quest
+            return true;
+        
+        for(int i = 0; i < currentStep; i++)
+        {
+            //check every step up to and including the current one
+            if (step.name == quest.steps[i].name && step.description == quest.steps[i].description)
+                return true;
+        }
+        return false;
+    }
+
     public QuestStep GetCurrentStep()
     {
-        if (currentStep < 0 || currentStep >= stepProgressCounts.Length)
+        if (currentStep < 0)
             return null;
+
+        if (currentStep >= stepProgressCounts.Length)
+            return quest.steps[currentStep - 1];    
+
         return quest.steps[currentStep];
     }
 
@@ -76,18 +120,29 @@ public class QuestTracker
         //Debug.Log(stepProgressCounts[currentStep]);
     }
 
-    public string GetShortStepDetail()
+    public string GetCurrentShortStepDetail()
     {
         QuestStep step = GetCurrentStep();
-        if (step == null)  //if step is completed
+        
+        return GetShortStepDetail(step);
+    }
+
+    public string GetShortStepDetail(QuestStep step)
+    {
+        if (GetQuestStepIndex(step) < currentStep)  //if quest step is completed already
         {
             step = quest.steps[quest.steps.Length - 1];
             return "Turned in to " + step.turnInName + ".";
-        } 
+        }
 
-        if (IsCurrentStepCompleted())
+        if (IsStepCompleted(step))  //otherwise if step progress is completed, step is ready to be turned in
             return "Turn in to " + step.turnInName + "!";
 
+        return GetStepProgressString(step);
+    }
+
+    public string GetStepProgressString(QuestStep step)
+    {
         string s = "";
 
         if (step.type == QuestType.Talk)
@@ -99,8 +154,7 @@ public class QuestTracker
         if (step.type == QuestType.DefeatMonster)
             s = "Defeat";
 
-        s += " " + step.objectiveName + " (" + GetCurrentStepProgress() + " / " + step.count + ")!";
-
+        s += " " + step.objectiveName + " (" + GetStepProgress(step)  + " / " + step.count + ")!";
         return s;
     }
 
@@ -118,5 +172,18 @@ public class QuestTracker
     public void LoadDetailsByName(string questName)
     {
         LoadDetailsFromQuest(Resources.Load<Quest>("Quests/" + questName));
+    }
+
+    private int GetQuestStepIndex(QuestStep step)
+    {
+        int index = -1;
+
+        for(int i = 0; i < quest.steps.Length; i++)
+        {
+            if (step.name == quest.steps[i].name && step.description == quest.steps[i].description)
+                index = i;
+        }
+
+        return index;
     }
 }

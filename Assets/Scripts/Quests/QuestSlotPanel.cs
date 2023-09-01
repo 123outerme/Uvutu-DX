@@ -42,6 +42,11 @@ public class QuestSlotPanel : MonoBehaviour
             return;
         
         questNameText.text = quest.name;
-        questStepText.text = quest.GetShortStepDetail(); 
+        questStepText.text = quest.GetCurrentShortStepDetail(); 
+    }
+
+    public void ShowQuestDetails()
+    {
+        parentPanel.OpenQuestDetails(quest);
     }
 }

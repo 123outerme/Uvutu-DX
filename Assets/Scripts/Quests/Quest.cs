@@ -13,13 +13,12 @@ public enum QuestType
 public class QuestStep
 {
     public string name;
-    public string description;
+    public string description;  //long description (~60 words) for showing in Quest Details menu
 
     public QuestType type;
     public int count;
     public string objectiveName;   //what NPC to talk to/type of item to collect/monster to defeat, to include names or "groups" such as World 1, creature types, element types, item types, etc.
     public string turnInName;  //what NPC to turn in at this step - empty string means no turn-in required (rewards get automatically added if any)
-    public string details;  //the details given by the Quest > Details menu
     
     public List<string> turnInDialogue = new List<string>(); //turn-in target's step completion dialogue
     public List<string> inProgressDialogue = new List<string>();  //originator NPC's in-progress reminder dialogue

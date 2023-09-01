@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Details
+  m_text: View
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
   m_sharedMaterial: {fileID: 3579496279039096208, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 2567281736129177341}
   - component: {fileID: 1638206857279773248}
   m_Layer: 5
-  m_Name: DetailsButton
+  m_Name: ViewButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -172,8 +172,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -80, y: 0}
-  m_SizeDelta: {x: 160, y: 40}
+  m_AnchoredPosition: {x: -70, y: 0}
+  m_SizeDelta: {x: 120, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3911141843656537350
 CanvasRenderer:
@@ -257,9 +257,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2237702005083789873}
-        m_TargetAssemblyTypeName: QuestSlotPanel, Assembly-CSharp
-        m_MethodName: ShowQuestDetails
+      - m_Target: {fileID: 8102240281464232530}
+        m_TargetAssemblyTypeName: QuestStepPanel, Assembly-CSharp
+        m_MethodName: ViewStepDetails
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -281,7 +281,7 @@ GameObject:
   - component: {fileID: 5749170223696776426}
   - component: {fileID: 5749170223696776427}
   m_Layer: 5
-  m_Name: QuestStepText
+  m_Name: StepProgressText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -416,7 +416,7 @@ GameObject:
   - component: {fileID: 5749170224528745493}
   - component: {fileID: 5749170224528745494}
   m_Layer: 5
-  m_Name: QuestNameText
+  m_Name: StepNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -470,7 +470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Quest Name Goes in here
+  m_text: Step Name Goes in here
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
   m_sharedMaterial: {fileID: 3579496279039096208, guid: 0bff3fd3e5a977e4cb4b6109730c0d25, type: 2}
@@ -550,9 +550,9 @@ GameObject:
   - component: {fileID: 5749170224967265373}
   - component: {fileID: 5749170224967265347}
   - component: {fileID: 5749170224967265372}
-  - component: {fileID: 2237702005083789873}
+  - component: {fileID: 8102240281464232530}
   m_Layer: 5
-  m_Name: QuestSlotPanel
+  m_Name: QuestStepPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -619,7 +619,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2237702005083789873
+--- !u!114 &8102240281464232530
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -628,11 +628,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 5749170224967265374}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01725c1d23a95fc7aa8617ebaebf2d36, type: 3}
+  m_Script: {fileID: 11500000, guid: db01f19ea3b540019a9d82e6880a8e25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   parentPanel: {fileID: 0}
-  quest:
+  step:
     name: 
-    stepProgressCounts: 
-    currentStep: 0
+    description: 
+    type: 0
+    count: 0
+    objectiveName: 
+    turnInName: 
+    turnInDialogue: []
+    inProgressDialogue: []
+  shortStepDetail: 
