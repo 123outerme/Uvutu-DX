@@ -24,9 +24,21 @@ MonoBehaviour:
     objectiveName: Coconut Head
     turnInName: Coconut Head
     turnInDialogue:
-    - Thanks! You just completed the quest.
+    - Now could you defeat a rat for me?
     inProgressDialogue:
     - Talk to me more!!
+  - name: No More Rats
+    description: Defeat a Rat so that Coconut Head is no longer crazy. Crazy? He
+      was crazy once. They put him in a room. A rubber room. A rubber room with rats.
+      Rats? Rats made him crazy. Crazy?
+    type: 2
+    count: 1
+    objectiveName: Rat
+    turnInName: Coconut Head
+    turnInDialogue:
+    - Thanks! You just completed the quest.
+    inProgressDialogue:
+    - Don't forget to defeat that rat!
   startDialogue:
   - After this, please talk to me a couple times!
   prerequisiteQuestNames: []

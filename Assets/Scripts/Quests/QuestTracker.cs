@@ -77,7 +77,7 @@ public class QuestTracker
         if (GetCurrentStepProgress() == -1)  //if we have completed the whole quest
             return true;
         
-        for(int i = 0; i < currentStep; i++)
+        for(int i = 0; i <= currentStep; i++)
         {
             //check every step up to and including the current one
             if (step.name == quest.steps[i].name && step.description == quest.steps[i].description)
