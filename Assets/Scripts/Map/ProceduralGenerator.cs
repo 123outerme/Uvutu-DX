@@ -33,6 +33,8 @@ class RestoringCavernExit {
 
 public class ProceduralGenerator : MonoBehaviour
 {
+    public int maxDepthIncrease = 2;
+
     public GameObject grid;
     public List<GameObject> cavernChunks;
     public GameObject cavernBaseMapPrefab;
@@ -247,7 +249,7 @@ public class ProceduralGenerator : MonoBehaviour
 
             GameObject newChunk = AttachCavernChunk(new CavernChunkCandidate(newChunkPrefab, newExitAbbr, prefix), loadExit.exitAbbr, loadExit.chunk, GetChunkScript(loadExit.chunk), exitDims);
             CavernChunk newChunkScript = GetChunkScript(newChunk);
-            newChunkScript.localMaxDepth += ((loadExit.nextChunkDepth == chunkScript.localMaxDepth) ? 2 : 0);  //update localMaxDepth if it is too low for current depth
+            newChunkScript.localMaxDepth += ((loadExit.nextChunkDepth == chunkScript.localMaxDepth) ? maxDepthIncrease : 0);  //update localMaxDepth if it is too low for current depth
             
             chunkExits = GetPossibleExitsForChunk(newChunk, newChunkScript);  //get all unfilled exits for this chunk
             foreach(string exit in chunkExits)
@@ -282,7 +284,7 @@ public class ProceduralGenerator : MonoBehaviour
         CavernChunk chunkScript = GetChunkScript(chunk);
 
         string[] exits = {"N", "S", "E", "W"};
-        //NOTE: if ShouldLoadMoreCavern(int) changes, the logic here to put the chunks that are at the end of the "tree" should change 
+        //NOTE: if ShouldLoadMoreCavern() changes, the logic here to put the chunks that are at the end of the "tree" should change 
         foreach(string exit in exits)
         {
             GameObject childChunk = null;
@@ -296,7 +298,7 @@ public class ProceduralGenerator : MonoBehaviour
 
         if (chunkQueue.Count > 0)
         {
-            chunkScript.localMaxDepth += 2;  //if any children were found, increase the local max depth to prevent processing happening again
+            chunkScript.localMaxDepth += maxDepthIncrease;  //if any children were found, increase the local max depth to prevent processing happening again
             CreateCavernChunks();  //start loading next chunk
         }
     }
@@ -413,12 +415,12 @@ public class ProceduralGenerator : MonoBehaviour
         newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
             
         curChunkScript.exits.TryAdd(exit, newChunk);
-        curChunkScript.PresentDictionary();
+        //curChunkScript.PresentDictionary();
             
         CavernChunk newChunkScript = GetChunkScript(newChunk);
         newChunkScript.depth = curChunkScript.depth + 1;
         newChunkScript.exits.TryAdd(generatedChunk.newExitAbbr, curChunk);
-        newChunkScript.PresentDictionary();
+        //newChunkScript.PresentDictionary();
         newChunkScript.debugId = nextDebugId;
         newChunk.name += "" + nextDebugId;
         nextDebugId++;
@@ -476,7 +478,7 @@ public class ProceduralGenerator : MonoBehaviour
             Debug.LogError("ERROR OFFSET Y INFINITY");
         }
 
-        Debug.Log(newChunk.name + ": " + newChunk.transform.rotation.eulerAngles.z);
+        //Debug.Log(newChunk.name + ": " + newChunk.transform.rotation.eulerAngles.z);
         
         for(int i = 0; i < prefabTilemaps.Length; i++)
         {
