@@ -198,6 +198,7 @@ public class ProceduralGenerator : MonoBehaviour
         
         GameObject rootChunkPrefab = LoadFindNextChunkPrefab(loadedChunks[0]);
         rootChunk = LoadCavernChunk(rootChunkPrefab);
+
         CavernChunk rootChunkScript = GetChunkScript(rootChunk);
         string prefix = loadedChunks[0].Substring(0,1);
 
@@ -214,6 +215,8 @@ public class ProceduralGenerator : MonoBehaviour
         rootChunk.transform.RotateAround(new Vector3(0, 0, 0), new Vector3(0.0f, 0.0f, 1.0f), degreesRotation);
         rootChunkScript.rotationPrefix = prefix;
         rootChunkScript.timesPrintingVisited = 1;  //we have visited the root chunk for creating its children now
+        
+        CopyChunkToBaseMap(rootChunkPrefab, rootChunk);
 
         int index = 1;
         rootChunkScript.localMaxDepth = 3;
@@ -303,11 +306,8 @@ public class ProceduralGenerator : MonoBehaviour
         //TODO: pick start state better
         GameObject startPrefab = cavernChunks[0];
         string rotationPrefix = "!";  //hard-coded to not rotate - TODO when picking a first map make this random as well!
-
-        CavernChunkCandidate rootCandidate = new CavernChunkCandidate(startPrefab, "", rotationPrefix);
-
         rootChunk = LoadCavernChunk(startPrefab);
-        CopyChunkToBaseMap(rootCandidate, null);
+        CopyChunkToBaseMap(startPrefab, rootChunk);
         CavernChunk rootChunkScript = GetChunkScript(rootChunk);
         rootChunkScript.rotationPrefix = rotationPrefix;
 
@@ -369,7 +369,6 @@ public class ProceduralGenerator : MonoBehaviour
                         chunkQueue.Enqueue(newChunk);
 
                     //Debug.Log("loaded; queue size " + chunkQueue.Count);
-                    chunkQueue.Clear();
                 }
             }
         }
@@ -412,8 +411,6 @@ public class ProceduralGenerator : MonoBehaviour
         newChunk.transform.Translate(x, y, 0.0f);  //move exits to be on top of each other
         newChunk.transform.RotateAround(chunkExit.position, new Vector3(0.0f, 0.0f, 1.0f), degreesRotation + curChunk.transform.rotation.eulerAngles.z);  //rotate to have new chunk's exit go "outwards" from old chunk's
         newChunk.transform.Translate(xAxisDelta, yAxisDelta, 0.0f);  //move chunk exit so that there is no gap between 
-
-        CopyChunkToBaseMap(generatedChunk, newChunk);
             
         curChunkScript.exits.TryAdd(exit, newChunk);
         curChunkScript.PresentDictionary();
@@ -426,22 +423,22 @@ public class ProceduralGenerator : MonoBehaviour
         newChunk.name += "" + nextDebugId;
         nextDebugId++;
 
+        CopyChunkToBaseMap(generatedChunk.chunkPrefab, newChunk);
+
         newChunkScript.rotationPrefix = generatedChunk.dictPrefix;
         newChunkScript.localMaxDepth = curChunkScript.localMaxDepth;  //copy local max depth from parent to child
 
         return newChunk;
     }
 
-    private void CopyChunkToBaseMap(CavernChunkCandidate generatedChunk, GameObject newChunk)
+    private void CopyChunkToBaseMap(GameObject newChunkPrefab, GameObject newChunk)
     {
-        bool reoriented = (generatedChunk.dictPrefix == "(" || generatedChunk.dictPrefix == ")");  //if X -> Y and Y -> X (i.e. 90 rotate)
-
-        Transform chunkPrefabTransform = generatedChunk.chunkPrefab.transform;
+        Transform chunkPrefabTransform = newChunkPrefab.transform;
 
         RectTransform boundingBox = chunkPrefabTransform.Find("BoundingBox").GetComponent<RectTransform>();
         float w = boundingBox.rect.width;
         float h = boundingBox.rect.height;
-        //Debug.Log(generatedChunk.chunkPrefab.name + " / " + w + ", " + h);
+        //Debug.Log(newChunkPrefab.name + " / " + w + ", " + h);
         
         //Vector2 v2 = new Vector2(v1.x + ((reoriented) ? h : w), v1.y + ((reoriented) ? w : h));
         Tilemap[] prefabTilemaps = {
@@ -452,48 +449,70 @@ public class ProceduralGenerator : MonoBehaviour
         };
         Tilemap[] baseTilemaps = { baseBackground, baseMidground, baseForeground, baseCollision };
 
-        float offsetX = 0;
-        float offsetY = 0;
+        float offsetX = Mathf.Infinity;
+        float offsetY = Mathf.Infinity;
 
-        if (newChunk != null)
+        RectTransform pasteBox = newChunk.transform.Find("BoundingBox").GetComponent<RectTransform>();
+        Vector3[] pasteCorners = new Vector3[4];
+        pasteBox.GetWorldCorners(pasteCorners);
+
+        //get the minimum values (top-left corner) of all corners in world-space
+        foreach(Vector3 corner in pasteCorners)
         {
-            offsetX = newChunk.transform.position.x;
-            offsetY = newChunk.transform.position.y;
+            if (corner.x < offsetX)
+                offsetX = corner.x;
+
+            if (corner.y < offsetY)
+                offsetY = corner.y;
         }
+
+        if (offsetX == Mathf.Infinity)
+        {
+            Debug.LogError("ERROR OFFSET X INFINITY");
+            offsetX = 0;
+        }
+        if (offsetY == Mathf.Infinity)
+        {
+            Debug.LogError("ERROR OFFSET Y INFINITY");
+        }
+
+        Debug.Log(newChunk.name + ": " + newChunk.transform.rotation.eulerAngles.z);
         
         for(int i = 0; i < prefabTilemaps.Length; i++)
         {
-            for(int y = (int) boundingBox.offsetMin.y; y < boundingBox.offsetMax.y; y++)
+            for(int y = 0; y < h; y++)
             {
-                for(int x = (int) boundingBox.offsetMin.x; x < boundingBox.offsetMax.x; x++)
+                for(int x = 0; x < w; x++)
                 {
-                    int destX = (int) (offsetX) + x;
-                    int destY = (int) (offsetY) + y;
+                    int destX = x;
+                    int destY = y;
 
-                    int transformedX = 0;
-                    int transformedY = 0;
-
-                    if (generatedChunk.dictPrefix == "(")
+                    if (Mathf.Round(newChunk.transform.rotation.eulerAngles.z) == 90.0f)
                     {
-                        transformedX = ((int) h - 1) - destY;
-                        transformedY = destX;
+                        //90 degree CW rotation
+                        destX = ((int) h - 1) - y;
+                        destY = x;
                     }
 
-                    if (generatedChunk.dictPrefix == ")")
+                    if (Mathf.Round(newChunk.transform.rotation.eulerAngles.z) == 270.0f || Mathf.Round(newChunk.transform.rotation.eulerAngles.z) == -90.0f)
                     {
-                        transformedX = destY;
-                        transformedY = ((int) w - 1) - destX;
+                        //90 degree CCW rotation
+                        destX = y;
+                        destY = ((int) w - 1) - x;
                     }
 
-                    if (generatedChunk.dictPrefix == "@")
+                    if (Mathf.Round(newChunk.transform.rotation.eulerAngles.z) == 180.0f)
                     {
                         //180 degree rotation, NOT mirroring
-                        transformedX = ((int) w - 1) - destX;
-                        transformedY = ((int) h - 1) - destY;
+                        destX = ((int) w - 1) - x;
+                        destY = ((int) h - 1) - y;
                     }
+
+                    destX += (int) Mathf.Round(offsetX);  //round up to fix fp errors
+                    destY += (int) Mathf.Round(offsetY);
                     //copy tile @ x, y to transformed destX, destY (if one has been placed there)
 
-                    TileBase tile = prefabTilemaps[i].GetTile(new Vector3Int(x, y, 0));
+                    TileBase tile = prefabTilemaps[i].GetTile(new Vector3Int(x + (int) boundingBox.offsetMin.x, y + (int) boundingBox.offsetMin.y, 0));
                     if (tile != null)
                         baseTilemaps[i].SetTile(new Vector3Int(destX, destY, 0), tile);
                 }
@@ -541,7 +560,7 @@ public class ProceduralGenerator : MonoBehaviour
 
     private GameObject LoadCavernChunk(GameObject chunkPrefab)
     {
-        GameObject chunkRoot = GameObject.Instantiate(new GameObject());
+        GameObject chunkRoot = new GameObject();
         chunkRoot.name = chunkPrefab.name + "(Clone)";  //mimick instantiating the prefab
         chunkRoot.transform.SetParent(grid.transform, false);
 
