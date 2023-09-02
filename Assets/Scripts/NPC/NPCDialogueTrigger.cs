@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class NPCDialogueTrigger : MonoBehaviour
 {
+    private NPCDialogue dialogue = null;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        GetDialogueScript();
     }
 
     // Update is called once per frame
@@ -16,15 +18,26 @@ public class NPCDialogueTrigger : MonoBehaviour
         
     }
 
+    void GetDialogueScript()
+    {
+        if (dialogue == null)
+            dialogue = transform.parent.gameObject.GetComponent<NPCDialogue>();
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (transform.parent.gameObject.GetComponent<NPCDialogue>().enableDialogue)
-            transform.parent.gameObject.GetComponent<NPCDialogue>().readyDialogue = true;
+        GetDialogueScript();
+        if (dialogue.enableDialogue)
+            dialogue.readyDialogue = true;
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (transform.parent.gameObject.GetComponent<NPCDialogue>().enableDialogue)
-            transform.parent.gameObject.GetComponent<NPCDialogue>().readyDialogue = false;
+        GetDialogueScript();
+        if (dialogue.enableDialogue)
+        {
+            dialogue.readyDialogue = false;
+            dialogue.HideShopButton();
+        }
     }
 }

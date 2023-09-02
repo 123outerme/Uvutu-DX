@@ -164,6 +164,12 @@ public class InventoryPanel : MonoBehaviour
         ReloadInventoryDisplay();
     }
 
+    public void SellToShop(InventorySlot item)
+    {
+        playerInfo.gold += item.cost;
+        npcShop.AddItemToInventory(item.item);
+    }
+
     public bool PlayerHasMoney(int money)
     {
         return (playerInfo.gold >= money);
@@ -173,11 +179,5 @@ public class InventoryPanel : MonoBehaviour
     {
         if (npcShop != null && isItemShop)
             npcShop.HideShop();
-    }
-
-    public void SellToShop(InventorySlot item)
-    {
-        playerInfo.gold += item.cost;
-        npcShop.AddItemToInventory(item.item);
     }
 }

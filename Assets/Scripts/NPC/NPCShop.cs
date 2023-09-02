@@ -37,6 +37,7 @@ public class NPCShop : Inventory
 
     public void HideShop()
     {
+        //Debug.Log("hide shop");
         if (dialogue)
             dialogue.OnCloseShop();
         
