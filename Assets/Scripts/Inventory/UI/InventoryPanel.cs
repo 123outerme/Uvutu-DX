@@ -80,7 +80,7 @@ public class InventoryPanel : MonoBehaviour
         //get the list of all types included in the inventory
         foreach(InventorySlot item in items)
         {
-            if (!includedTypes.Contains(item.type))
+            if (!includedTypes.Contains(item.type) && !(inBattle && !item.IsUseAvailable(playerInfo.scene, inBattle, inBattleActions)))
                 includedTypes.Add(item.type);
         }
 
