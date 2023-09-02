@@ -42,7 +42,7 @@ public class NPCDialogue : MonoBehaviour
         prevEnableMoveSetting = movement.enableMovement;
 
         //get dialogue text component for showing dialogue text
-        dialogueText = GameObject.Find("Canvas").transform.Find("Dialogue").gameObject.GetComponent<TMP_Text>();
+        dialogueText = GameObject.Find("WorldCanvas").transform.Find("Dialogue").gameObject.GetComponent<TMP_Text>();
 
         //set baseline for talk activation delay logic
         dialogProgressTime = Time.realtimeSinceStartup;

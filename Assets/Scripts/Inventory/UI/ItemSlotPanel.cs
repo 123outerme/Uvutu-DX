@@ -13,12 +13,12 @@ public class ItemSlotPanel : MonoBehaviour
 
     public string playerScene;
 
-    private Image itemImage = null;
-    private TMP_Text itemNameText = null;
-    private TMP_Text itemTypeText = null;
-    private TMP_Text countText = null;
-    private Button useButton = null;
-    private Button trashButton = null;
+    protected Image itemImage = null;
+    protected TMP_Text itemNameText = null;
+    protected TMP_Text itemTypeText = null;
+    protected TMP_Text countText = null;
+    protected Button useButton = null;
+    protected Button trashButton = null;
 
     void Start()
     {

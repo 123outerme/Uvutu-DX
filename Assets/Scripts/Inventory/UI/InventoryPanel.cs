@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using TMPro;
 using UnityEngine.UI;
 
 public class InventoryPanel : MonoBehaviour
 {
     public GameObject itemSlotPanelPrefab;
+    public GameObject shopItemPanelPrefab;
     public GameObject itemListContent;
 
     public ItemType typeToFilterBy = ItemType.All;
@@ -16,9 +18,14 @@ public class InventoryPanel : MonoBehaviour
     public bool inBattle = false;
     public bool inBattleActions = false;
 
+    public bool isItemShop = false;
+    public bool shopSeePlayerInventory = false;
+
     public GameObject player;
+    public NPCShop npcShop = null;
 
     public GameObject filterPanel;
+    public GameObject switchShopInventoryButton;
 
     [System.NonSerialized]
     public PlayerInfo playerInfo = null;
@@ -49,6 +56,14 @@ public class InventoryPanel : MonoBehaviour
             playerInfo = player.GetComponent<PlayerInfo>();
 
         InventorySlot[] items = inventory.GetItems();
+        GameObject prefab = itemSlotPanelPrefab;
+
+        if (isItemShop && !shopSeePlayerInventory && npcShop != null)
+        {
+            items = npcShop.GetItems();
+            prefab = shopItemPanelPrefab;
+        }
+
         includedTypes = new List<ItemType>();
 
         //destroy each child object in the list to start adding the refreshed list
@@ -65,7 +80,7 @@ public class InventoryPanel : MonoBehaviour
 
             if ((typeToFilterBy == ItemType.All || items[i].type == typeToFilterBy) && !battleFiltered)
             {
-                GameObject panelObj = Instantiate(itemSlotPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, itemListContent.transform);
+                GameObject panelObj = Instantiate(prefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, itemListContent.transform);
                 ItemSlotPanel itemSlotPanel = panelObj.GetComponent<ItemSlotPanel>();
                 itemSlotPanel.parentPanel = this;
                 itemSlotPanel.itemSlot = items[i];
@@ -77,7 +92,6 @@ public class InventoryPanel : MonoBehaviour
                 includedTypes.Add(items[i].type);
         }
 
-        
         foreach (Transform child in filterPanel.transform)
         {
             Button filterButton = child.GetComponent<Button>();
@@ -101,6 +115,10 @@ public class InventoryPanel : MonoBehaviour
             else
                 buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);  // white, 100% alpha - tab's normal color
         }
+
+        switchShopInventoryButton.SetActive(isItemShop);
+        TMP_Text switchButtonText = switchShopInventoryButton.transform.Find("Text").GetComponent<TMP_Text>();
+        switchButtonText.text = (shopSeePlayerInventory) ? "View Shop Items" : "View Your Items";
     }
 
     public void FilterByType(ItemType type)
@@ -113,5 +131,15 @@ public class InventoryPanel : MonoBehaviour
     {
         ItemType t = (ItemType) typeId;
         FilterByType(t);
+    }
+
+    public void BuyShopItem(InventorySlot item)
+    {
+        inventory.AddItemToInventory(item.item);
+    }
+
+    public bool PlayerHasMoney(int money)
+    {
+        return (playerInfo.gold >= money);
     }
 }

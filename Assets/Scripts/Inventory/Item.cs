@@ -29,6 +29,9 @@ public abstract class Item : ScriptableObject
     private bool _Consumable = true;
 
     [SerializeField]
+    private int _Cost = 0;
+
+    [SerializeField]
     private ValidBattleTarget _ValidTargets = ValidBattleTarget.Allies;
 
     public string ItemName => _ItemName;
@@ -39,6 +42,8 @@ public abstract class Item : ScriptableObject
     public int MaxCarryable => _MaxCarryable;
 
     public bool Consumable => _Consumable;
+
+    public int Cost => _Cost;
 
     public ValidBattleTarget ValidTargets => _ValidTargets;
 

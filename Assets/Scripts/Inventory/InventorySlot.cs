@@ -11,6 +11,7 @@ public class InventorySlot
     public string itemName;
     public ItemType type;
     public int count = 1;
+    public int cost = 0;
 
     public InventorySlot()
     {
@@ -36,6 +37,7 @@ public class InventorySlot
             item = i;
             itemName = i.ItemName;
             type = i.Type;
+            cost = i.Cost;
         }
     }
 
