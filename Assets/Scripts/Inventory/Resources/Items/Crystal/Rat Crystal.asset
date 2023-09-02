@@ -15,6 +15,8 @@ MonoBehaviour:
   _ItemName: Rat Crystal
   _Description: The essence of Rat trapped within a crystal.
   _MaxCarryable: 4
+  _Consumable: 1
+  _Cost: 5
   _ValidTargets: 6
   sprite: {fileID: -731449358, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   scenesUnusuableIn:

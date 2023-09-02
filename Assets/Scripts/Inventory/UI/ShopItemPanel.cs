@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class ShopItemPanel : ItemSlotPanel
 {
-    private TMP_Text costText = null;
     private Button buyButton = null;
 
     // Start is called before the first frame update
@@ -32,14 +31,17 @@ public class ShopItemPanel : ItemSlotPanel
         if (itemTypeText == null)
             itemTypeText = transform.Find("ItemTypeText").GetComponent<TMP_Text>();
         
+        if (countText == null)
+            countText = transform.Find("CountText").GetComponent<TMP_Text>();
+
         if (costText == null)
-            costText = transform.Find("CostText").GetComponent<TMP_Text>();
+            costText = transform.Find("CostDisplay/CostText").GetComponent<TMP_Text>();
 
         if (buyButton == null)
             buyButton = transform.Find("BuyButton").GetComponent<Button>();
     }
 
-    new public void UpdateFromItemSlot()
+    public override void UpdateFromItemSlot()
     {
         GetComponentReferences();
 
@@ -49,9 +51,10 @@ public class ShopItemPanel : ItemSlotPanel
         itemImage.sprite = itemSlot.item.sprite;
         itemNameText.text = itemSlot.itemName;
         itemTypeText.text = Item.ItemTypeToString(itemSlot.type);
-        costText.text = "" + itemSlot.cost;
+        countText.text = ((itemSlot.count > 0) ? ("x" + itemSlot.count) : "");
+        costText.text = "" + ((itemSlot.cost > 0) ? itemSlot.cost : "---");
 
-        buyButton.interactable = parentPanel.PlayerHasMoney(itemSlot.cost);
+        buyButton.interactable = (parentPanel.PlayerHasMoney(itemSlot.cost) && itemSlot.count != 0);
     }
 
     public void BuyItem()

@@ -11,8 +11,9 @@ public class NPCState
     public int step;
     public int frame;
     public string name;
+    public InventorySlot[] shop;
 
-    public NPCState(Vector3 pos, bool enableMove, bool startMove, int curStep, int curFrame, string npcName)
+    public NPCState(Vector3 pos, bool enableMove, bool startMove, int curStep, int curFrame, string npcName, InventorySlot[] stock)
     {
         position = pos;
         enableMovement = enableMove;
@@ -20,16 +21,18 @@ public class NPCState
         step = curStep;
         frame = curFrame;
         name = npcName;
+        shop = stock;
     }
 }
 
 public class NPCStats : MonoBehaviour
 {
     public bool saveStatus = true;
-    public NPCState state = new NPCState(new Vector3(0,0,0), false, false, 0, 0, "");
+    public NPCState state = new NPCState(new Vector3(0,0,0), false, false, 0, 0, "", new InventorySlot[] {});
 
     private NPCMovement movement;
-    private NPCDialogue dialogue;
+    //private NPCDialogue dialogue;
+    private NPCShop shop;
 
     private SaveHandler saver;
 
@@ -37,13 +40,17 @@ public class NPCStats : MonoBehaviour
     {
         if (movement == null)
             movement = gameObject.GetComponent<NPCMovement>();
+
+        if (shop == null)
+            shop = gameObject.GetComponent<NPCShop>();
+        
         saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
         //SaveNPCState();
     }
 
     public void SaveNPCState()
     {
-        state = new NPCState(transform.position, movement.enableMovement, movement.startMovement, movement.step, movement.frame, gameObject.name);
+        state = new NPCState(transform.position, movement.enableMovement, movement.startMovement, movement.step, movement.frame, gameObject.name, shop.GetItems());
     }
 
     public void LoadNPCState(NPCState s)
@@ -52,6 +59,9 @@ public class NPCStats : MonoBehaviour
         {
             if (movement == null)
                 movement = gameObject.GetComponent<NPCMovement>();
+
+            if (shop == null)
+                shop = gameObject.GetComponent<NPCShop>();
             
             state = s;
             transform.position = state.position;
@@ -61,6 +71,10 @@ public class NPCStats : MonoBehaviour
 
             movement.lastMinusNext = movement.posSteps[movement.step] - state.position;
             movement.startMovement = state.startMovement;
+
+            shop.items = new List<InventorySlot>(state.shop);
+            shop.LoadAllInventorySlots();
+            shop.loaded = true;
             //Debug.Log("given state is not null.");
         }
         else

@@ -118,7 +118,7 @@ public class StatsDataHandler : MonoBehaviour
     {
         for(int i = 0; i < playerStats.moveset.Length; i++)
         {
-            TMP_Text moveNameText = movesPanel.transform.Find("PanelMove" + (i+1)).Find("MoveText").GetComponent<TMP_Text>();
+            TMP_Text moveNameText = movesPanel.transform.Find("PanelMove" + (i+1) + "/MoveText").GetComponent<TMP_Text>();
             moveNameText.text = playerStats.moveset[i];
         }
     }

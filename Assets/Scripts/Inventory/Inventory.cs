@@ -5,7 +5,6 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
     public static int MAX_INVENTORY = 64;
-
     public List<InventorySlot> items = new List<InventorySlot>();
 
     // Start is called before the first frame update

@@ -41,7 +41,7 @@ public class BattleOverview : MonoBehaviour
     {
         foreach(string option in options)
         {
-            GameObject combatantTabPanel = transform.Find("CombatantListPanel").Find(option + "TabPanel").gameObject;
+            GameObject combatantTabPanel = transform.Find("CombatantListPanel/" + option + "TabPanel").gameObject;
             GameObject combatantObj = GameObject.Find(option);
             if (combatantObj != null)
             {

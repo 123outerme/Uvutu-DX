@@ -15,8 +15,11 @@ public class NPCDialogue : MonoBehaviour
     public List<string> dialogue = new List<string>();
     public int dialogueItem = 0;
 
-    public Quest[] quests;  //list of all quests this NPC gives
+    public bool hasShop = false;
+    private NPCShop shop = null;
+
     public bool givesQuests = false;
+    public Quest[] quests;  //list of all quests this NPC gives
     private List<QuestTracker> questsToGive = new List<QuestTracker>();  //quests to give the player upon completion of dialogue reading
     private List<QuestAndStepPair> turningInQuestSteps;  //quests the player is turning in upon completion of dialogue reading
     private List<string> curDialogueList = new List<string>();  //the list of all lines of dialogue to present
@@ -32,6 +35,10 @@ public class NPCDialogue : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //get shop script (if activated)
+        if (hasShop)
+            shop = gameObject.GetComponent<NPCShop>();
+
         //get some player scripts
         player = GameObject.Find("Player");
         pController = player.GetComponent<PlayerController>();
@@ -116,19 +123,27 @@ public class NPCDialogue : MonoBehaviour
                             questsInventory.TurnInCurrentQuestStep(pair.quest.name);
 
                         //reset state to disable dialogue mode changes
-                        pController.SetMovementLock(false);  //unlock player movement
-                        dialogueItem = 0;  //reset current dialogue string index
-                        //hide dialogue
-                        dialogueText.text = "";  //reset dialogue text to nothing (hide)
-                        questsToGive = new List<QuestTracker>();  //clear list of quests to be given
-                        turningInQuestSteps = new List<QuestAndStepPair>();  //clear list of quest steps to turn in
-                        curDialogueList = new List<string>();  //clear list of dialogue strings
-                        movement.enableMovement = prevEnableMoveSetting; //resume NPC movement (if previous setting was enabled)
+                        if (!hasShop || shop == null)
+                            AfterDialogFinished();
+                        else
+                            shop.ShowShop(this);
                     }
                     dialogProgressTime = Time.realtimeSinceStartup;
                 }
             }
         }
+    }
+
+    private void AfterDialogFinished()
+    {
+        pController.SetMovementLock(false);  //unlock player movement
+        dialogueItem = 0;  //reset current dialogue string index
+        //hide dialogue
+        dialogueText.text = "";  //reset dialogue text to nothing (hide)
+        questsToGive = new List<QuestTracker>();  //clear list of quests to be given
+        turningInQuestSteps = new List<QuestAndStepPair>();  //clear list of quest steps to turn in
+        curDialogueList = new List<string>();  //clear list of dialogue strings
+        movement.enableMovement = prevEnableMoveSetting; //resume NPC movement (if previous setting was enabled)
     }
 
     void UpdateDialogueText()
@@ -142,5 +157,10 @@ public class NPCDialogue : MonoBehaviour
 
         conversationPosDiff = new Vector3(conversationPosDiff.x, newYPos, 0);
         dialogueText.gameObject.transform.position = transform.position - conversationPosDiff;
+    }
+
+    public void OnCloseShop()
+    {
+        AfterDialogFinished();
     }
 }

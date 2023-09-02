@@ -10,6 +10,7 @@ public class ItemSlotPanel : MonoBehaviour
     public InventorySlot itemSlot = null;
 
     public InventoryPanel parentPanel = null;
+    public bool isInShop = false;
 
     public string playerScene;
 
@@ -17,8 +18,13 @@ public class ItemSlotPanel : MonoBehaviour
     protected TMP_Text itemNameText = null;
     protected TMP_Text itemTypeText = null;
     protected TMP_Text countText = null;
-    protected Button useButton = null;
-    protected Button trashButton = null;
+    protected GameObject costDisplay = null;
+    protected TMP_Text costText = null;
+    private Button useButton = null;
+    private Button trashButton = null;
+    private Button sellButton = null;
+    private GameObject useActions = null;
+    private GameObject shopActions = null;
 
     void Start()
     {
@@ -43,15 +49,30 @@ public class ItemSlotPanel : MonoBehaviour
         
         if (countText == null)
             countText = transform.Find("CountText").GetComponent<TMP_Text>();
+        
+        if (costText == null)
+            costText = transform.Find("CostDisplay/CostText").GetComponent<TMP_Text>();
 
         if (useButton == null)
-            useButton = transform.Find("UseButton").GetComponent<Button>();
+            useButton = transform.Find("UseActions/UseButton").GetComponent<Button>();
 
         if (trashButton == null)
-            trashButton = transform.Find("TrashButton").GetComponent<Button>();
+            trashButton = transform.Find("UseActions/TrashButton").GetComponent<Button>();
+
+        if (sellButton == null)
+            sellButton = transform.Find("ShopActions/SellButton").GetComponent<Button>();
+
+        if (costDisplay == null)
+            costDisplay = transform.Find("CostDisplay").gameObject;
+
+        if (useActions == null)
+            useActions = transform.Find("UseActions").gameObject;
+
+        if (shopActions == null)
+            shopActions = transform.Find("ShopActions").gameObject;
     }
 
-    public void UpdateFromItemSlot()
+    public virtual void UpdateFromItemSlot()
     {
         GetComponentReferences();
 
@@ -62,9 +83,23 @@ public class ItemSlotPanel : MonoBehaviour
         itemNameText.text = itemSlot.itemName;
         itemTypeText.text = Item.ItemTypeToString(itemSlot.type);
         countText.text = "x" + itemSlot.count;
+        costText.text = "" + ((itemSlot.cost > 0) ? itemSlot.cost : "???");
 
         useButton.interactable = (!parentPanel.disableUseButtonOverride && itemSlot.IsUseAvailable(parentPanel.playerInfo.scene, parentPanel.inBattle, parentPanel.inBattleActions));
         trashButton.interactable = itemSlot.item.Consumable;
+        if (isInShop)
+        {
+            sellButton.interactable = (itemSlot.cost > 0);
+            useActions.SetActive(false);
+            shopActions.SetActive(true);
+            costDisplay.SetActive(true);
+        }
+        else
+        {
+            useActions.SetActive(true);
+            shopActions.SetActive(false);
+            costDisplay.SetActive(false);
+        }
     }
 
     public void UseItem()
@@ -82,5 +117,12 @@ public class ItemSlotPanel : MonoBehaviour
             itemSlot.TrashItem();
             parentPanel.ReloadInventoryDisplay();
         }
+    }
+
+    public void SellItem()
+    {
+        parentPanel.SellToShop(itemSlot);
+        itemSlot.TrashItem();
+        parentPanel.ReloadInventoryDisplay();
     }
 }

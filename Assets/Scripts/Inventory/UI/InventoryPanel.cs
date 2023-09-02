@@ -10,6 +10,7 @@ public class InventoryPanel : MonoBehaviour
     public GameObject itemSlotPanelPrefab;
     public GameObject shopItemPanelPrefab;
     public GameObject itemListContent;
+    public GameObject goldText;
 
     public ItemType typeToFilterBy = ItemType.All;
     public bool lockFilter = false;
@@ -64,6 +65,8 @@ public class InventoryPanel : MonoBehaviour
             prefab = shopItemPanelPrefab;
         }
 
+        UpdateGoldText();
+
         includedTypes = new List<ItemType>();
 
         //destroy each child object in the list to start adding the refreshed list
@@ -84,6 +87,7 @@ public class InventoryPanel : MonoBehaviour
                 ItemSlotPanel itemSlotPanel = panelObj.GetComponent<ItemSlotPanel>();
                 itemSlotPanel.parentPanel = this;
                 itemSlotPanel.itemSlot = items[i];
+                itemSlotPanel.isInShop = isItemShop;
                 itemSlotPanel.UpdateFromItemSlot();
             }
 
@@ -117,8 +121,14 @@ public class InventoryPanel : MonoBehaviour
         }
 
         switchShopInventoryButton.SetActive(isItemShop);
-        TMP_Text switchButtonText = switchShopInventoryButton.transform.Find("Text").GetComponent<TMP_Text>();
+        TMP_Text switchButtonText = switchShopInventoryButton.transform.Find("Text (TMP)").GetComponent<TMP_Text>();
         switchButtonText.text = (shopSeePlayerInventory) ? "View Shop Items" : "View Your Items";
+    }
+
+    private void UpdateGoldText()
+    {
+        TMP_Text gText = goldText.GetComponent<TMP_Text>();
+        gText.text = "" + playerInfo.gold;
     }
 
     public void FilterByType(ItemType type)
@@ -133,13 +143,35 @@ public class InventoryPanel : MonoBehaviour
         FilterByType(t);
     }
 
+    public void ClickSwitchInventory()
+    {
+        shopSeePlayerInventory = !shopSeePlayerInventory;
+        ReloadInventoryDisplay();
+    }
+
     public void BuyShopItem(InventorySlot item)
     {
         inventory.AddItemToInventory(item.item);
+        if (item.count > 0)
+            item.count--;
+        playerInfo.gold -= item.cost;
+        ReloadInventoryDisplay();
     }
 
     public bool PlayerHasMoney(int money)
     {
         return (playerInfo.gold >= money);
+    }
+
+    public void HideInventoryPanel()
+    {
+        if (npcShop != null && isItemShop)
+            npcShop.HideShop();
+    }
+
+    public void SellToShop(InventorySlot item)
+    {
+        playerInfo.gold += item.cost;
+        npcShop.AddItemToInventory(item.item);
     }
 }
