@@ -374,13 +374,12 @@ public class ProceduralGenerator : MonoBehaviour
                     Vector3[] corners = GetCornersOfRotatedChunk(newChunk);
 
                     List<Collider2D> colliders = new List<Collider2D>();
-                    int count = Physics2D.OverlapArea(corners[0] + new Vector3(0.1f, 0.1f, 0), corners[1] - new Vector3(0.1f, 0.1f, 0), boundsCheckingFilter, colliders);
-                    //see if this chunk can be copied into the given area (inset by 0.1 units on all sides, since these are tiles, but borders touching triggers collision)
+                    int count = Physics2D.OverlapArea(corners[0] + new Vector3(0.25f, 0.25f, 0), corners[1] - new Vector3(0.25f, 0.25f, 0), boundsCheckingFilter, colliders);
+                    //see if this chunk can be copied into the given area (inset by 0.25 units on all sides, since these are tiles, but borders touching triggers collision)
 
                     if (count == 0)
                     {
                         ContinueAttachChunk(generatedChunk, exit, newChunk, curChunk, curChunkScript, corners[0]);
-
                         
                         if (curChunkScript.depth + 1 < curChunkScript.localMaxDepth)
                             chunkQueue.Enqueue(newChunk);
@@ -389,7 +388,7 @@ public class ProceduralGenerator : MonoBehaviour
                     }
                     else
                     {
-                        //Destroy(newChunk);
+                        Destroy(newChunk);
                         Debug.Log("Destroyed chunk for collision(s) [" + count + "]: " + corners[0] + " / " + corners[1] + " | debug ID " + colliders[0].gameObject.GetComponent<CavernChunk>().debugId);
                     }
                 }
@@ -571,10 +570,10 @@ public class ProceduralGenerator : MonoBehaviour
 
         for(int i = 1; i < pasteCorners.Length; i++)
         {
-            if (pasteCorners[i].x <= topLeft.x && pasteCorners[i].y <= topLeft.y)
+            if (Mathf.Round(pasteCorners[i].x) <= Mathf.Round(topLeft.x) && Mathf.Round(pasteCorners[i].y) <= Mathf.Round(topLeft.y))
                 topLeft = pasteCorners[i];
 
-            if (pasteCorners[i].x >= bottomRight.x && pasteCorners[i].y >= bottomRight.y)
+            if (Mathf.Round(pasteCorners[i].x) >= Mathf.Round(bottomRight.x) && Mathf.Round(pasteCorners[i].y) >= Mathf.Round(bottomRight.y))
                 bottomRight = pasteCorners[i];
         }
 
