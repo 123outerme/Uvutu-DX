@@ -787,6 +787,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 840aedc60d42463688d53d971203f5cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDepthIncrease: 5
   grid: {fileID: 799660635}
   cavernChunks:
   - {fileID: 7366680821851561862, guid: b7666720f87634ce88a8f9daa6d872b5, type: 3}
