@@ -59,15 +59,16 @@ public class InventoryPanel : MonoBehaviour
         InventorySlot[] items = inventory.GetItems();
         GameObject prefab = itemSlotPanelPrefab;
 
+        //if this is a shop and we are seeing the NPC's inventory, use that as the list of items, and use the shop item prefab instead of the usual
         if (isItemShop && !shopSeePlayerInventory && npcShop != null)
         {
             items = npcShop.GetItems();
             prefab = shopItemPanelPrefab;
         }
 
-        UpdateGoldText();
-
-        includedTypes = new List<ItemType>();
+        //update gold text
+        TMP_Text gText = goldText.GetComponent<TMP_Text>();
+        gText.text = "" + playerInfo.gold;
 
         //destroy each child object in the list to start adding the refreshed list
         foreach(Transform child in itemListContent.transform)
@@ -75,6 +76,19 @@ public class InventoryPanel : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        includedTypes = new List<ItemType>();
+        //get the list of all types included in the inventory
+        foreach(InventorySlot item in items)
+        {
+            if (!includedTypes.Contains(item.type))
+                includedTypes.Add(item.type);
+        }
+
+        //if the UI is filtering by a type that the inventory does not have anymore, set filter to all
+        if (!includedTypes.Contains(typeToFilterBy))
+            typeToFilterBy = ItemType.All;
+
+        //create all ItemSlotPanels in the scrolling list
         for(int i = 0; i < items.Length; i++)
         {
             bool battleFiltered = false;
@@ -90,12 +104,9 @@ public class InventoryPanel : MonoBehaviour
                 itemSlotPanel.isInShop = isItemShop;
                 itemSlotPanel.UpdateFromItemSlot();
             }
-
-
-            if (!includedTypes.Contains(items[i].type))
-                includedTypes.Add(items[i].type);
         }
 
+        //Set all filter buttons based on if at least one item of the button's type is in the inventory, and set selected button's color
         foreach (Transform child in filterPanel.transform)
         {
             Button filterButton = child.GetComponent<Button>();
@@ -119,16 +130,11 @@ public class InventoryPanel : MonoBehaviour
             else
                 buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);  // white, 100% alpha - tab's normal color
         }
-
+        
+        //enable/set the text of the switch inventory button present in the shop UI
         switchShopInventoryButton.SetActive(isItemShop);
         TMP_Text switchButtonText = switchShopInventoryButton.transform.Find("Text (TMP)").GetComponent<TMP_Text>();
         switchButtonText.text = (shopSeePlayerInventory) ? "View Shop Items" : "View Your Items";
-    }
-
-    private void UpdateGoldText()
-    {
-        TMP_Text gText = goldText.GetComponent<TMP_Text>();
-        gText.text = "" + playerInfo.gold;
     }
 
     public void FilterByType(ItemType type)
