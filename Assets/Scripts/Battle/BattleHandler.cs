@@ -49,6 +49,8 @@ public class BattleHandler : MonoBehaviour
     public GameObject attackPanel;
     public GameObject targetPanel;
     public GameObject turnPanel;
+    public GameObject rewardsPanel;
+    public GameObject levelUpPanel;
     public GameObject overviewPanel;
     public GameObject inventoryPanel;
 
@@ -61,6 +63,8 @@ public class BattleHandler : MonoBehaviour
     //[System.NonSerialized]
     public BattleState battleState;
 
+    private PlayerInfo playerInfo;
+
     private Stats playerStats;
     private Stats minionStats;
     private Stats enemy1Stats;
@@ -72,7 +76,8 @@ public class BattleHandler : MonoBehaviour
     private PrioQueue<BattleAction, BattleAction> turnQueue = new PrioQueue<BattleAction, BattleAction>(new BattleActionPriorityComparer());
     public BattleAction currentTurn;
     private Dictionary<string, GameObject> nameToHealthPanelMap;
-    private bool escaping = false;
+    private bool battleEnding = false;
+    private bool battleWon = false;
 
     private string[] availableEnemyTypes; //TODO
 
@@ -99,6 +104,7 @@ public class BattleHandler : MonoBehaviour
         enemy2Stats = enemy2.GetComponent<Stats>();
         enemy3Stats = enemy3.GetComponent<Stats>();
 
+        playerInfo = player.GetComponent<PlayerInfo>();
         playerInventory = player.GetComponent<Inventory>();
 
         overview = overviewPanel.GetComponent<BattleOverview>();
@@ -284,7 +290,6 @@ public class BattleHandler : MonoBehaviour
 
     public void ChooseMinionSummon()
     {
-        //TODO open choose summon menu, then once picked activate the command panel for player turn
         invPanelScript.typeToFilterBy = ItemType.Crystal;
         invPanelScript.lockFilter = true;
         ToggleInventoryPanel(true);
@@ -496,7 +501,6 @@ public class BattleHandler : MonoBehaviour
 
     public void ChooseGuard()
     {
-        //TODO
         if (!battleState.commandingMinion)
         {
             playerAction.move = Resources.Load<Move>("Moves/Guard");
@@ -574,7 +578,6 @@ public class BattleHandler : MonoBehaviour
 
     private void SetCommandMenuUI()
     {
-        //TODO: hide some player-specific UI like items or some minion-specific UI like "back to player command"
         TMP_Text chooseCommandNameText = commandPanel.transform.Find("ChooseCommandNameText").GetComponent<TMP_Text>();
 
         GameObject backButton = commandPanel.transform.Find("BackButton").gameObject;
@@ -600,7 +603,7 @@ public class BattleHandler : MonoBehaviour
         Debug.Log("do turn");
         SetBattleOverviewShowButton(false);  //disable battle overview button even if enabled, until end of turn process
 
-        //TODO: simulate whole turn based on player's desired action(s)
+        //simulate whole turn based on player's desired action(s)
         //first: generate enemy actions and targets based on their "tendencies" and the battle status
         //and sort actions based on combatants' speed (and some random factors?)
         turnQueue = new PrioQueue<BattleAction, BattleAction>(new BattleActionPriorityComparer());
@@ -666,6 +669,16 @@ public class BattleHandler : MonoBehaviour
 
             Debug.Log("action " + currentTurn.type);
 
+            //quickly calculate escape chances and update turn text before damage is dealt, so the killing blow doesn't trigger "overkill damage"
+            if (currentTurn.type == BattleActionType.Escape)
+            {
+                //TODO: calculate escape chances, generate a random number, compare for finding escape
+                //in the meantime: 100% escape chance
+                battleEnding = true;
+            }
+
+            UpdateTurnActionText();
+
             ValidBattleTarget actionTargets = ValidBattleTarget.None;
         
             if (currentTurn.type == BattleActionType.Move)
@@ -704,6 +717,9 @@ public class BattleHandler : MonoBehaviour
                                 if (currentTurn.type == BattleActionType.Move)
                                 {
                                     //TODO moves that affect self/ally/allies
+                                    int damage = GetCurrentTurnDamageOnTarget(targetStats);
+                                    targetStats.health -= damage;
+                                    UpdateHealthDisplay(currentTurn.GetTargetObjs()[i], true);
                                 }
 
                                 if (currentTurn.type == BattleActionType.UseItem)
@@ -726,14 +742,6 @@ public class BattleHandler : MonoBehaviour
                 if (currentTurn.type == BattleActionType.Move)
                     userStats.RecieveMultipliers(currentTurn.move);
             }
-
-            if (currentTurn.type == BattleActionType.Escape)
-            {
-                //TODO: calculate escape chances, generate a random number, compare for finding escape
-                escaping = true;  //in the meantime: 100% escape chance
-            }
-
-            UpdateTurnActionText();
         }
         else
             StartTurn();  //start a new turn
@@ -809,10 +817,19 @@ public class BattleHandler : MonoBehaviour
                             //effects self/ally/allies/all allies
                             if (currentTurn.type == BattleActionType.Move)
                             {
+                                string action = "buffing";
+                                int damage = GetCurrentTurnDamageOnTarget(targetStats);
+
+                                if (damage < 0)
+                                    action += " and healing";
+
                                 if (targetStats.combatantName != userStats.combatantName)  //if target is NOT self
-                                    actionText += ", buffing " + targetStats.combatantName;
+                                    actionText += ", " + action + " " + targetStats.combatantName;
                                 else
-                                    actionText += " on self";
+                                    actionText += " " + action + " self";
+
+                                if (damage < 0)
+                                    actionText += " for " + (-1 * damage) + " HP";
                             }
 
                             if (currentTurn.type == BattleActionType.UseItem)
@@ -894,7 +911,7 @@ public class BattleHandler : MonoBehaviour
 
         if (currentTurn.type == BattleActionType.Escape)
         {
-            if (escaping)
+            if (battleEnding)
                 actionText = userStats.combatantName + " escaped the battle successfully!";
             else
                 actionText = userStats.combatantName + " could not get away!";
@@ -926,17 +943,12 @@ public class BattleHandler : MonoBehaviour
         turnQueue.Remove(currentTurn);
         currentTurn.Clear(); //clear action so saving here won't repeat the same action again
 
-        if (escaping)
-        {
-            //if the last thing that happened was the escape succeeded, instead of doing the next action, actually escape the battle
-            EscapeBattle();
-            return;  //don't show the next turn starting in the UI
-        }
-
         CheckCombatantsDefeated();
 
-        if (!escaping)
+        if (!battleEnding)
             DoNextAction();
+        else
+            UpdateView(BattleView.FinishBattle);
     }
 
     private void CheckCombatantsDefeated()
@@ -960,7 +972,7 @@ public class BattleHandler : MonoBehaviour
         if (downedPlayers == 2)
         {
             //TODO: after leaving the battle, make sure whatever scene loaded into resets the player's stats and/or position
-            escaping = true;
+            battleEnding = true;
             UpdateTurnPanel("You have been defeated.");
         }
 
@@ -988,8 +1000,8 @@ public class BattleHandler : MonoBehaviour
 
         if (downedEnemies == 3)
         {
-            //TODO: reward the player and tell them what the rewards are, do level ups if necessary, update quests, then leave the battle
-            escaping = true;
+            battleEnding = true;
+            battleWon = true;
             UpdateTurnPanel("You defeated all the enemies!");
 
             QuestInventory qInv = player.GetComponent<QuestInventory>();
@@ -1022,7 +1034,7 @@ public class BattleHandler : MonoBehaviour
         //NOTE: we have to use this function because we're on stretch mode and it is a different calc than setting the deltas between each corner of the RectTransform
     }
 
-    private void EscapeBattle()
+    private void EndBattle()
     {
         GameObject loader = GameObject.Find("SceneLoader");
         if (loader != null)
@@ -1191,5 +1203,83 @@ public class BattleHandler : MonoBehaviour
             UpdateTurnActionText();
         }
         turnPanel.SetActive((battleState.view == BattleView.TurnActions));
+
+        if (battleState.view == BattleView.FinishBattle)
+            FinishBattle();
+        rewardsPanel.SetActive((battleState.view == BattleView.FinishBattle));
+
+        if (battleState.view == BattleView.LevelUp)
+        {
+            UpdateHealthDisplay(player, true);
+            AllocateStatPoints();
+        }
+        levelUpPanel.SetActive((battleState.view == BattleView.LevelUp));
+    }
+
+    private void FinishBattle()
+    {
+        if (battleWon)
+        {
+            //give out rewards
+            if (battleState.reward == null)
+            {
+                //generate rewards if they haven't already been generated
+                int exp = enemy1Stats.combatantStats.baseExpYield + enemy2Stats.combatantStats.baseExpYield + enemy3Stats.combatantStats.baseExpYield;
+                int gold = enemy1Stats.combatantStats.baseGoldYield + enemy2Stats.combatantStats.baseGoldYield + enemy3Stats.combatantStats.baseGoldYield;
+
+                //TODO increase yields by a certain percentage if multiple enemies are fought at the same time
+                float expModifier = 1.0f;
+                float goldModifier = 1.0f;
+
+                //TODO: generate item drop
+                Item drop = null;
+
+                battleState.reward = new BattleRewards((int) Mathf.Round(exp * expModifier), (int) Mathf.Round(gold * goldModifier), drop);
+            }
+            
+            string rewardsString = "You gained " + battleState.reward.exp + " exp and " + battleState.reward.gold + "gold!";
+            
+            if (battleState.reward.item != null)
+                rewardsString += "\nNot to mention, you found this " + battleState.reward.item.name + "!";
+
+            UpdateFinishPanel(rewardsString);
+        }
+    }
+
+    private void UpdateFinishPanel(string text)
+    {
+        TMP_Text rewardsText = rewardsPanel.transform.Find("FinishText").GetComponent<TMP_Text>();
+        rewardsText.text = text;
+
+        RectTransform rt = rewardsText.gameObject.GetComponent<RectTransform>();
+
+        Vector2 preferredDims = rewardsText.GetPreferredValues(rewardsText.text, rt.sizeDelta.x, -1);
+        
+        //rt.sizeDelta = new Vector2(rt.sizeDelta.x, preferredDims.y);  //change the y dimensions to fit the string
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredDims.y);  //change the height to fit the string
+        //NOTE: we have to use this function because we're on stretch mode and it is a different calc than setting the deltas between each corner of the RectTransform
+    }
+
+    public void AcceptRewards()
+    {
+        int levels = playerStats.PlayerGainExp(battleState.reward.exp, playerInfo);
+        playerInfo.gold += battleState.reward.gold;
+        playerInventory.AddItemToInventory(battleState.reward.item);
+
+        if (levels > 0)
+            UpdateView(BattleView.LevelUp);
+        else
+            EndBattle();
+    }
+
+    private void AllocateStatPoints()
+    {
+        StatsListPanel statsPanel = levelUpPanel.transform.Find("StatsListPanel").GetComponent<StatsListPanel>();
+    }
+
+    public void CompleteStatAllocation()
+    {
+        playerInfo.statPtPool = playerInfo.statPoints;
+        EndBattle();
     }
 }

@@ -14,7 +14,10 @@ public class Combatant : ScriptableObject
     public int magicAttack = 1;  //magic attack modifier stat
     public int affinity = 1;  // buff/debuff/status strength modifier stat
     public int resistance = 1;  //damage resistance stat
-    public int speed = 1;  //move speed stat
+    public int speed = 1;  //move speed 
+    
+    public int baseExpYield = 0;  //base exp yielded for defeating as an enemy
+    public int baseGoldYield = 0; //base gold yielded for defeating as an enemy
 
     public Move[] moveset;
 }

@@ -12,8 +12,11 @@ public class PlayerInfo : MonoBehaviour
     public int underworldDepth = 0;  //how deep in the underworld (in number of maps from start state) the player is
 
     public int prestige = 0;  //how many times the player has New Game+'d (to start)
-    public int statPoints = 0;  //how many free stat points the player has (to start)
+    public int statPoints = 0;  //how many free stat points the player has currently (to start)
+    public int statPtPool = 0;  //how many stat points the player can allocate freely at this time (i.e. allocate, de-allocate, allocate again) (to start)
     public int gold = 10;  //how much money the player has (to start)
+
+    public string[] movepool = new string[] {"Slice"};  //total movepool for the player (to start)
 
     public string scene = "Overworld";  //start scene on new save; this is the current (unpaused) scene the player is in
 

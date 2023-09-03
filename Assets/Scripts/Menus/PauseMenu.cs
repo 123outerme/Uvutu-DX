@@ -60,6 +60,7 @@ public class PauseMenu : MonoBehaviour
 
     public void SaveGame()
     {
+        playerInfo.statPtPool = playerInfo.statPoints;
         saver.Save();
     }
 

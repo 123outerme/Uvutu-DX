@@ -39,6 +39,9 @@ public class Inventory : MonoBehaviour
 
     public void AddItemToInventory(Item i)
     {
+        if (i == null)  //failsafe, do not add a null item
+            return;
+
         foreach(InventorySlot slot in items)
         {
             if (i.ItemName == slot.itemName)

@@ -9,7 +9,24 @@ public enum BattleView
     Attack,
     Target,
     UseItem,
-    TurnActions
+    TurnActions,
+    FinishBattle,
+    LevelUp
+}
+
+[System.Serializable]
+public class BattleRewards
+{
+    public int exp;
+    public int gold;
+    public Item item;
+
+    public BattleRewards(int expYield, int goldYield, Item foundItem)
+    {
+        exp = expYield;
+        gold = goldYield;
+        item = foundItem;
+    }
 }
 
 [System.Serializable]
@@ -21,6 +38,7 @@ public class BattleState
     public bool battleStarted = false;
     public string selectedTarget;
     public bool battleOverviewAvailable = true;
+    public BattleRewards reward = null;
 
     public BattleState()
     {
@@ -30,6 +48,7 @@ public class BattleState
         battleStarted = false;
         selectedTarget = "";
         battleOverviewAvailable = true;
+        reward = null;
     }
 
     public void IncrementTurn()

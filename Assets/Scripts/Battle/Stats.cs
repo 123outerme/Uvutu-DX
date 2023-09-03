@@ -89,4 +89,37 @@ public class Stats : MonoBehaviour
         resistanceMultiplier += (m.resistanceMultiplier - 1.0f);
         speedMultiplier += (m.speedMultiplier - 1.0f);
     }
+
+    public int PlayerGainExp(int gainedExp, PlayerInfo playerInfo)
+    {
+        exp += gainedExp;
+        
+        int neededExp = PlayerCalculateNeededExp();
+        int levels = 0;
+        while(exp >= neededExp)
+        {
+            exp -= neededExp;  //subtract needed exp from current exp
+            levels++;  //level up!
+            neededExp = PlayerCalculateNeededExp();  //recalculate needed exp
+        }
+
+        PlayerLevelUp(levels, playerInfo);
+
+        return levels;
+    }
+
+    public int PlayerCalculateNeededExp()
+    {
+        //TODO: exp growth curve
+        return 100;
+    }
+
+    public void PlayerLevelUp(int levels, PlayerInfo playerInfo)
+    {
+        //TODO: level up based on stat point gain growth and set health to max
+        level += levels;
+        playerInfo.statPoints += levels;
+        playerInfo.statPtPool += levels;
+        health = maxHealth;
+    }
 }
