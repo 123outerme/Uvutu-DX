@@ -15,11 +15,14 @@ MonoBehaviour:
   combatantName: MissingNo.
   sprite: {fileID: 68806785, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   level: 1
-  maxHealth: -1
-  physAttack: 0
-  magicAttack: 0
-  affinity: 0
-  resistance: 0
-  speed: 0
+  statLine:
+    maxHealth: -1
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
+  baseExpYield: 0
+  baseGoldYield: 0
   moveset:
   - {fileID: 11400000, guid: 3a9b3e3245f6c9b4ababb93e535f2f63, type: 2}

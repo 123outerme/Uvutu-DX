@@ -86,11 +86,9 @@ public class Stats : MonoBehaviour
             if (health == -1)
             {
                 //Debug.Log(combatantName + health + " / " + maxHealth);
-                health = combatantStats.statLine.maxHealth;
-            }
-
-            if (statLine == null)
                 statLine = combatantStats.statLine.Copy();
+                health = statLine.maxHealth;
+            }
 
             if (moveset == null || moveset.Length == 0)
             {

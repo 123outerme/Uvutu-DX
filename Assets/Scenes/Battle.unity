@@ -602,15 +602,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: c4166e47ffde3054aae389d1aeff54fc, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: -1
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
@@ -985,15 +986,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: c4166e47ffde3054aae389d1aeff54fc, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: -1
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
@@ -1476,15 +1478,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: 52c7a981b209e214094ca68a89e4ec19, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: -1
-  maxHealth: 50
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
@@ -6513,15 +6516,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: c4166e47ffde3054aae389d1aeff54fc, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: -1
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
@@ -9171,15 +9175,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: c4166e47ffde3054aae389d1aeff54fc, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: -1
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
