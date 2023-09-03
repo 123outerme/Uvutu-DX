@@ -68,7 +68,7 @@ public class InventoryPanel : MonoBehaviour
 
         //update gold text
         TMP_Text gText = goldText.GetComponent<TMP_Text>();
-        gText.text = "" + playerInfo.gold;
+        gText.text = "" + StatsListPanel.AddCommasToInt(playerInfo.gold);
 
         //destroy each child object in the list to start adding the refreshed list
         foreach(Transform child in itemListContent.transform)

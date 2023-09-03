@@ -39,6 +39,7 @@ public class BattleState
     public string selectedTarget;
     public bool battleOverviewAvailable = true;
     public BattleRewards reward = null;
+    public StatLine statUpgradeCopy = null;
 
     public BattleState()
     {
@@ -49,6 +50,7 @@ public class BattleState
         selectedTarget = "";
         battleOverviewAvailable = true;
         reward = null;
+        statUpgradeCopy = null;
     }
 
     public void IncrementTurn()

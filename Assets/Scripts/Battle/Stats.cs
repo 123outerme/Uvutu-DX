@@ -36,6 +36,29 @@ public class StatLine
         resistance = s.resistance;
         speed = s.speed;
     }
+
+    public bool DeepEquals(StatLine s)
+    {
+        if (maxHealth != s.maxHealth)
+            return false;
+        
+        if (physAttack != s.physAttack)
+            return false;
+
+        if (magicAttack != s.magicAttack)
+            return false;
+
+        if (affinity != s.affinity)
+            return false;
+
+        if (resistance != s.resistance)
+            return false;
+
+        if (speed != s.speed)
+            return false;
+
+        return true;
+    }
 }
 
 [System.Serializable]

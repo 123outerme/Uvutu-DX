@@ -18,18 +18,15 @@ public class StatsListPanel : MonoBehaviour
     public GameObject speedPanel;
     public GameObject statPtsText;
 
-    private Stats playerStats;
-    private PlayerInfo playerInfo;
-
-    private StatLine playerStatLineCopy;
+    private Stats playerStats = null;
+    private PlayerInfo playerInfo = null;
+    private StatLine playerStatLineCopy = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        playerStats = player.GetComponent<Stats>();
+        GetPlayerData();
         GetStatLineCopy();
-
-        playerInfo = player.GetComponent<PlayerInfo>();
         UpdateStatsList();
     }
 
@@ -39,13 +36,33 @@ public class StatsListPanel : MonoBehaviour
         
     }
 
+    private void GetPlayerData()
+    {
+        if (playerStats == null)
+            playerStats = player.GetComponent<Stats>();
+
+        if (playerInfo == null)
+            playerInfo = player.GetComponent<PlayerInfo>();
+    }
+
     public void GetStatLineCopy()
     {
-        playerStatLineCopy = playerStats.statLine.Copy();
+        GetPlayerData();
+        if (playerStatLineCopy == null && playerStats != null)
+            SetStatLineCopy(playerStats.statLine.Copy());
+    }
+
+    public void SetStatLineCopy(StatLine s)
+    {
+        Debug.Log(s.magicAttack);
+        playerStatLineCopy = s;
+        UpdateStatsList();
     }
 
     public void UpdateStatsList()
     {
+        GetPlayerData();
+
         UpdateLevel();
         UpdateHealth();
         UpdateExp();
@@ -134,7 +151,7 @@ public class StatsListPanel : MonoBehaviour
         text.text = "" + playerInfo.statPoints;
     }
 
-    private string AddCommasToInt(int number)
+    public static string AddCommasToInt(int number)
     {
         string numString = "";
         string convertNum = "" + number;
@@ -231,7 +248,24 @@ public class StatsListPanel : MonoBehaviour
 
     public void ConfirmStats()
     {
-        playerStats.statLine.Set(playerStatLineCopy);
-        playerInfo.statPtPool = playerInfo.statPoints;
+        if (playerStatLineCopy != null)
+        {
+            playerStats.statLine = playerStatLineCopy;
+            playerInfo.statPtPool = playerInfo.statPoints;
+        }
+    }
+
+    public void CancelStatChanges()
+    {
+        if (playerInfo != null)
+            playerInfo.statPoints = playerInfo.statPtPool;
+    }
+
+    public bool HaveStatsChanged()
+    {
+        if (playerStatLineCopy == null)
+            return false;
+
+        return !(playerStatLineCopy.DeepEquals(playerStats.statLine));
     }
 }

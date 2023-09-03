@@ -63,7 +63,7 @@ public class PauseMenu : MonoBehaviour
 
     public void SaveGame()
     {
-        statsListScript.ConfirmStats();
+        statsListScript.CancelStatChanges();
         saver.Save();
     }
 

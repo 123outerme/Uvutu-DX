@@ -77,7 +77,6 @@ public class BattleHandler : MonoBehaviour
     public BattleAction currentTurn;
     private Dictionary<string, GameObject> nameToHealthPanelMap;
     private bool battleEnding = false;
-    private bool battleWon = false;
 
     private string[] availableEnemyTypes; //TODO
 
@@ -1001,7 +1000,6 @@ public class BattleHandler : MonoBehaviour
         if (downedEnemies == 3)
         {
             battleEnding = true;
-            battleWon = true;
             UpdateTurnPanel("You defeated all the enemies!");
 
             QuestInventory qInv = player.GetComponent<QuestInventory>();
@@ -1218,7 +1216,7 @@ public class BattleHandler : MonoBehaviour
 
     private void FinishBattle()
     {
-        if (battleWon)
+        if (player.activeSelf || minion.activeSelf)
         {
             //give out rewards
             if (battleState.reward == null)
@@ -1237,7 +1235,7 @@ public class BattleHandler : MonoBehaviour
                 battleState.reward = new BattleRewards((int) Mathf.Round(exp * expModifier), (int) Mathf.Round(gold * goldModifier), drop);
             }
             
-            string rewardsString = "You gained " + battleState.reward.exp + " exp and " + battleState.reward.gold + "gold!";
+            string rewardsString = "You gained " + StatsListPanel.AddCommasToInt(battleState.reward.exp) + " exp and " + StatsListPanel.AddCommasToInt(battleState.reward.gold) + " gold!";
             
             if (battleState.reward.item != null)
                 rewardsString += "\nNot to mention, you found this " + battleState.reward.item.name + "!";
@@ -1267,7 +1265,10 @@ public class BattleHandler : MonoBehaviour
         playerInventory.AddItemToInventory(battleState.reward.item);
 
         if (levels > 0)
+        {
+            battleState.statUpgradeCopy = playerStats.statLine.Copy();
             UpdateView(BattleView.LevelUp);
+        }
         else
             EndBattle();
     }
@@ -1275,7 +1276,7 @@ public class BattleHandler : MonoBehaviour
     private void AllocateStatPoints()
     {
         StatsListPanel statsPanel = levelUpPanel.transform.Find("StatsListPanel").GetComponent<StatsListPanel>();
-        statsPanel.GetStatLineCopy();
+        statsPanel.SetStatLineCopy(battleState.statUpgradeCopy);
     }
 
     public void CompleteStatAllocation()

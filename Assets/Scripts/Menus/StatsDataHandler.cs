@@ -9,24 +9,34 @@ public class StatsDataHandler : MonoBehaviour
     public GameObject player;
 
     public GameObject nameText;
-    //public GameObject statsListPanel;
+    public GameObject statsListPanel;
+    public GameObject saveChangesButton;
     public GameObject movesPanel;
 
     private Stats playerStats;
+    private StatsListPanel statsListScript = null;
+    private Button saveChangesButtonScript = null;
     
     // Start is called before the first frame update
     void Start()
     {
         playerStats = player.GetComponent<Stats>();
+        statsListScript = statsListPanel.GetComponent<StatsListPanel>();
         UpdateName();
-        //statsListPanel.GetComponent<StatsListPanel>().UpdateStatsList();
         UpdateMovesPanel();
+        UpdateSaveStatsButton();
     }
 
     // Update is called once per frame
     void Update()
     {
         //
+    }
+
+    private void GetSaveButtonScript()
+    {
+        if (saveChangesButtonScript == null)
+            saveChangesButtonScript = saveChangesButton.GetComponent<Button>();
     }
 
     public void UpdateName()
@@ -42,5 +52,11 @@ public class StatsDataHandler : MonoBehaviour
             TMP_Text moveNameText = movesPanel.transform.Find("PanelMove" + (i+1) + "/MoveText").GetComponent<TMP_Text>();
             moveNameText.text = playerStats.moveset[i];
         }
+    }
+
+    public void UpdateSaveStatsButton()
+    {
+        GetSaveButtonScript();
+        saveChangesButtonScript.interactable = statsListScript.HaveStatsChanged();
     }
 }
