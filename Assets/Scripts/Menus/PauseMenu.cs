@@ -7,12 +7,14 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject mainPausePanel;
     public GameObject statsPanel;
+    public GameObject statsListPanel;
     public GameObject inventoryPanel;
     public GameObject questsPanel;
     public GameObject player;
 
     private InventoryPanel invPanelScript;
     private PlayerInfo playerInfo;
+    private StatsListPanel statsListScript;
 
     List<AsyncOperation> scenesToLoad = new List<AsyncOperation>();
 
@@ -23,6 +25,7 @@ public class PauseMenu : MonoBehaviour
         saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
         playerInfo = player.GetComponent<PlayerInfo>();
         invPanelScript = inventoryPanel.GetComponent<InventoryPanel>();
+        statsListScript = statsListPanel.GetComponent<StatsListPanel>();
     }
 
     // Update is called once per frame
@@ -60,7 +63,7 @@ public class PauseMenu : MonoBehaviour
 
     public void SaveGame()
     {
-        playerInfo.statPtPool = playerInfo.statPoints;
+        statsListScript.ConfirmStats();
         saver.Save();
     }
 

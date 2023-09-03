@@ -21,10 +21,14 @@ public class StatsListPanel : MonoBehaviour
     private Stats playerStats;
     private PlayerInfo playerInfo;
 
+    private StatLine playerStatLineCopy;
+
     // Start is called before the first frame update
     void Start()
     {
         playerStats = player.GetComponent<Stats>();
+        GetStatLineCopy();
+
         playerInfo = player.GetComponent<PlayerInfo>();
         UpdateStatsList();
     }
@@ -33,6 +37,11 @@ public class StatsListPanel : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void GetStatLineCopy()
+    {
+        playerStatLineCopy = playerStats.statLine.Copy();
     }
 
     public void UpdateStatsList()
@@ -57,7 +66,7 @@ public class StatsListPanel : MonoBehaviour
     public void UpdateHealth()
     {
         TMP_Text text = healthText.GetComponent<TMP_Text>();
-        text.text = playerStats.health + "/" + playerStats.maxHealth;
+        text.text = playerStats.health + "/" + playerStats.statLine.maxHealth;
     }
 
     public void UpdateExp()
@@ -70,41 +79,41 @@ public class StatsListPanel : MonoBehaviour
     public void UpdatePhysAtk()
     {
         TMP_Text text = physAtkPanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = "" + playerStats.physAttack;
+        text.text = "" + playerStatLineCopy.physAttack;
         UpdateIncreaseStatButton(physAtkPanel);
-        UpdateDecreaseStatButton(physAtkPanel);
+        UpdateDecreaseStatButton(physAtkPanel, playerStats.statLine.physAttack, playerStatLineCopy.physAttack);
     }
 
     public void UpdateMagicAtk()
     {
         TMP_Text text = magicAtkPanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = "" + playerStats.magicAttack;
+        text.text = "" + playerStatLineCopy.magicAttack;
         UpdateIncreaseStatButton(magicAtkPanel);
-        UpdateDecreaseStatButton(magicAtkPanel);
+        UpdateDecreaseStatButton(magicAtkPanel, playerStats.statLine.magicAttack, playerStatLineCopy.magicAttack);
     }
 
     public void UpdateAffinity()
     {
         TMP_Text text = affinityPanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = "" + playerStats.affinity;
+        text.text = "" + playerStatLineCopy.affinity;
         UpdateIncreaseStatButton(affinityPanel);
-        UpdateDecreaseStatButton(affinityPanel);
+        UpdateDecreaseStatButton(affinityPanel, playerStats.statLine.affinity, playerStatLineCopy.affinity);
     }
 
     public void UpdateResistance()
     {
         TMP_Text text = resistancePanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = "" + playerStats.resistance;
+        text.text = "" + playerStatLineCopy.resistance;
         UpdateIncreaseStatButton(resistancePanel);
-        UpdateDecreaseStatButton(resistancePanel);
+        UpdateDecreaseStatButton(resistancePanel, playerStats.statLine.resistance, playerStatLineCopy.resistance);
     }
 
     public void UpdateSpeed()
     {
         TMP_Text text = speedPanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = "" + playerStats.speed;
+        text.text = "" + playerStatLineCopy.speed;
         UpdateIncreaseStatButton(speedPanel);
-        UpdateDecreaseStatButton(speedPanel);
+        UpdateDecreaseStatButton(speedPanel, playerStats.statLine.speed, playerStatLineCopy.speed);
     }
 
     private void UpdateIncreaseStatButton(GameObject panel)
@@ -113,10 +122,10 @@ public class StatsListPanel : MonoBehaviour
         button.interactable = (playerInfo.statPoints > 0);
     }
 
-    private void UpdateDecreaseStatButton(GameObject panel)
+    private void UpdateDecreaseStatButton(GameObject panel, int prevStat, int curStat)
     {
         Button button = panel.transform.Find("StatDecreaseButton").gameObject.GetComponent<Button>();
-        button.interactable = (playerInfo.statPtPool > 0);
+        button.interactable = (playerInfo.statPtPool > 0 && curStat > prevStat);
     }
 
     public void UpdateStatPts()
@@ -140,43 +149,89 @@ public class StatsListPanel : MonoBehaviour
         return numString;
     }
 
-    public void IncreasePhysAtk()
+    public void IncreasePhysAtk(bool increase)
     {
-        playerInfo.statPoints--;
-        playerStats.physAttack++;
+        if (increase)
+        {
+            playerInfo.statPoints--;
+            playerStatLineCopy.physAttack++;
+        }
+        else
+        {
+            playerInfo.statPoints++;
+            playerStatLineCopy.physAttack--;
+        }
         UpdatePhysAtk();
         UpdateStatPts();
     }
 
-    public void IncreaseMagicAttack()
+    public void IncreaseMagicAttack(bool increase)
     {
-        playerInfo.statPoints--;
-        playerStats.magicAttack++;
+        if (increase)
+        {
+            playerInfo.statPoints--;
+            playerStatLineCopy.magicAttack++;
+        }
+        else
+        {
+            playerInfo.statPoints++;
+            playerStatLineCopy.magicAttack--;
+        }
         UpdateMagicAtk();
         UpdateStatPts();
     }
 
-    public void IncreaseAffinity()
+    public void IncreaseAffinity(bool increase)
     {
-        playerInfo.statPoints--;
-        playerStats.affinity++;
+        if (increase)
+        {
+            playerInfo.statPoints--;
+            playerStatLineCopy.affinity++;
+        }
+        else
+        {
+            playerInfo.statPoints++;
+            playerStatLineCopy.affinity--;
+        }
         UpdateAffinity();
         UpdateStatPts();
     }
 
-    public void IncreaseResistance()
+    public void IncreaseResistance(bool increase)
     {
-        playerInfo.statPoints--;
-        playerStats.resistance++;
+        if (increase)
+        {
+            playerInfo.statPoints--;
+            playerStatLineCopy.resistance++;
+        }
+        else
+        {
+            playerInfo.statPoints++;
+            playerStatLineCopy.resistance--;
+        }
         UpdateResistance();
         UpdateStatPts();
     }
 
-    public void IncreaseSpeed()
+    public void IncreaseSpeed(bool increase)
     {
-        playerInfo.statPoints--;
-        playerStats.speed++;
+        if (increase)
+        {
+            playerInfo.statPoints--;
+            playerStatLineCopy.speed++;
+        }
+        else
+        {
+            playerInfo.statPoints++;
+            playerStatLineCopy.speed--;
+        }
         UpdateSpeed();
         UpdateStatPts();
+    }
+
+    public void ConfirmStats()
+    {
+        playerStats.statLine.Set(playerStatLineCopy);
+        playerInfo.statPtPool = playerInfo.statPoints;
     }
 }

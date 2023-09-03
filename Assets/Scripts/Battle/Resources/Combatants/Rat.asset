@@ -15,12 +15,13 @@ MonoBehaviour:
   combatantName: Rat
   sprite: {fileID: -731449358, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   level: 2
-  maxHealth: 25
-  physAttack: 1
-  magicAttack: 2
-  affinity: 2
-  resistance: 1
-  speed: 2
+  statLine:
+    maxHealth: 20
+    physAttack: 2
+    magicAttack: 1
+    affinity: 1
+    resistance: 1
+    speed: 2
   baseExpYield: 20
   baseGoldYield: 3
   moveset:

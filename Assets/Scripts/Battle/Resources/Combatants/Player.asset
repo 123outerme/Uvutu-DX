@@ -15,12 +15,14 @@ MonoBehaviour:
   combatantName: Player
   sprite: {fileID: 1392123364, guid: 98b28e068f53168428c14c432ecafbc9, type: 3}
   level: 1
-  health: 50
-  maxHealth: 50
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
+  statLine:
+    maxHealth: 50
+    physAttack: 1
+    magicAttack: 1
+    affinity: 1
+    resistance: 1
+    speed: 1
+  baseExpYield: 0
+  baseGoldYield: 0
   moveset:
   - {fileID: 11400000, guid: 3a9b3e3245f6c9b4ababb93e535f2f63, type: 2}

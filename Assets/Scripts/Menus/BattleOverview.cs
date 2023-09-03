@@ -91,14 +91,14 @@ public class BattleOverview : MonoBehaviour
     private void UpdateHealth(Stats s)
     {
         TMP_Text text = healthPanel.transform.Find("StatText").GetComponent<TMP_Text>();
-        text.text = s.health + "/" + s.maxHealth;
+        text.text = s.health + "/" + s.statLine.maxHealth;
     }
 
     private void UpdatePhysAtk(Stats s)
     {
         Transform textObj = physAtkPanel.transform.Find("StatText");
         TMP_Text text = textObj.GetComponent<TMP_Text>();
-        text.text = "" + s.physAttack;
+        text.text = "" + s.statLine.physAttack;
 
         GameObject multiplier = textObj.Find("MultiplierText").gameObject;
         UpdateMultiplier(s.physAttackMultiplier, multiplier);
@@ -108,7 +108,7 @@ public class BattleOverview : MonoBehaviour
     {
         Transform textObj = magicAtkPanel.transform.Find("StatText");
         TMP_Text text = textObj.GetComponent<TMP_Text>();
-        text.text = "" + s.magicAttack;
+        text.text = "" + s.statLine.magicAttack;
 
         GameObject multiplier = textObj.Find("MultiplierText").gameObject;
         UpdateMultiplier(s.magicAttackMultiplier, multiplier);
@@ -118,7 +118,7 @@ public class BattleOverview : MonoBehaviour
     {
         Transform textObj = affinityPanel.transform.Find("StatText");
         TMP_Text text = textObj.GetComponent<TMP_Text>();
-        text.text = "" + s.affinity;
+        text.text = "" + s.statLine.affinity;
 
         GameObject multiplier = textObj.Find("MultiplierText").gameObject;
         UpdateMultiplier(s.affinityMultiplier, multiplier);
@@ -128,7 +128,7 @@ public class BattleOverview : MonoBehaviour
     {
         Transform textObj = resistancePanel.transform.Find("StatText");
         TMP_Text text = textObj.GetComponent<TMP_Text>();
-        text.text = "" + s.resistance;
+        text.text = "" + s.statLine.resistance;
 
         GameObject multiplier = textObj.Find("MultiplierText").gameObject;
         UpdateMultiplier(s.resistanceMultiplier, multiplier);
@@ -138,7 +138,7 @@ public class BattleOverview : MonoBehaviour
     {
         Transform textObj = speedPanel.transform.Find("StatText");
         TMP_Text text = textObj.GetComponent<TMP_Text>();
-        text.text = "" + s.speed;
+        text.text = "" + s.statLine.speed;
 
         GameObject multiplier = textObj.Find("MultiplierText").gameObject;
         UpdateMultiplier(s.speedMultiplier, multiplier);

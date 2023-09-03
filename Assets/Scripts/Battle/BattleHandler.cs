@@ -12,10 +12,10 @@ public class BattleActionPriorityComparer : PrioQueueComparer<BattleAction>
         Stats sx = x.GetUser().GetComponent<Stats>();
         Stats sy = y.GetUser().GetComponent<Stats>();
 
-        if (sx.speed == sy.speed)
+        if (sx.statLine.speed == sy.statLine.speed)
             return 0;
 
-        if (sx.speed > sy.speed)
+        if (sx.statLine.speed > sy.statLine.speed)
             return 1;
         else
             return -1;
@@ -265,13 +265,13 @@ public class BattleHandler : MonoBehaviour
 
             if (text != null && stats != null)
             {
-                if (stats.health > stats.maxHealth)
-                    stats.health = stats.maxHealth;  //cap health at max health
+                if (stats.health > stats.statLine.maxHealth)
+                    stats.health = stats.statLine.maxHealth;  //cap health at max health
 
                 if (stats.health < 0)
                     stats.health = 0;  //lower bound of health is non-negative (zero)
 
-                text.text = "L" + stats.level + ": " + stats.health + "/" + stats.maxHealth;
+                text.text = "L" + stats.level + ": " + stats.health + "/" + stats.statLine.maxHealth;
             }
             else
                 text.text = "L???: ????/????";
@@ -926,14 +926,14 @@ public class BattleHandler : MonoBehaviour
         float damage = currentTurn.move.attackPower;
         if (currentTurn.move.isMagic)
         {
-            damage += userStats.magicAttack * userStats.magicAttackMultiplier;
+            damage += userStats.statLine.magicAttack * userStats.magicAttackMultiplier;
         }
         else
         {
-            damage += userStats.physAttack * userStats.physAttackMultiplier;
+            damage += userStats.statLine.physAttack * userStats.physAttackMultiplier;
         }
         //TODO take into account target's resistance and resistance multiplier better
-        damage -= targetStats.resistance * targetStats.resistanceMultiplier;
+        damage -= targetStats.statLine.resistance * targetStats.resistanceMultiplier;
 
         return Mathf.RoundToInt(damage);  //finally, round up decimal points of damage
     }
@@ -1275,11 +1275,13 @@ public class BattleHandler : MonoBehaviour
     private void AllocateStatPoints()
     {
         StatsListPanel statsPanel = levelUpPanel.transform.Find("StatsListPanel").GetComponent<StatsListPanel>();
+        statsPanel.GetStatLineCopy();
     }
 
     public void CompleteStatAllocation()
     {
-        playerInfo.statPtPool = playerInfo.statPoints;
+        StatsListPanel statsPanel = levelUpPanel.transform.Find("StatsListPanel").GetComponent<StatsListPanel>();
+        statsPanel.ConfirmStats();
         EndBattle();
     }
 }

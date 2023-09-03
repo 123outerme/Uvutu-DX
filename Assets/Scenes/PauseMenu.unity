@@ -2656,6 +2656,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainPausePanel: {fileID: 916190437}
   statsPanel: {fileID: 93994678}
+  statsListPanel: {fileID: 959349635}
   inventoryPanel: {fileID: 503722321}
   questsPanel: {fileID: 2143123050}
   player: {fileID: 1201379868}
@@ -3386,6 +3387,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 957210434}
   m_CullTransparentMesh: 1
+--- !u!1 &959349635 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6915388293949788524, guid: 7ab80d2027cbfbd6daa36070d6c8e315, type: 3}
+  m_PrefabInstance: {fileID: 6915388295122376979}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &970594583
 GameObject:
   m_ObjectHideFlags: 0
@@ -4498,6 +4504,7 @@ MonoBehaviour:
   underworldDepth: 0
   prestige: 0
   statPoints: 0
+  statPtPool: 0
   gold: 0
   movepool:
   - Slice
@@ -4547,15 +4554,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 0}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: 20
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1

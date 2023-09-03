@@ -3,20 +3,52 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Stats : MonoBehaviour
+public class StatLine
 {
-    public Combatant combatantStats;  // cannot be [System.NonSerialized] because of MissingNo. combatant used to detect if battle is new or loading from previous save/scene
-
-    public string combatantName;  //name
-    public int level = 1;  //level
-    public int exp = 0;  //exp
-    public int health = -1;  //current health (-1 means fill in from max health upon Combatant load)
     public int maxHealth = 20;  //maximum health
     public int physAttack = 1;  //attack modifier stat
     public int magicAttack = 1;  //magic attack modifier stat
     public int affinity = 1;  // buff/debuff/status strength modifier stat
     public int resistance = 1;  //damage resistance stat
     public int speed = 1;  //move speed stat
+
+    public StatLine(int maxHp, int physAtk, int magicAtk, int affinityStat, int resistanceStat, int speedStat)
+    {
+        maxHealth = maxHp;
+        physAttack = physAtk;
+        magicAttack = magicAtk;
+        affinity = affinityStat;
+        resistance = resistanceStat;
+        speed = speedStat;
+    }
+
+    public StatLine Copy()
+    {
+        return new StatLine(maxHealth, physAttack, magicAttack, affinity, resistance, speed);
+    }
+
+    public void Set(StatLine s)
+    {
+        maxHealth = s.maxHealth;
+        physAttack = s.physAttack;
+        magicAttack = s.magicAttack;
+        affinity = s.affinity;
+        resistance = s.resistance;
+        speed = s.speed;
+    }
+}
+
+[System.Serializable]
+public class Stats : MonoBehaviour
+{
+    public Combatant combatantStats;  // cannot be [System.NonSerialized] because of MissingNo. combatant used to detect if battle is new or loading from previous save/scene
+
+    public string combatantName;  //name
+
+    public StatLine statLine = null;
+    public int level = 1;  //level
+    public int exp = 0;  //exp
+    public int health = -1;  //current health (-1 means fill in from max health upon Combatant load)
 
     public float physAttackMultiplier = 1.0f;  //currently applied physical attack multiplier
     public float magicAttackMultiplier = 1.0f;  //currently applied magic attack multiplier
@@ -50,18 +82,15 @@ public class Stats : MonoBehaviour
 
             level = combatantStats.level;
             
-            maxHealth = combatantStats.maxHealth;
+            statLine.maxHealth = combatantStats.statLine.maxHealth;
             if (health == -1)
             {
                 //Debug.Log(combatantName + health + " / " + maxHealth);
-                health = combatantStats.maxHealth;
+                health = combatantStats.statLine.maxHealth;
             }
 
-            physAttack = combatantStats.physAttack;
-            magicAttack = combatantStats.magicAttack;
-            affinity = combatantStats.affinity;
-            resistance = combatantStats.resistance;
-            speed = combatantStats.speed;
+            if (statLine == null)
+                statLine = combatantStats.statLine.Copy();
 
             if (moveset == null || moveset.Length == 0)
             {
@@ -116,10 +145,10 @@ public class Stats : MonoBehaviour
 
     public void PlayerLevelUp(int levels, PlayerInfo playerInfo)
     {
-        //TODO: level up based on stat point gain growth and set health to max
+        //TODO: level up based on stat point gain growth, gain max health, then set health to max
         level += levels;
         playerInfo.statPoints += levels;
         playerInfo.statPtPool += levels;
-        health = maxHealth;
+        health = statLine.maxHealth;
     }
 }
