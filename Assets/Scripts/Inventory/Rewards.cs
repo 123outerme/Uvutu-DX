@@ -30,6 +30,11 @@ public class Rewards
         exp = expYield;
         gold = goldYield;
         item = foundItem;
+        LoadRewardItemName();
+    }
+
+    public void LoadRewardItemName()
+    {
         if (item != null)
             itemName = Item.ItemTypeToString(item.Type) + "/" + item.name;
         else

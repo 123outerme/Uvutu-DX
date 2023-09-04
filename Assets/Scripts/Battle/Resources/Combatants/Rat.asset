@@ -22,11 +22,16 @@ MonoBehaviour:
     affinity: 1
     resistance: 1
     speed: 2
+  weaponTable: []
+  weaponChances: []
+  armorTable: []
+  armorChances: []
   lootTable:
   - exp: 20
-    gold: 3
+    gold: 20
     item: {fileID: 11400000, guid: ef710aa05ec201c45a1fdb836cfdc993, type: 2}
+    itemName: 
   lootTableChances:
-  - 0
+  - 1
   moveset:
   - {fileID: 11400000, guid: 3a9b3e3245f6c9b4ababb93e535f2f63, type: 2}

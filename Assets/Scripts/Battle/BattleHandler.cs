@@ -1247,6 +1247,7 @@ public class BattleHandler : MonoBehaviour
                 {
                     r.exp = (int) Mathf.Round(r.exp * expModifier);
                     r.gold = (int) Mathf.Round(r.exp * goldModifier);
+                    r.LoadRewardItemName();
                 }
             }
 
