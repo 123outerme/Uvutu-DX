@@ -14,7 +14,7 @@ public class NPCShopButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        pController = player.GetComponent<PlayerController>();    
+        UpdateScripts();  
     }
 
     // Update is called once per frame
@@ -23,8 +23,16 @@ public class NPCShopButton : MonoBehaviour
         
     }
 
+    private void UpdateScripts()
+    {
+        if (pController == null)
+            pController = player.GetComponent<PlayerController>();  
+    }
+
     public void OpenShopFromButton()
     {
+        UpdateScripts();
+        dialogue.showingShop = true;
         shop.ShowShop(dialogue);
         pController.SetMovementLock(true);
     }

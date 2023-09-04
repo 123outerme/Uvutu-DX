@@ -16,7 +16,7 @@ public class NPCShop : Inventory
     // Start is called before the first frame update
     void Start()
     {
-        inventoryPanel = GameObject.Find("ScreenCanvas").transform.Find("InventoryPanel").GetComponent<InventoryPanel>();
+        GetNPCScripts();
         LoadNPCShop();
     }
 
@@ -26,8 +26,14 @@ public class NPCShop : Inventory
         
     }
 
+    private void GetNPCScripts()
+    {
+        inventoryPanel = GameObject.Find("ScreenCanvas").transform.Find("InventoryPanel").GetComponent<InventoryPanel>();
+    }
+
     public void ShowShop(NPCDialogue openerDialogue)
     {
+        GetNPCScripts();
         dialogue = openerDialogue;
         inventoryPanel.isItemShop = true;
         inventoryPanel.npcShop = this;

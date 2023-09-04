@@ -17,7 +17,8 @@ public class NPCDialogue : MonoBehaviour
 
     public bool hasShop = false;
     private NPCShop shop = null;
-    private bool showingShopButton = false;
+    public bool showingShopButton = false;
+    public bool showingShop = false;
 
     public bool givesQuests = false;
     public Quest[] quests;  //list of all quests this NPC gives
@@ -25,35 +26,19 @@ public class NPCDialogue : MonoBehaviour
     private List<QuestAndStepPair> turningInQuestSteps;  //quests the player is turning in upon completion of dialogue reading
     private List<string> curDialogueList = new List<string>();  //the list of all lines of dialogue to present
 
-    private NPCMovement movement;
+    private NPCMovement movement = null;
     private bool prevEnableMoveSetting;
     
-    private GameObject player;
-    private PlayerController pController;
-    private QuestInventory questsInventory;
-    private TMP_Text dialogueText;
-    private GameObject shopButton;
+    private GameObject player = null;
+    private PlayerController pController = null;
+    private QuestInventory questsInventory = null;
+    private TMP_Text dialogueText = null;
+    private GameObject shopButton = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        //get shop script (if activated)
-        if (hasShop)
-            shop = gameObject.GetComponent<NPCShop>();
-
-        //get some player scripts
-        player = GameObject.Find("Player");
-        pController = player.GetComponent<PlayerController>();
-        questsInventory = player.GetComponent<QuestInventory>();
-        
-        //get movement script for use in pausing movement while dialogue is active
-        movement = GetComponent<NPCMovement>();
-        prevEnableMoveSetting = movement.enableMovement;
-
-        //get dialogue text component for showing dialogue text
-        dialogueText = GameObject.Find("WorldCanvas/Dialogue").GetComponent<TMP_Text>();
-        shopButton = GameObject.Find("WorldCanvas").transform.Find("ShopButton").gameObject;
-        //have to use Transform.Find to get an inactive object
+        GetAllScripts();
 
         //set baseline for talk activation delay logic
         dialogProgressTime = Time.realtimeSinceStartup;
@@ -72,10 +57,7 @@ public class NPCDialogue : MonoBehaviour
                     //tell quest handler to add progress to quest steps that involve talking to this NPC (so progress can be checked below on self-referencing talk quests)
                     questsInventory.ProgressQuest(gameObject.name, QuestType.Talk, 1);
 
-                    //get all quest steps that are being turned in
-                    turningInQuestSteps = questsInventory.GetQuestStepsForTurnIn(gameObject.name);                
-                    foreach(QuestAndStepPair pair in turningInQuestSteps)
-                        curDialogueList.AddRange(pair.step.turnInDialogue); //add all dialogues for all quests being turned in currently
+                    GetQuestsToTurnInHere();
 
                     if (turningInQuestSteps.Count < 1)  //if we aren't turning in any quests
                         curDialogueList.AddRange(dialogue);  //add "normal" dialogue (almost-always present dialogue)
@@ -100,10 +82,10 @@ public class NPCDialogue : MonoBehaviour
                     }
 
                     inDialogue = true;
-                    pController.SetMovementLock(true);  //lock player movement
+                    SetPlayerLock(true);  //lock player movement
                     UpdateDialogueText();  //show dialogue
 
-                    prevEnableMoveSetting = movement.enableMovement;  //save previous NPC movement setting
+                    SetPrevEnableMove(movement.enableMovement);  //save previous NPC movement setting
                     movement.enableMovement = false;  //pause NPC movement until dialogue is complete
                     dialogProgressTime = Time.realtimeSinceStartup;  //set last dialogue progression action to now
                 }
@@ -140,7 +122,7 @@ public class NPCDialogue : MonoBehaviour
                         else
                             ReenableMovement();  //otherwise let the NPC move again
 
-                        UnlockPlayer();
+                        SetPlayerLock(false);
                             
                     }
                     dialogProgressTime = Time.realtimeSinceStartup;
@@ -149,9 +131,47 @@ public class NPCDialogue : MonoBehaviour
         }
     }
 
-    private void UnlockPlayer()
+    public void GetAllScripts()
     {
-        pController.SetMovementLock(false);  //unlock player movement
+        //get shop script (if activated)
+        if (hasShop && shop == null)
+            shop = gameObject.GetComponent<NPCShop>();
+
+        //get some player scripts
+        if (player == null)
+            player = GameObject.Find("Player");
+        
+        if (pController == null)
+            pController = player.GetComponent<PlayerController>();
+        
+        if (questsInventory == null)
+            questsInventory = player.GetComponent<QuestInventory>();
+        
+        //get movement script for use in pausing movement while dialogue is active
+        if (movement == null)
+            movement = GetComponent<NPCMovement>();
+        
+        //get dialogue text component for showing dialogue text
+        if (dialogueText == null)
+            dialogueText = GameObject.Find("WorldCanvas/Dialogue").GetComponent<TMP_Text>();
+        
+        if (shopButton == null)
+            shopButton = GameObject.Find("WorldCanvas").transform.Find("ShopButton").gameObject;
+        //have to use Transform.Find to get an inactive object
+    }
+
+    public void GetQuestsToTurnInHere()
+    {
+        //get all quest steps that are being turned in
+        GetAllScripts();
+        turningInQuestSteps = questsInventory.GetQuestStepsForTurnIn(gameObject.name);
+        foreach(QuestAndStepPair pair in turningInQuestSteps)
+            curDialogueList.AddRange(pair.step.turnInDialogue); //add all dialogues for all quests being turned in currently
+    }
+
+    public void SetPlayerLock(bool playerLock)
+    {
+        pController.SetMovementLock(playerLock);  //(un)lock player movement
     }
 
     public void ReenableMovement()
@@ -159,8 +179,33 @@ public class NPCDialogue : MonoBehaviour
         movement.enableMovement = prevEnableMoveSetting; //resume NPC movement (if previous setting was enabled)
     }
 
-    void UpdateDialogueText()
+    public void SetCurDialogue(List<string> curDialogue)
     {
+        curDialogueList = curDialogue;
+    }
+
+    public List<string> GetCurDialogue()
+    {
+        return curDialogueList;
+    }
+
+    public void SetPrevEnableMove(bool prevEnableMove)
+    {
+        prevEnableMoveSetting = prevEnableMove;
+    }
+
+    public bool GetPrevEnableMove()
+    {
+        return prevEnableMoveSetting;
+    }
+
+    public void UpdateDialogueText()
+    {
+        if (curDialogueList == null || curDialogueList.Count == 0)
+            return;
+
+        GetAllScripts();
+
         dialogueText.text = curDialogueList[dialogueItem];  //should be first string shown first
         Vector3 conversationPosDiff = player.transform.position - transform.position;  //vector from NPC to player
 
@@ -172,7 +217,7 @@ public class NPCDialogue : MonoBehaviour
         dialogueText.gameObject.transform.position = transform.position - conversationPosDiff;
     }
 
-    void UpdateShopButtonPosition()
+    public void UpdateShopButtonPosition()
     {
         Vector3 conversationPosDiff = player.transform.position - transform.position;  //vector from NPC to player
 
@@ -186,6 +231,7 @@ public class NPCDialogue : MonoBehaviour
 
     public void ShowShopButton()
     {
+        GetAllScripts();
         NPCShopButton shopBtnScript = shopButton.GetComponent<NPCShopButton>();
         shopBtnScript.dialogue = this;
         shopBtnScript.shop = shop;
@@ -199,6 +245,7 @@ public class NPCDialogue : MonoBehaviour
     {
         if (showingShopButton)
         {
+            GetAllScripts();
             NPCShopButton shopBtnScript = shopButton.GetComponent<NPCShopButton>();
             shopButton.SetActive(false);
             shopBtnScript.dialogue = null;
@@ -211,7 +258,8 @@ public class NPCDialogue : MonoBehaviour
     public void OnCloseShop()
     {
         //Debug.Log("on close shop");
+        showingShop = false;
         HideShopButton();
-        UnlockPlayer();
+        SetPlayerLock(true);
     }
 }
