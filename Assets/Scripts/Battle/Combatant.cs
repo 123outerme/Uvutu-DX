@@ -10,9 +10,9 @@ public class Combatant : ScriptableObject
     
     public int level = 1;  //current level
     public StatLine statLine;
-    
-    public int baseExpYield = 0;  //base exp yielded for defeating as an enemy
-    public int baseGoldYield = 0; //base gold yielded for defeating as an enemy
+
+    public Rewards[] lootTable;
+    public float[] lootTableChances;
 
     public Move[] moveset;
 }

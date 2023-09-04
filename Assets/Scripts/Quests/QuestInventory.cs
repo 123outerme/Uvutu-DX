@@ -16,16 +16,32 @@ public class QuestInventory : MonoBehaviour
 {
     public List<QuestTracker> quests;
 
+    private GameObject player = null;
+    private Stats playerStats;
+    private PlayerInfo playerInfo;
+    private Inventory playerInventory;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        GetPlayerData();
     }
 
     // Update is called once per frame
     void Update()
     {
         //manage quest collection (?)
+    }
+
+    private void GetPlayerData()
+    {
+        if (player == null)
+        {
+            player = GameObject.Find("Player");
+            playerStats = player.GetComponent<Stats>();
+            playerInfo = player.GetComponent<PlayerInfo>();
+            playerInventory = player.GetComponent<Inventory>();
+        }
     }
 
     public void AddQuest(Quest q)
@@ -93,7 +109,7 @@ public class QuestInventory : MonoBehaviour
         return pairs;
     }
 
-    public void TurnInCurrentQuestStep(string questName)
+    public RewardsRedeemedStatus TurnInCurrentQuestStep(string questName)
     {
         QuestTracker q = GetQuestByName(questName);
         QuestStep step = q.GetCurrentStep();
@@ -101,8 +117,16 @@ public class QuestInventory : MonoBehaviour
         {
             //TODO: reward player for quest step completion
             Debug.Log("Completed a quest step for " + q.name);
+            int levels = step.rewards.RedeemExp(playerStats, playerInfo);
+            step.rewards.RedeemGold(playerInfo);
+            bool success = step.rewards.RedeemItem(playerInventory);
+
             q.GotoNextStep();
+
+            return new RewardsRedeemedStatus(step.rewards, levels, success);
         }
+
+        return null;
     }
 
     public bool ArePrereqsCompleted(string[] prereqs)

@@ -54,7 +54,6 @@ public class StatsListPanel : MonoBehaviour
 
     public void SetStatLineCopy(StatLine s)
     {
-        Debug.Log(s.magicAttack);
         playerStatLineCopy = s;
         UpdateStatsList();
     }

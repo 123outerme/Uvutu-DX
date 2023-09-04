@@ -23,6 +23,10 @@ MonoBehaviour:
     count: 2
     objectiveName: Coconut Head
     turnInName: Coconut Head
+    rewards:
+      exp: 10
+      gold: 1
+      item: {fileID: 0}
     turnInDialogue:
     - Now could you defeat a rat for me?
     inProgressDialogue:
@@ -35,6 +39,10 @@ MonoBehaviour:
     count: 1
     objectiveName: Rat
     turnInName: Coconut Head
+    rewards:
+      exp: 20
+      gold: 2
+      item: {fileID: 11400000, guid: ef710aa05ec201c45a1fdb836cfdc993, type: 2}
     turnInDialogue:
     - Thanks! You just completed the quest.
     inProgressDialogue:

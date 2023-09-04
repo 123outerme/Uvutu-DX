@@ -37,23 +37,27 @@ public class Inventory : MonoBehaviour
         return slot;
     }
 
-    public void AddItemToInventory(Item i)
+    public bool AddItemToInventory(Item i)
     {
         if (i == null)  //failsafe, do not add a null item
-            return;
+            return false;
 
         foreach(InventorySlot slot in items)
         {
             if (i.ItemName == slot.itemName)
             {
-                slot.AddItem();
-                return;
+                return slot.AddItem();
             }
         }
 
         //if the slot where this item belongs isn't found, check the size, if less than max, add an item
         if (items.Count < MAX_INVENTORY)
-            items.Add(new InventorySlot(i));    
+        {
+            items.Add(new InventorySlot(i));
+            return true;
+        }
+
+        return false;
     }
 
     public void RemoveEmptyItemSlots()

@@ -15,21 +15,6 @@ public enum BattleView
 }
 
 [System.Serializable]
-public class BattleRewards
-{
-    public int exp;
-    public int gold;
-    public Item item;
-
-    public BattleRewards(int expYield, int goldYield, Item foundItem)
-    {
-        exp = expYield;
-        gold = goldYield;
-        item = foundItem;
-    }
-}
-
-[System.Serializable]
 public class BattleState
 {
     public BattleView view;
@@ -38,7 +23,7 @@ public class BattleState
     public bool battleStarted = false;
     public string selectedTarget;
     public bool battleOverviewAvailable = true;
-    public BattleRewards reward = null;
+    public Rewards reward = null;
     public StatLine statUpgradeCopy = null;
 
     public BattleState()

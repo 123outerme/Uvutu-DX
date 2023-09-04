@@ -41,10 +41,15 @@ public class InventorySlot
         }
     }
 
-    public void AddItem()
+    public bool AddItem()
     {
         if (count < item.MaxCarryable)
+        {
             count++;
+            return true;
+        }
+
+        return false;
     }
 
     public void TrashItem()

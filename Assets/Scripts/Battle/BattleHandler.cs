@@ -1222,17 +1222,26 @@ public class BattleHandler : MonoBehaviour
             if (battleState.reward == null)
             {
                 //generate rewards if they haven't already been generated
-                int exp = enemy1Stats.combatantStats.baseExpYield + enemy2Stats.combatantStats.baseExpYield + enemy3Stats.combatantStats.baseExpYield;
-                int gold = enemy1Stats.combatantStats.baseGoldYield + enemy2Stats.combatantStats.baseGoldYield + enemy3Stats.combatantStats.baseGoldYield;
+                
+                //TODO: use weighted randomness to pick loot drops
+                int reward1 = 0;
+                int reward2 = 0;
+                int reward3 = 0;
+
+                int exp = enemy1Stats.combatantStats.lootTable[reward1].exp +
+                    enemy2Stats.combatantStats.lootTable[reward2].exp +
+                    enemy3Stats.combatantStats.lootTable[reward3].exp;
+                int gold = enemy1Stats.combatantStats.lootTable[reward1].gold +
+                enemy2Stats.combatantStats.lootTable[reward2].gold +
+                enemy3Stats.combatantStats.lootTable[reward3].gold;
 
                 //TODO increase yields by a certain percentage if multiple enemies are fought at the same time
                 float expModifier = 1.0f;
                 float goldModifier = 1.0f;
 
-                //TODO: generate item drop
-                Item drop = null;
+                Item drop = enemy1Stats.combatantStats.lootTable[reward1].item;
 
-                battleState.reward = new BattleRewards((int) Mathf.Round(exp * expModifier), (int) Mathf.Round(gold * goldModifier), drop);
+                battleState.reward = new Rewards((int) Mathf.Round(exp * expModifier), (int) Mathf.Round(gold * goldModifier), drop);
             }
             
             string rewardsString = "You gained " + StatsListPanel.AddCommasToInt(battleState.reward.exp) + " exp and " + StatsListPanel.AddCommasToInt(battleState.reward.gold) + " gold!";
@@ -1260,9 +1269,9 @@ public class BattleHandler : MonoBehaviour
 
     public void AcceptRewards()
     {
-        int levels = playerStats.PlayerGainExp(battleState.reward.exp, playerInfo);
-        playerInfo.gold += battleState.reward.gold;
-        playerInventory.AddItemToInventory(battleState.reward.item);
+        int levels = battleState.reward.RedeemExp(playerStats, playerInfo);
+        battleState.reward.RedeemGold(playerInfo);
+        battleState.reward.RedeemItem(playerInventory);
 
         if (levels > 0)
         {

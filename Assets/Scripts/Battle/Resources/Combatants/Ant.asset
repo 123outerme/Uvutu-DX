@@ -22,7 +22,11 @@ MonoBehaviour:
     affinity: 1
     resistance: 1
     speed: 1
-  baseExpYield: 10
-  baseGoldYield: 1
+  lootTable:
+  - exp: 10
+    gold: 1
+    item: {fileID: 11400000, guid: 6f0bbe118bee4de419384b11656f145e, type: 2}
+  lootTableChances:
+  - 1
   moveset:
   - {fileID: 11400000, guid: 3a9b3e3245f6c9b4ababb93e535f2f63, type: 2}
