@@ -73,6 +73,9 @@ public class Stats : MonoBehaviour
     public int exp = 0;  //exp
     public int health = -1;  //current health (-1 means fill in from max health upon Combatant load)
 
+    public string equippedWeaponName = "";  //currently equipped weapon
+    public string equippedArmorName = "";  //currently equipped armor
+
     public float physAttackMultiplier = 1.0f;  //currently applied physical attack multiplier
     public float magicAttackMultiplier = 1.0f;  //currently applied magic attack multiplier
     public float affinityMultiplier = 1.0f;  //currently applied affinity multiplier
@@ -82,6 +85,8 @@ public class Stats : MonoBehaviour
     public string[] moveset;
 
     private SpriteRenderer spr;
+    private Weapon equippedWeapon;
+    private Armor equippedArmor;
 
     void Start()
     {
@@ -111,6 +116,37 @@ public class Stats : MonoBehaviour
                 //Debug.Log(combatantName + health + " / " + maxHealth);
                 statLine = combatantStats.statLine.Copy();
                 health = statLine.maxHealth;
+            
+                //TODO: randomly select weapon from table
+                if (combatantStats.weaponTable != null && combatantStats.weaponTable.Length > 0)
+                {
+                    int selectedWeapon = WeightedRandomChoice.Pick(combatantStats.weaponChances);
+                    equippedWeapon = combatantStats.weaponTable[selectedWeapon];
+                    equippedWeaponName = equippedWeapon.name;
+                }
+                else
+                    equippedWeapon = null;
+
+                if (combatantStats.armorTable != null && combatantStats.armorTable.Length > 0)
+                {
+                    int selectedArmor = WeightedRandomChoice.Pick(combatantStats.armorChances);
+                    equippedArmor = combatantStats.armorTable[selectedArmor];
+                    equippedArmorName = equippedArmor.name;
+                }
+                else
+                    equippedArmor = null;
+            }
+            else
+            {
+                if (equippedWeaponName != null && equippedWeaponName != "")
+                {
+                    equippedWeapon = Resources.Load<Weapon>("Items/Weapon/" + equippedWeaponName);
+                }
+                
+                if (equippedArmorName != null && equippedArmorName != "")
+                {
+                    equippedArmor = Resources.Load<Armor>("Items/Armor/" + equippedArmorName);
+                }
             }
 
             if (moveset == null || moveset.Length == 0)

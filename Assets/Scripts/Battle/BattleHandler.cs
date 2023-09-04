@@ -54,6 +54,8 @@ public class BattleHandler : MonoBehaviour
     public GameObject overviewPanel;
     public GameObject inventoryPanel;
 
+    public GameObject rewardsPanelPrefab;
+
     public BattleAction playerAction;
     public BattleAction minionAction;
     public BattleAction enemy1Action;
@@ -1219,59 +1221,65 @@ public class BattleHandler : MonoBehaviour
         if (player.activeSelf || minion.activeSelf)
         {
             //give out rewards
-            if (battleState.reward == null)
+            if (battleState.rewardsList.Count == 0)
             {
                 //generate rewards if they haven't already been generated
                 
-                //TODO: use weighted randomness to pick loot drops
-                int reward1 = 0;
-                int reward2 = 0;
-                int reward3 = 0;
-
-                int exp = enemy1Stats.combatantStats.lootTable[reward1].exp +
-                    enemy2Stats.combatantStats.lootTable[reward2].exp +
-                    enemy3Stats.combatantStats.lootTable[reward3].exp;
-                int gold = enemy1Stats.combatantStats.lootTable[reward1].gold +
-                enemy2Stats.combatantStats.lootTable[reward2].gold +
-                enemy3Stats.combatantStats.lootTable[reward3].gold;
+                //use weighted randomness to pick loot drops
+                int reward1 = WeightedRandomChoice.Pick(enemy1Stats.combatantStats.lootTableChances);
+                int reward2 = WeightedRandomChoice.Pick(enemy2Stats.combatantStats.lootTableChances);
+                int reward3 = WeightedRandomChoice.Pick(enemy3Stats.combatantStats.lootTableChances);
 
                 //TODO increase yields by a certain percentage if multiple enemies are fought at the same time
                 float expModifier = 1.0f;
                 float goldModifier = 1.0f;
 
-                Item drop = enemy1Stats.combatantStats.lootTable[reward1].item;
+                if (enemy1Stats.combatantStats.lootTable != null && enemy1Stats.combatantStats.lootTable.Length > 0)
+                    battleState.rewardsList.Add(enemy1Stats.combatantStats.lootTable[reward1]);
+                
+                if (enemy2Stats.combatantStats.lootTable != null && enemy2Stats.combatantStats.lootTable.Length > 0)
+                    battleState.rewardsList.Add(enemy2Stats.combatantStats.lootTable[reward2]);
+                
+                if (enemy3Stats.combatantStats.lootTable != null && enemy3Stats.combatantStats.lootTable.Length > 0)
+                    battleState.rewardsList.Add(enemy3Stats.combatantStats.lootTable[reward3]);
 
-                battleState.reward = new Rewards((int) Mathf.Round(exp * expModifier), (int) Mathf.Round(gold * goldModifier), drop);
+                foreach(Rewards r in battleState.rewardsList)
+                {
+                    r.exp = (int) Mathf.Round(r.exp * expModifier);
+                    r.gold = (int) Mathf.Round(r.exp * goldModifier);
+                }
             }
-            
-            string rewardsString = "You gained " + StatsListPanel.AddCommasToInt(battleState.reward.exp) + " exp and " + StatsListPanel.AddCommasToInt(battleState.reward.gold) + " gold!";
-            
-            if (battleState.reward.item != null)
-                rewardsString += "\nNot to mention, you found this " + battleState.reward.item.name + "!";
 
-            UpdateFinishPanel(rewardsString);
+            UpdateFinishPanel();
         }
     }
 
-    private void UpdateFinishPanel(string text)
+    private void UpdateFinishPanel()
     {
-        TMP_Text rewardsText = rewardsPanel.transform.Find("FinishText").GetComponent<TMP_Text>();
-        rewardsText.text = text;
+        GameObject rewardsListPanel = rewardsPanel.transform.Find("RewardsListPanel").gameObject;
 
-        RectTransform rt = rewardsText.gameObject.GetComponent<RectTransform>();
-
-        Vector2 preferredDims = rewardsText.GetPreferredValues(rewardsText.text, rt.sizeDelta.x, -1);
-        
-        //rt.sizeDelta = new Vector2(rt.sizeDelta.x, preferredDims.y);  //change the y dimensions to fit the string
-        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredDims.y);  //change the height to fit the string
-        //NOTE: we have to use this function because we're on stretch mode and it is a different calc than setting the deltas between each corner of the RectTransform
+        foreach(Rewards r in battleState.rewardsList)
+        {
+            
+            GameObject panelObj = Instantiate(rewardsPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, rewardsListPanel.transform) as GameObject;
+            RewardsPanel panelScript = panelObj.GetComponent<RewardsPanel>();
+            r.LoadRewardItemFromName();
+            panelScript.rewards = r;
+            panelScript.LoadFromRewardsObj();
+            panelObj.transform.localPosition = new Vector3(0,0,0);  //WHY DOES THIS NEED TO BE DONE!!!!!!!!!!
+            //If this isn't set, this panel will be set at some random transformation value. This has never happened before, and no other object will do this. WHY????
+        }
     }
 
     public void AcceptRewards()
     {
-        int levels = battleState.reward.RedeemExp(playerStats, playerInfo);
-        battleState.reward.RedeemGold(playerInfo);
-        battleState.reward.RedeemItem(playerInventory);
+        int levels = 0;
+        foreach(Rewards r in battleState.rewardsList)
+        {
+            levels += r.RedeemExp(playerStats, playerInfo);
+            r.RedeemGold(playerInfo);
+            r.RedeemItem(playerInventory);
+        }
 
         if (levels > 0)
         {

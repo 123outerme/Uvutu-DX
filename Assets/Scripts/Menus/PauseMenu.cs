@@ -12,6 +12,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject questsPanel;
     public GameObject player;
 
+    private Stats playerStats;
     private InventoryPanel invPanelScript;
     private PlayerInfo playerInfo;
     private StatsListPanel statsListScript;
@@ -24,6 +25,7 @@ public class PauseMenu : MonoBehaviour
     {
         saver = GameObject.Find("SaveHandler").GetComponent<SaveHandler>();
         playerInfo = player.GetComponent<PlayerInfo>();
+        playerStats = player.GetComponent<Stats>();
         invPanelScript = inventoryPanel.GetComponent<InventoryPanel>();
         statsListScript = statsListPanel.GetComponent<StatsListPanel>();
     }
@@ -76,5 +78,22 @@ public class PauseMenu : MonoBehaviour
     public void UseItem(InventorySlot slot)
     {
         //Use item in pause menu
+        if (slot.item.Type == ItemType.Healing)
+        {
+            Healing healItem = (Healing) slot.item;
+            playerStats.health += healItem.healthHealedBy;
+            if (playerStats.health > playerStats.statLine.maxHealth)
+                playerStats.health = playerStats.statLine.maxHealth;
+        }
+
+        if (slot.item.Type == ItemType.Weapon)
+        {
+            //TODO
+        }
+
+        if (slot.item.Type == ItemType.Armor)
+        {
+            //TODO
+        }
     }
 }

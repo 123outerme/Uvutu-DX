@@ -45,7 +45,7 @@ public class QuestPanel : MonoBehaviour
             QuestStatus qStatus = questInventory.GetQuestStatus(q.name);
             if (statusToFilterBy == QuestStatus.All || (statusToFilterBy == QuestStatus.Incomplete && qStatus != QuestStatus.Completed) || qStatus == statusToFilterBy)
             {
-                Debug.Log(qStatus);
+                //Debug.Log(qStatus);
                 GameObject panelObj = Instantiate(questSlotPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, questListContent.transform);
                 QuestSlotPanel questSlotPanel = panelObj.GetComponent<QuestSlotPanel>();
                 questSlotPanel.parentPanel = this;

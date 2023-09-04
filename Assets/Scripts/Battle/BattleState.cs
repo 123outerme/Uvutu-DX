@@ -23,7 +23,7 @@ public class BattleState
     public bool battleStarted = false;
     public string selectedTarget;
     public bool battleOverviewAvailable = true;
-    public Rewards reward = null;
+    public List<Rewards> rewardsList = new List<Rewards>();
     public StatLine statUpgradeCopy = null;
 
     public BattleState()
@@ -34,7 +34,7 @@ public class BattleState
         battleStarted = false;
         selectedTarget = "";
         battleOverviewAvailable = true;
-        reward = null;
+        rewardsList = new List<Rewards>();
         statUpgradeCopy = null;
     }
 

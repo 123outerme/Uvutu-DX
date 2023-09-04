@@ -106,24 +106,8 @@ public class QuestDetailsPanel : MonoBehaviour
         curStepProgressText.text = quest.GetStepProgressString(curStep);
         curStepTurnInText.text = curStep.turnInName;
 
-        //update details panel
-        TMP_Text goldText = curStepRewardsPanel.transform.Find("GoldDisplay/GoldText").GetComponent<TMP_Text>();
-        TMP_Text expText = curStepRewardsPanel.transform.Find("ExpText").GetComponent<TMP_Text>();
-        GameObject itemPanel = curStepRewardsPanel.transform.Find("ItemPanel").gameObject;
-        Image itemImage = itemPanel.transform.Find("ItemImage").GetComponent<Image>();
-        TMP_Text itemNameText = itemPanel.transform.Find("ItemNameText").GetComponent<TMP_Text>();
-
-        expText.text = StatsListPanel.AddCommasToInt(step.rewards.exp) + " Exp";
-        goldText.text = StatsListPanel.AddCommasToInt(step.rewards.gold);
-        if (step.rewards.item != null)
-        {
-            itemImage.sprite = step.rewards.item.sprite;
-            itemNameText.text = step.rewards.item.ItemName;
-            itemPanel.SetActive(true);
-        }
-        else
-        {
-            itemPanel.SetActive(false);
-        }
+        RewardsPanel rewardsPanel = curStepRewardsPanel.GetComponent<RewardsPanel>();
+        rewardsPanel.rewards = curStep.rewards;
+        rewardsPanel.LoadFromRewardsObj();
     }
 }

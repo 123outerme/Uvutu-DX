@@ -21,13 +21,27 @@ public class Rewards
 {
     public int exp = 0;
     public int gold = 0;
+
     public Item item = null;
+    public string itemName = "";
 
     public Rewards(int expYield, int goldYield, Item foundItem)
     {
         exp = expYield;
         gold = goldYield;
         item = foundItem;
+        if (item != null)
+            itemName = Item.ItemTypeToString(item.Type) + "/" + item.name;
+        else
+            itemName = "";
+    }
+
+    public void LoadRewardItemFromName()
+    {
+        if (itemName == "" || itemName == null)
+            item = null;
+        else
+            item = Resources.Load<Item>("Items/" + itemName);
     }
     
     public int RedeemExp(Stats playerStats, PlayerInfo playerInfo)
