@@ -50,14 +50,9 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        //if the slot where this item belongs isn't found, check the size, if less than max, add an item
-        if (items.Count < MAX_INVENTORY)
-        {
-            items.Add(new InventorySlot(i));
-            return true;
-        }
-
-        return false;
+        //if the slot where this item belongs isn't found, add an item slot
+        items.Add(new InventorySlot(i));
+        return true;
     }
 
     public void RemoveEmptyItemSlots()
