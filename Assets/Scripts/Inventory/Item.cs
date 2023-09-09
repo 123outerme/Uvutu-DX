@@ -51,6 +51,8 @@ public abstract class Item : ScriptableObject
 
     public Sprite sprite;
 
+    public ItemEffects customEffect;
+
     public static string ItemTypeToString(ItemType type)
     {
         if (type == ItemType.All)

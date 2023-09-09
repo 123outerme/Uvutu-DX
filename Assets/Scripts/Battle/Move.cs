@@ -32,7 +32,7 @@ public class StatMultiplierText
 }
 
 //[System.Serializable]
-[CreateAssetMenu(fileName = "New Move", menuName = "Uvutu/Move")]
+[CreateAssetMenu(fileName = "New Move", menuName = "Uvutu/Move/Move")]
 public class Move : ScriptableObject
 {
     public string moveName;
@@ -48,6 +48,7 @@ public class Move : ScriptableObject
     public StatusCondition appliedCondition = StatusCondition.None;
     public float conditionChance = 0.0f;
     public ValidBattleTarget validTargets = ValidBattleTarget.Enemy;
+    public MoveEffects customEffects;
 
     public bool HasMultipliers()
     {
