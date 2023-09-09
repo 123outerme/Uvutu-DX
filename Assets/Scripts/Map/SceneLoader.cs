@@ -28,8 +28,10 @@ public class SceneLoader : MonoBehaviour
         scenesToLoad.Add(SceneManager.LoadSceneAsync("PauseMenu"));
     }
 
-    public void LoadBattle()
+    public void LoadBattle(Combatant combatant)
     {
+        PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
+        playerInfo.encounteredName = combatant.combatantName;
         SavePlayerData();
         scenesToLoad.Add(SceneManager.LoadSceneAsync("Battle"));
     }

@@ -52,17 +52,6 @@ public class PlayerController : MonoBehaviour
             readyToSpeak = true;
         else
             readyToSpeak = false;
-        
-        if (Input.GetButtonUp("Fire2"))
-        {
-            GameObject loader = GameObject.Find("SceneLoader");
-            if (loader != null)
-            {
-                SceneLoader loadScript = loader.GetComponent<SceneLoader>();
-                if (loadScript != null)
-                    loadScript.LoadBattle();
-            }
-        }
     }
 
     public void SetMovementLock(bool locked)

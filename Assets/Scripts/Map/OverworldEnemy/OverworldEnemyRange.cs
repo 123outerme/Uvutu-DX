@@ -24,13 +24,13 @@ public class OverworldEnemyRange : MonoBehaviour
             parent = transform.parent.gameObject.GetComponent<OverworldEnemy>();
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         GetParentScript();
         parent.TargetPlayer(); //set enemy to nav towards player
     }
 
-    private void OnCollisionExit2D(Collision2D other)
+    private void OnTriggerExit2D(Collider2D other)
     {
         GetParentScript();
         parent.TargetHome(); //set enemy to nav around home

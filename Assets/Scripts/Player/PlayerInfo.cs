@@ -23,6 +23,7 @@ public class PlayerInfo : MonoBehaviour
 
     public bool inBattle = false;
     public bool exitingBattle = false;
+    public string encounteredName = "";  //name of the combatant encountered in the overworld
 
     public bool loaded = false;
 

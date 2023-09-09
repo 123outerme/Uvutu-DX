@@ -13,6 +13,8 @@ public class EnemySpawner : MonoBehaviour
 
     public bool enemyIsSpawned = false;
 
+    public bool enemyCanSpawn = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -22,7 +24,7 @@ public class EnemySpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!enemyIsSpawned && Random.Range(0.0f, 1.0f) <= spawnChancePerFrame)
+        if (enemyCanSpawn && !enemyIsSpawned && Random.Range(0.0f, 1.0f) <= spawnChancePerFrame)
         {
             int enemyIndex = WeightedRandomChoice.Pick(enemyChances);
             
@@ -36,7 +38,18 @@ public class EnemySpawner : MonoBehaviour
                 enemyScript.parentSpawner = this;
                 enemyScript.homePosition = enemyPos;
                 enemyScript.LoadEnemyFromCombatant();
+                enemyIsSpawned = true;
             }
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        enemyCanSpawn = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        enemyCanSpawn = false;
     }
 }

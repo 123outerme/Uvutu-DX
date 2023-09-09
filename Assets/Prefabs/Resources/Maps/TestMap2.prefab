@@ -8000,6 +8000,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemySpawner
       objectReference: {fileID: 0}
+    - target: {fileID: 2051431788320431453, guid: babc680ed615fd2bcba3fcaad9a7e30e, type: 3}
+      propertyPath: enemyChances.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051431788320431453, guid: babc680ed615fd2bcba3fcaad9a7e30e, type: 3}
+      propertyPath: enemyOptions.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051431788320431453, guid: babc680ed615fd2bcba3fcaad9a7e30e, type: 3}
+      propertyPath: enemyChances.Array.data[0]
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051431788320431453, guid: babc680ed615fd2bcba3fcaad9a7e30e, type: 3}
+      propertyPath: enemyOptions.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f54339114551b44c8057b28e199462c, type: 2}
     - target: {fileID: 2874796222313461775, guid: babc680ed615fd2bcba3fcaad9a7e30e, type: 3}
       propertyPath: m_RootOrder
       value: 5

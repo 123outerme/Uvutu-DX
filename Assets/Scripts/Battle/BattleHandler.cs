@@ -116,11 +116,12 @@ public class BattleHandler : MonoBehaviour
             //new battle
             battleState = new BattleState();
 
-             //TODO: decide upon selection of enemy types
+            string enemy1Name = "Combatants/" + playerInfo.encounteredName;
+
+            //TODO: decide upon selection of enemy types
             List<string> enemyOptions = new List<string> {"Combatants/Ant", "Combatants/Rat"};
-            //randomly generate 1-3 enemies to fight
+            //randomly generate 1-2 more enemies to fight
             //TODO: weighted randomness, random level within appropriate range for location
-            int enemy1Pick = Mathf.RoundToInt(Random.Range(0, enemyOptions.Count));
             int enemy2Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
             int enemy3Pick = Mathf.RoundToInt(Random.Range(-1, enemyOptions.Count));
             //Debug.Log("" + enemyOptions.Count + " , " + enemy1Pick + " , " + enemy2Pick + " , " + enemy3Pick);
@@ -128,7 +129,7 @@ public class BattleHandler : MonoBehaviour
             playerActive = true;
             enemy1Active = true;
 
-            enemy1Stats.combatantStats = Resources.Load<Combatant>(enemyOptions[enemy1Pick]);
+            enemy1Stats.combatantStats = Resources.Load<Combatant>(enemy1Name);
             enemy1Stats.UpdateStats();
             
             if (enemy2Pick >= 0)
