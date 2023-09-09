@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using NavMeshPlus.Components;
 
 class CavernChunkCandidate {
     public GameObject chunkPrefab;
@@ -36,12 +37,15 @@ public class ProceduralGenerator : MonoBehaviour
     public int maxDepthIncrease = 2;
 
     public GameObject grid;
+    public GameObject navMesh;
     public List<GameObject> cavernChunks;
     public GameObject cavernBaseMapPrefab;
     public ContactFilter2D boundsCheckingFilter;
 
     public GameObject playerInfoParent;
     private PlayerInfo playerInfo;
+
+    private NavMeshSurface navSurface2D = null;
     
     private GameObject cavernBaseMap = null;
     
@@ -61,6 +65,7 @@ public class ProceduralGenerator : MonoBehaviour
     void Start()
     {
         playerInfo = playerInfoParent.GetComponent<PlayerInfo>();
+        navSurface2D = navMesh.GetComponent<NavMeshSurface>();
 
         PopulateExitDict();
     }
@@ -305,6 +310,7 @@ public class ProceduralGenerator : MonoBehaviour
         {
             chunkScript.localMaxDepth += maxDepthIncrease;  //if any children were found, increase the local max depth to prevent processing happening again
             CreateCavernChunks();  //start loading next chunk
+            navSurface2D.UpdateNavMesh(navSurface2D.navMeshData); //update nav mesh
         }
     }
 

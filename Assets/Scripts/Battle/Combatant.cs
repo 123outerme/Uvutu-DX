@@ -27,7 +27,16 @@ public class WeightedRandomChoice
 {
     public static int Pick(float[] chances)
     {
-        //TODO
-        return 0;
+        float accumulator = 0.0f;
+        float target = Random.Range(0.0f, 1.0f);
+        
+        for(int i = 0; i < chances.Length; i++)
+        {
+            accumulator += chances[i];
+            if (target <= accumulator)
+                return i;
+        }
+
+        return -1;  //if -1 is returned, this is probably an error
     }
 }

@@ -106,7 +106,7 @@ NavMeshSettings:
   m_BuildSettings:
     serializedVersion: 2
     agentTypeID: 0
-    agentRadius: 0.5
+    agentRadius: 0.35
     agentHeight: 2
     agentSlope: 45
     agentClimb: 0.4
@@ -114,7 +114,7 @@ NavMeshSettings:
     maxJumpAcrossDistance: 0
     minRegionArea: 2
     manualCellSize: 0
-    cellSize: 0.16666667
+    cellSize: 0.11666667
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
@@ -224,6 +224,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &291988582 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2774570144275217232, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+  m_PrefabInstance: {fileID: 1282490026}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &349945040 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3677796644462375101, guid: 96567db19fbf6ee4b987608af4492308, type: 3}
@@ -880,6 +885,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1223327395}
   m_CullTransparentMesh: 1
+--- !u!1001 &1282490026
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_RootOrder
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217197, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2774570144275217232, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
+      propertyPath: m_Name
+      value: NavMesh
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d8b05d2c9eb043a89a3fecfb5678597e, type: 3}
 --- !u!1 &1371055682
 GameObject:
   m_ObjectHideFlags: 0
@@ -1154,9 +1216,13 @@ MonoBehaviour:
   map: TestMap
   underworldMap: 
   underworldDepth: 0
+  savedPosition: {x: 0, y: 0, z: 0}
   prestige: 0
   statPoints: 0
+  statPtPool: 0
   gold: 10
+  movepool:
+  - Slice
   scene: 
   inBattle: 0
   exitingBattle: 0
@@ -1188,15 +1254,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combatantStats: {fileID: 11400000, guid: 52c7a981b209e214094ca68a89e4ec19, type: 2}
   combatantName: 
+  statLine:
+    maxHealth: 0
+    physAttack: 0
+    magicAttack: 0
+    affinity: 0
+    resistance: 0
+    speed: 0
   level: 1
   exp: 0
   health: 20
-  maxHealth: 20
-  physAttack: 1
-  magicAttack: 1
-  affinity: 1
-  resistance: 1
-  speed: 1
+  equippedWeaponName: 
+  equippedArmorName: 
   physAttackMultiplier: 1
   magicAttackMultiplier: 1
   affinityMultiplier: 1
@@ -1428,6 +1497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 799660635}
+  navMesh: {fileID: 291988582}
   playerInfoParent: {fileID: 1426036523}
   disable: 0
   proceduralGenerator: {fileID: 1696662601}
@@ -1460,6 +1530,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDepthIncrease: 6
   grid: {fileID: 799660635}
+  navMesh: {fileID: 291988582}
   cavernChunks:
   - {fileID: 7366680821851561862, guid: b7666720f87634ce88a8f9daa6d872b5, type: 3}
   - {fileID: 7366680821851561862, guid: e39d12367038b3cdebbca05ac7fa09c0, type: 3}

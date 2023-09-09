@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3036085031710595940}
   - component: {fileID: 7899572402559423507}
   - component: {fileID: 3217920365254459855}
+  - component: {fileID: 7406188706692353313}
   m_Layer: 0
   m_Name: Collision
   m_TagString: Untagged
@@ -220,6 +221,22 @@ CompositeCollider2D:
     m_Paths: []
   m_VertexDistance: 0.0005
   m_OffsetDistance: 0.00005
+--- !u!114 &7406188706692353313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 546216573262927664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 1
+  m_IgnoreFromBuild: 0
+  m_AffectedAgents: ffffffff
 --- !u!1 &5064574093094919771
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,6 +248,7 @@ GameObject:
   - component: {fileID: 6248968891361472615}
   - component: {fileID: 2846896718031623318}
   - component: {fileID: 6253459581724606701}
+  - component: {fileID: 8428151868781530602}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -388,6 +406,22 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!114 &8428151868781530602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5064574093094919771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 0
+  m_IgnoreFromBuild: 0
+  m_AffectedAgents: ffffffff
 --- !u!1 &5758568202175513226
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,6 +433,7 @@ GameObject:
   - component: {fileID: 1860780460396976135}
   - component: {fileID: 5861437934796654156}
   - component: {fileID: 1720244992175151208}
+  - component: {fileID: 7147446784313853396}
   m_Layer: 0
   m_Name: Midground
   m_TagString: Untagged
@@ -544,6 +579,22 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!114 &7147446784313853396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5758568202175513226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 0
+  m_IgnoreFromBuild: 0
+  m_AffectedAgents: ffffffff
 --- !u!1 &6116512310340822268
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,6 +606,7 @@ GameObject:
   - component: {fileID: 5283455895951288254}
   - component: {fileID: 4433091523431784136}
   - component: {fileID: 1955818471493898500}
+  - component: {fileID: 8279957227499191629}
   m_Layer: 0
   m_Name: Foreground
   m_TagString: Untagged
@@ -700,6 +752,22 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!114 &8279957227499191629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6116512310340822268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 0
+  m_IgnoreFromBuild: 0
+  m_AffectedAgents: ffffffff
 --- !u!1 &7366680821851561862
 GameObject:
   m_ObjectHideFlags: 0

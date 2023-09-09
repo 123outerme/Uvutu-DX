@@ -7,6 +7,8 @@ public class WarpTile : MonoBehaviour
     public string map = "";
     public Vector3 position = new Vector3(0, 0, 0);
 
+    public bool loadsUnderground = false;
+
     private GameObject player;
     private MapLoader maploader;
 
@@ -28,9 +30,19 @@ public class WarpTile : MonoBehaviour
         if (player != null && maploader != null)
         {
             PlayerInfo playerInfo = player.GetComponent<PlayerInfo>();
-            playerInfo.position = position;
-            playerInfo.map = map;
-            //Debug.Log("Warp: " + playerInfo.map);
+            if (!loadsUnderground)
+            {
+                playerInfo.position = position;
+                playerInfo.map = map;
+                //Debug.Log("Warp: " + playerInfo.map);
+            }
+            else
+            {
+                playerInfo.savedPosition = playerInfo.position;
+                playerInfo.position = new Vector3(0,0,0);
+                playerInfo.underworldMap = "new";
+            }
+
             maploader.LoadMap();
             playerInfo.ApplyPosition();
         }

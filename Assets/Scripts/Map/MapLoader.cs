@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using NavMeshPlus.Components;
 
 public class MapLoader : MonoBehaviour
 {
     public GameObject grid;
+    public GameObject navMesh;
     public GameObject playerInfoParent;
     public bool disable = false;
 
@@ -12,6 +15,8 @@ public class MapLoader : MonoBehaviour
 
     private PlayerInfo playerInfo;
     private SaveHandler saver;
+    private NavMeshSurface navSurface2D;
+    private bool buildMeshFlag = false;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +30,8 @@ public class MapLoader : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (buildMeshFlag)
+            BuildNavMesh();
     }
 
     public void LoadMap()
@@ -37,9 +43,7 @@ public class MapLoader : MonoBehaviour
             
             //destroy each child object in the grid to clear space for the new map
             foreach(Transform child in grid.transform)
-            {
                 Destroy(child.gameObject);
-            }
 
             //Debug.Log(playerInfo.map);
 
@@ -58,6 +62,27 @@ public class MapLoader : MonoBehaviour
                 map.transform.SetParent(grid.transform, false);
             }
             saver.LoadNPCs();
+            PrepareNewNavMesh();
         }
+    }
+
+    public void PrepareNewNavMesh()
+    {
+        //reset nav mesh and rebuild
+        if (navSurface2D == null)
+        {
+            navSurface2D = navMesh.GetComponent<NavMeshSurface>();
+            navSurface2D.hideEditorLogs = true;
+        }
+        
+        navSurface2D.RemoveData();
+        NavMesh.RemoveAllNavMeshData();
+        buildMeshFlag = true;
+    }
+
+    private void BuildNavMesh()
+    {
+        navSurface2D.BuildNavMeshAsync();
+        buildMeshFlag = false;
     }
 }

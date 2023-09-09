@@ -260,6 +260,6 @@ public class NPCDialogue : MonoBehaviour
         //Debug.Log("on close shop");
         showingShop = false;
         HideShopButton();
-        SetPlayerLock(true);
+        SetPlayerLock(false);
     }
 }
