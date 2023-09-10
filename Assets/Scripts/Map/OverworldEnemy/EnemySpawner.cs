@@ -9,8 +9,6 @@ public class EnemySpawner : MonoBehaviour
     public Combatant[] enemyOptions;
     public float[] enemyChances;
 
-    public float spawnChancePerFrame = 0.01f;
-
     public bool enemyIsSpawned = false;
 
     public bool enemyCanSpawn = false;
@@ -24,7 +22,7 @@ public class EnemySpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (enemyCanSpawn && !enemyIsSpawned && Random.Range(0.0f, 1.0f) <= spawnChancePerFrame)
+        if (enemyCanSpawn && !enemyIsSpawned)
         {
             int enemyIndex = WeightedRandomChoice.Pick(enemyChances);
             

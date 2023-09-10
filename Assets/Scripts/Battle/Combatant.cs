@@ -37,6 +37,6 @@ public class WeightedRandomChoice
                 return i;
         }
 
-        return -1;  //if -1 is returned, this is probably an error
+        return chances.Length - 1;
     }
 }

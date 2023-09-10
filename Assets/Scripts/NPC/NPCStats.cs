@@ -69,6 +69,10 @@ public class NPCStats : MonoBehaviour
     {
         GetNPCScripts();
 
+        List<string> dialogueList = new List<string>();
+        if (dialogue.inDialogue)
+            dialogueList = dialogue.GetCurDialogue();
+
         state = new NPCState(
             transform.position,
             movement.enableMovement,
@@ -77,7 +81,7 @@ public class NPCStats : MonoBehaviour
             movement.frame,
             gameObject.name,
             dialogue.GetPrevEnableMove(),
-            dialogue.GetCurDialogue(),
+            dialogueList,
             dialogue.dialogueItem,
             dialogue.showingShopButton,
             dialogue.showingShop,
