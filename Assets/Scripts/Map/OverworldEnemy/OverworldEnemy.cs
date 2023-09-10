@@ -77,6 +77,7 @@ public class OverworldEnemy : MonoBehaviour
     {
         UpdateAgent();
         targetPlayer = true;
+        agent.autoBraking = false;
     }
 
     public void TargetHome()
@@ -85,6 +86,7 @@ public class OverworldEnemy : MonoBehaviour
         targetPlayer = false;
         GetNewNearbyHomePos();
         agent.SetDestination(nearbyHomePos);
+        agent.autoBraking = true;
     }
 
     private void GetNewNearbyHomePos()
