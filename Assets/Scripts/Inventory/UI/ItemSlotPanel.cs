@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class ItemSlotPanel : MonoBehaviour
 {
@@ -124,5 +123,10 @@ public class ItemSlotPanel : MonoBehaviour
         parentPanel.SellToShop(itemSlot);
         itemSlot.TrashItem();
         parentPanel.ReloadInventoryDisplay();
+    }
+
+    public void ViewItemDetails()
+    {
+        parentPanel.viewItemDetails.Invoke(itemSlot);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class BattleActionPriorityComparer : PrioQueueComparer<BattleAction>
 {
@@ -53,6 +54,7 @@ public class BattleHandler : MonoBehaviour
     public GameObject levelUpPanel;
     public GameObject overviewPanel;
     public GameObject inventoryPanel;
+    public GameObject itemDetailsPanel;
 
     public GameObject rewardsPanelPrefab;
 
@@ -64,6 +66,8 @@ public class BattleHandler : MonoBehaviour
 
     //[System.NonSerialized]
     public BattleState battleState;
+    
+    public UnityEvent<Item> viewItemDetails;
 
     private PlayerInfo playerInfo;
 
@@ -1267,10 +1271,30 @@ public class BattleHandler : MonoBehaviour
             RewardsPanel panelScript = panelObj.GetComponent<RewardsPanel>();
             r.LoadRewardItemFromName();
             panelScript.rewards = r;
+            panelScript.viewItemDetails = viewItemDetails;
             panelScript.LoadFromRewardsObj();
             panelObj.transform.localPosition = new Vector3(0,0,0);  //WHY DOES THIS NEED TO BE DONE!!!!!!!!!!
             //If this isn't set, this panel will be set at some random transformation value. This has never happened before, and no other object will do this. WHY????
         }
+    }
+
+    public void ViewItemSlotDetails(InventorySlot slot)
+    {
+        ViewItemDetailsPanel(slot.item, slot.count);
+    }
+
+    public void ViewItemDetails(Item item)
+    {
+        ViewItemDetailsPanel(item, 0);
+    }
+
+    private void ViewItemDetailsPanel(Item item, int count)
+    {
+        ItemDetailsPanel panelScript = itemDetailsPanel.GetComponent<ItemDetailsPanel>();
+        panelScript.item = item;
+        panelScript.itemCount = count;
+        panelScript.LoadDetailsFromItem();
+        itemDetailsPanel.SetActive(true);
     }
 
     public void AcceptRewards()

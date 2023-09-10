@@ -33,6 +33,7 @@ public class InventoryPanel : MonoBehaviour
     private Inventory inventory = null;
 
     public UnityEvent<InventorySlot> useItemCallback;
+    public UnityEvent<InventorySlot> viewItemDetails;
 
     public List<ItemType> includedTypes = new List<ItemType>();
 

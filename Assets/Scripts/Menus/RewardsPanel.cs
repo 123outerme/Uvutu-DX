@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class RewardsPanel : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class RewardsPanel : MonoBehaviour
     public GameObject itemPanel;
     public Image itemImage;
     public TMP_Text itemNameText;
+    
+    public UnityEvent<Item> viewItemDetails;
 
     // Start is called before the first frame update
     void Start()
@@ -44,5 +47,10 @@ public class RewardsPanel : MonoBehaviour
         {
             itemPanel.SetActive(false);
         }
+    }
+
+    public void ShowItemDetails()
+    {
+        viewItemDetails.Invoke(rewards.item);
     }
 }

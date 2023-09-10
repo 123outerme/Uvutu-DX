@@ -10,6 +10,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject statsListPanel;
     public GameObject inventoryPanel;
     public GameObject questsPanel;
+    public GameObject itemDetailsPanel;
     public GameObject player;
 
     private Stats playerStats;
@@ -56,6 +57,25 @@ public class PauseMenu : MonoBehaviour
     public void ShowQuests(bool setting)
     {
         questsPanel.SetActive(setting);
+    }
+
+    public void ShowItemSlotDetails(InventorySlot slot)
+    {
+        ShowItemDetailsPanel(slot.item, slot.count);
+    }
+
+    public void ShowItemDetails(Item item)
+    {
+        ShowItemDetailsPanel(item, 0);
+    }
+
+    private void ShowItemDetailsPanel(Item item, int count)
+    {
+        ItemDetailsPanel panelScript = itemDetailsPanel.GetComponent<ItemDetailsPanel>();
+        panelScript.item = item;
+        panelScript.itemCount = count;
+        panelScript.LoadDetailsFromItem();
+        itemDetailsPanel.SetActive(true);
     }
 
     public void OpenSettings()

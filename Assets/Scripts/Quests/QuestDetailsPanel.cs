@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class QuestDetailsPanel : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class QuestDetailsPanel : MonoBehaviour
     public GameObject curStepProgressObj;
     public GameObject curStepTurnInObj;
     public GameObject curStepRewardsPanel;
+
+    public UnityEvent<Item> viewItemDetails;
 
     private TMP_Text questTitleText = null;
     private TMP_Text questDescriptionText = null;
@@ -108,6 +111,7 @@ public class QuestDetailsPanel : MonoBehaviour
 
         RewardsPanel rewardsPanel = curStepRewardsPanel.GetComponent<RewardsPanel>();
         rewardsPanel.rewards = curStep.rewards;
+        rewardsPanel.viewItemDetails = viewItemDetails;
         rewardsPanel.LoadFromRewardsObj();
     }
 }
