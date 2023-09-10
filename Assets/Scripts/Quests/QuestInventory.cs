@@ -36,11 +36,18 @@ public class QuestInventory : MonoBehaviour
     private void GetPlayerData()
     {
         if (player == null)
-        {
             player = GameObject.Find("Player");
-            playerStats = player.GetComponent<Stats>();
-            playerInfo = player.GetComponent<PlayerInfo>();
-            playerInventory = player.GetComponent<Inventory>();
+
+        if (player != null)
+        {
+            if (playerStats == null)
+                playerStats = player.GetComponent<Stats>();
+            
+            if (playerInfo == null)
+                playerInfo = player.GetComponent<PlayerInfo>();
+            
+            if (playerInventory)
+                playerInventory = player.GetComponent<Inventory>();
         }
     }
 
@@ -111,6 +118,7 @@ public class QuestInventory : MonoBehaviour
 
     public RewardsRedeemedStatus TurnInCurrentQuestStep(string questName)
     {
+        GetPlayerData();
         QuestTracker q = GetQuestByName(questName);
         QuestStep step = q.GetCurrentStep();
         if (step != null)

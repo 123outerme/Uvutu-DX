@@ -30,9 +30,7 @@ public class OverworldEnemy : MonoBehaviour
     void Update()
     {
         if (targetPlayer)
-        {
             agent.SetDestination(player.transform.position);
-        }
         else
         {
             //Debug.Log(transform.position + " / " + nearbyHomePos + " = " + (transform.position - nearbyHomePos).magnitude);

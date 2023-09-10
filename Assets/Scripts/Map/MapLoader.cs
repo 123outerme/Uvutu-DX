@@ -13,6 +13,8 @@ public class MapLoader : MonoBehaviour
 
     public ProceduralGenerator proceduralGenerator;
 
+    public bool navMeshBuilt = false;
+
     private PlayerInfo playerInfo;
     private SaveHandler saver;
     private NavMeshSurface navSurface2D;
@@ -69,6 +71,7 @@ public class MapLoader : MonoBehaviour
     public void PrepareNewNavMesh()
     {
         //reset nav mesh and rebuild
+        navMeshBuilt = false;
         if (navSurface2D == null)
         {
             navSurface2D = navMesh.GetComponent<NavMeshSurface>();
@@ -82,7 +85,8 @@ public class MapLoader : MonoBehaviour
 
     private void BuildNavMesh()
     {
-        navSurface2D.BuildNavMeshAsync();
+        navSurface2D.BuildNavMesh();
         buildMeshFlag = false;
+        navMeshBuilt = true;
     }
 }

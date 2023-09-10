@@ -13,16 +13,19 @@ public class EnemySpawner : MonoBehaviour
 
     public bool enemyCanSpawn = false;
 
+    private MapLoader mapLoader;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (mapLoader == null)
+            mapLoader = GameObject.Find("MapLoader").GetComponent<MapLoader>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (enemyCanSpawn && !enemyIsSpawned)
+        if (enemyCanSpawn && !enemyIsSpawned && mapLoader != null && mapLoader.navMeshBuilt)
         {
             int enemyIndex = WeightedRandomChoice.Pick(enemyChances);
             
