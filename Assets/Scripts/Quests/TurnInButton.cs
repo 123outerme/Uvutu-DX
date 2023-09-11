@@ -45,4 +45,16 @@ public class TurnInButton : MonoBehaviour
         questPanelScript.turnInName = "";
         questPanel.SetActive(false);
     }
+
+    public void ShowRewards(Rewards rewards)
+    {
+        dialogue.viewingQuestRewards = true;
+        dialogue.viewedQuestRewards = rewards;
+    }
+
+    public void HideRewards()
+    {
+        dialogue.viewingQuestRewards = false;
+        dialogue.viewedQuestRewards = null;
+    }
 }

@@ -14,11 +14,14 @@ public class NPCDialogue : MonoBehaviour
     //public Dictionary<string, string> dialogueOptions = new Dictionary<string, string>();
     public List<string> dialogue = new List<string>();
     public int dialogueItem = 0;
+    
+    public bool showingTurnInButton = false;
+    public bool showingTurnIn = false;
+    public bool viewingQuestRewards = false;
+    public Rewards viewedQuestRewards;
 
     public bool hasShop = false;
     private NPCShop shop = null;
-    public bool showingTurnInButton = false;
-    public bool showingTurnIn = false;
     public bool showingShopButton = false;
     public bool showingShop = false;
 

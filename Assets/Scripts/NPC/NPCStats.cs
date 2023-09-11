@@ -16,6 +16,8 @@ public class NPCState
     public int dialogueItem;
     public bool showingTurnInButton;
     public bool showingTurnIn;
+    public bool viewingQuestRewards = false;
+    public Rewards viewedQuestRewards = null;
     public bool showingShopButton;
     public bool showingShop;
     public InventorySlot[] shop;
@@ -31,6 +33,8 @@ public class NPCState
         int dialogueIndex,
         bool showTurnInBtn,
         bool showTurnIn,
+        bool viewQuestRewards,
+        Rewards viewedRewards,
         bool showShopBtn,
         bool showShop,
         InventorySlot[] stock
@@ -47,6 +51,8 @@ public class NPCState
         dialogueItem = dialogueIndex;
         showingTurnInButton = showTurnInBtn;
         showingTurnIn = showTurnIn;
+        viewingQuestRewards = viewQuestRewards;
+        viewedQuestRewards = viewedRewards;
         showingShopButton = showShopBtn;
         showingShop = showShop;
         shop = stock;
@@ -56,7 +62,23 @@ public class NPCState
 public class NPCStats : MonoBehaviour
 {
     public bool saveStatus = true;
-    public NPCState state = new NPCState(new Vector3(0,0,0), false, false, 0, 0, "", false, new List<string>(), 0, false, false, false, false, new InventorySlot[] {});
+    public NPCState state = new NPCState(new Vector3(0,0,0),
+        false,
+        false,
+        0,
+        0,
+        "",
+        false,
+        new List<string>(),
+        0,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        new InventorySlot[] {}
+    );
 
     private NPCMovement movement = null;
     private NPCDialogue dialogue = null;
@@ -103,6 +125,8 @@ public class NPCStats : MonoBehaviour
             dialogue.dialogueItem,
             dialogue.showingTurnInButton,
             dialogue.showingTurnIn,
+            dialogue.viewingQuestRewards,
+            dialogue.viewedQuestRewards,
             dialogue.showingShopButton,
             dialogue.showingShop,
             shop.GetItems()
@@ -132,8 +156,12 @@ public class NPCStats : MonoBehaviour
                 dialogue.SetPlayerLock(true);
             
             dialogue.dialogueItem = state.dialogueItem;
+            
             dialogue.showingTurnInButton = state.showingTurnInButton;
             dialogue.showingTurnIn = state.showingTurnIn;
+            dialogue.viewingQuestRewards = state.viewingQuestRewards;
+            dialogue.viewedQuestRewards = state.viewedQuestRewards;
+
             dialogue.showingShopButton = state.showingShopButton;
             dialogue.showingShop = state.showingShop;
             dialogue.UpdateDialogueText();
@@ -150,6 +178,10 @@ public class NPCStats : MonoBehaviour
                 shopButton.OpenShopFromButton();
             }
 
+            shop.items = new List<InventorySlot>(state.shop);
+            shop.LoadAllInventorySlots();
+            shop.loaded = true;
+
             if (dialogue.showingTurnInButton)
                 dialogue.ShowTurnInButton();
 
@@ -161,14 +193,16 @@ public class NPCStats : MonoBehaviour
                 turnInButton.OpenTurnInQuests();
             }
 
-            shop.items = new List<InventorySlot>(state.shop);
-            shop.LoadAllInventorySlots();
-            shop.loaded = true;
+            if (dialogue.viewingQuestRewards)
+            {
+                QuestRewardPanel questRewardPanel = GameObject.Find("ScreenCanvas").transform.Find("QuestRewardPanel").GetComponent<QuestRewardPanel>();
+                questRewardPanel.ShowRewardsPanel(dialogue.viewedQuestRewards);
+            }
             //Debug.Log("given state is not null.");
         }
         else
         {
-            Debug.Log("given state is null!!");
+            Debug.Log("given NPC state is null!!");
         }
     }
 }

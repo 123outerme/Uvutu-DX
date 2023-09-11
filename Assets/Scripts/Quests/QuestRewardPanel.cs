@@ -7,6 +7,8 @@ public class QuestRewardPanel : MonoBehaviour
 {
     public Rewards rewards;
 
+    public GameObject turnInButton;
+
     public GameObject rewardsContainerPanel;
     public GameObject rewardsPanelPrefab;
     public UnityEvent<Item> viewItemDetails;
@@ -28,6 +30,9 @@ public class QuestRewardPanel : MonoBehaviour
         rewards = reward;
         gameObject.SetActive(true);
         UpdateRewardsPanel();
+
+        TurnInButton turnInBtnScript = turnInButton.GetComponent<TurnInButton>();
+        turnInBtnScript.ShowRewards(rewards);
     }
 
     public void UpdateRewardsPanel()
@@ -41,5 +46,12 @@ public class QuestRewardPanel : MonoBehaviour
         rewardsPanelScript.rewards = rewards;
         rewardsPanelScript.viewItemDetails = viewItemDetails;
         rewardsPanelScript.LoadFromRewardsObj();
+    }
+
+    public void HideRewardsPanel()
+    {
+        TurnInButton turnInBtnScript = turnInButton.GetComponent<TurnInButton>();
+        turnInBtnScript.HideRewards();
+        gameObject.SetActive(false);
     }
 }
