@@ -639,6 +639,11 @@ MonoBehaviour:
     count: 0
     objectiveName: 
     turnInName: 
+    rewards:
+      exp: 0
+      gold: 0
+      item: {fileID: 0}
+      itemName: 
     turnInDialogue: []
     inProgressDialogue: []
   shortStepDetail: 

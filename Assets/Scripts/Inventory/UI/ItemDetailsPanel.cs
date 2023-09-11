@@ -66,6 +66,14 @@ public class ItemDetailsPanel : MonoBehaviour
         LoadDetailsFromItem();
     }
 
+    public void ShowFromItem(Item invItem)
+    {
+        gameObject.SetActive(true);
+        item = invItem;
+        itemCount = 0;
+        LoadDetailsFromItem();
+    }
+
     public void LoadDetailsFromItem()
     {
         GetUIScripts();

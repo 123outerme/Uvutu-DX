@@ -1266,12 +1266,12 @@ public class BattleHandler : MonoBehaviour
 
         foreach(Rewards r in battleState.rewardsList)
         {
-            
             GameObject panelObj = Instantiate(rewardsPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, rewardsListPanel.transform) as GameObject;
             RewardsPanel panelScript = panelObj.GetComponent<RewardsPanel>();
             r.LoadRewardItemFromName();
             panelScript.rewards = r;
             panelScript.viewItemDetails = viewItemDetails;
+            panelScript.playerInventory = playerInventory;
             panelScript.LoadFromRewardsObj();
             panelObj.transform.localPosition = new Vector3(0,0,0);  //WHY DOES THIS NEED TO BE DONE!!!!!!!!!!
             //If this isn't set, this panel will be set at some random transformation value. This has never happened before, and no other object will do this. WHY????

@@ -37,7 +37,7 @@ public class NPCDialogueTrigger : MonoBehaviour
         if (dialogue.enableDialogue)
         {
             dialogue.readyDialogue = false;
-            dialogue.HideShopButton();
+            dialogue.HideButtonPanel();
         }
     }
 }

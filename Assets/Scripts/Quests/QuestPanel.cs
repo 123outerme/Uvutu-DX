@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class QuestPanel : MonoBehaviour
 {
     public GameObject questSlotPanelPrefab;
     public GameObject questListContent;
     public GameObject questDetailsPanel;
+
+    public string turnInName = "";
 
     public QuestStatus statusToFilterBy = QuestStatus.Incomplete;
 
@@ -16,6 +19,8 @@ public class QuestPanel : MonoBehaviour
     public GameObject player;
 
     private QuestInventory questInventory;
+
+    public UnityEvent<Rewards> viewRewardsCallback;
 
     // Start is called before the first frame update
     void Start()
@@ -43,7 +48,8 @@ public class QuestPanel : MonoBehaviour
         foreach(QuestTracker q in questInventory.quests)
         {
             QuestStatus qStatus = questInventory.GetQuestStatus(q.name);
-            if (statusToFilterBy == QuestStatus.All || (statusToFilterBy == QuestStatus.Incomplete && qStatus != QuestStatus.Completed) || qStatus == statusToFilterBy)
+
+            if ((statusToFilterBy == QuestStatus.All || (statusToFilterBy == QuestStatus.Incomplete && qStatus != QuestStatus.Completed) || qStatus == statusToFilterBy))
             {
                 //Debug.Log(qStatus);
                 GameObject panelObj = Instantiate(questSlotPanelPrefab, new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity, questListContent.transform);
@@ -74,5 +80,13 @@ public class QuestPanel : MonoBehaviour
     {
         questDetailsPanel.SetActive(true);
         questDetailsPanel.GetComponent<QuestDetailsPanel>().ViewQuestDetails(quest);
+    }
+
+    public void TurnInQuest(QuestTracker quest)
+    {
+        Debug.Log("turn in quest: " + quest.name);
+        viewRewardsCallback.Invoke(quest.GetCurrentStep().rewards);
+        questInventory.TurnInCurrentQuestStep(quest.name);
+        ReloadQuestsDisplay();
     }
 }

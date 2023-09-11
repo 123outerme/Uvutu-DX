@@ -12,6 +12,7 @@ public class QuestSlotPanel : MonoBehaviour
 
     private TMP_Text questNameText = null;
     private TMP_Text questStepText = null;
+    private GameObject turnInButton = null;
 
     // Start is called before the first frame update
     void Start()
@@ -32,6 +33,9 @@ public class QuestSlotPanel : MonoBehaviour
         
         if (questStepText == null)
             questStepText = transform.Find("QuestStepText").GetComponent<TMP_Text>();
+
+        if (turnInButton == null)
+            turnInButton = transform.Find("ButtonPanel/TurnInButton").gameObject;
     }
 
     public void UpdateFromQuestTracker()
@@ -43,10 +47,18 @@ public class QuestSlotPanel : MonoBehaviour
         
         questNameText.text = quest.name;
         questStepText.text = quest.GetCurrentShortStepDetail(); 
+
+        bool canTurnIn = parentPanel.turnInName == quest.GetCurrentStep().turnInName && quest.GetStatus() == QuestStatus.ReadyToTurnInStep;
+        turnInButton.SetActive(canTurnIn);
     }
 
     public void ShowQuestDetails()
     {
         parentPanel.OpenQuestDetails(quest);
+    }
+
+    public void TurnInQuest()
+    {
+        parentPanel.TurnInQuest(quest);
     }
 }

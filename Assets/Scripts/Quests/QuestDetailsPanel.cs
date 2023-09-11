@@ -109,9 +109,12 @@ public class QuestDetailsPanel : MonoBehaviour
         curStepProgressText.text = quest.GetStepProgressString(curStep);
         curStepTurnInText.text = curStep.turnInName;
 
+        Inventory playerInventory = player.GetComponent<Inventory>();
+
         RewardsPanel rewardsPanel = curStepRewardsPanel.GetComponent<RewardsPanel>();
         rewardsPanel.rewards = curStep.rewards;
         rewardsPanel.viewItemDetails = viewItemDetails;
+        rewardsPanel.playerInventory = playerInventory;
         rewardsPanel.LoadFromRewardsObj();
     }
 }

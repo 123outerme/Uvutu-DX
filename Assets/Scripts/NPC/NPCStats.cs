@@ -14,11 +14,27 @@ public class NPCState
     public bool prevEnableMove;
     public List<string> curDialogueList;
     public int dialogueItem;
+    public bool showingTurnInButton;
+    public bool showingTurnIn;
     public bool showingShopButton;
     public bool showingShop;
     public InventorySlot[] shop;
 
-    public NPCState(Vector3 pos, bool enableMove, bool startMove, int curStep, int curFrame, string npcName, bool prevEnableMoveSetting, List<string> curDialogue, int dialogueIndex, bool showShopBtn, bool showShop, InventorySlot[] stock)
+    public NPCState(Vector3 pos,
+        bool enableMove,
+        bool startMove,
+        int curStep,
+        int curFrame,
+        string npcName,
+        bool prevEnableMoveSetting,
+        List<string> curDialogue,
+        int dialogueIndex,
+        bool showTurnInBtn,
+        bool showTurnIn,
+        bool showShopBtn,
+        bool showShop,
+        InventorySlot[] stock
+    )
     {
         position = pos;
         enableMovement = enableMove;
@@ -29,6 +45,8 @@ public class NPCState
         prevEnableMove = prevEnableMoveSetting;
         curDialogueList = curDialogue;
         dialogueItem = dialogueIndex;
+        showingTurnInButton = showTurnInBtn;
+        showingTurnIn = showTurnIn;
         showingShopButton = showShopBtn;
         showingShop = showShop;
         shop = stock;
@@ -38,7 +56,7 @@ public class NPCState
 public class NPCStats : MonoBehaviour
 {
     public bool saveStatus = true;
-    public NPCState state = new NPCState(new Vector3(0,0,0), false, false, 0, 0, "", false, new List<string>(), 0, false, false, new InventorySlot[] {});
+    public NPCState state = new NPCState(new Vector3(0,0,0), false, false, 0, 0, "", false, new List<string>(), 0, false, false, false, false, new InventorySlot[] {});
 
     private NPCMovement movement = null;
     private NPCDialogue dialogue = null;
@@ -83,6 +101,8 @@ public class NPCStats : MonoBehaviour
             dialogue.GetPrevEnableMove(),
             dialogueList,
             dialogue.dialogueItem,
+            dialogue.showingTurnInButton,
+            dialogue.showingTurnIn,
             dialogue.showingShopButton,
             dialogue.showingShop,
             shop.GetItems()
@@ -112,6 +132,8 @@ public class NPCStats : MonoBehaviour
                 dialogue.SetPlayerLock(true);
             
             dialogue.dialogueItem = state.dialogueItem;
+            dialogue.showingTurnInButton = state.showingTurnInButton;
+            dialogue.showingTurnIn = state.showingTurnIn;
             dialogue.showingShopButton = state.showingShopButton;
             dialogue.showingShop = state.showingShop;
             dialogue.UpdateDialogueText();
@@ -122,8 +144,21 @@ public class NPCStats : MonoBehaviour
             if (dialogue.showingShop)
             {
                 dialogue.hasShop = true;
-                NPCShopButton shopButton = GameObject.Find("WorldCanvas").transform.Find("ShopButton").GetComponent<NPCShopButton>();
+                NPCShopButton shopButton = GameObject.Find("WorldCanvas/ButtonPanel").transform.Find("ShopButton").GetComponent<NPCShopButton>();
+                shopButton.dialogue = dialogue;
+                shopButton.shop = shop;
                 shopButton.OpenShopFromButton();
+            }
+
+            if (dialogue.showingTurnInButton)
+                dialogue.ShowTurnInButton();
+
+            if (dialogue.showingTurnIn)
+            {
+                TurnInButton turnInButton = GameObject.Find("WorldCanvas/ButtonPanel").transform.Find("TurnInButton").GetComponent<TurnInButton>();
+                turnInButton.dialogue = dialogue;
+                turnInButton.turnInName = dialogue.gameObject.name;
+                turnInButton.OpenTurnInQuests();
             }
 
             shop.items = new List<InventorySlot>(state.shop);

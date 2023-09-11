@@ -9,11 +9,14 @@ public class RewardsPanel : MonoBehaviour
 {
     public Rewards rewards;
 
+    public Inventory playerInventory;
+
     public TMP_Text goldText;
     public TMP_Text expText;
     public GameObject itemPanel;
     public Image itemImage;
     public TMP_Text itemNameText;
+    public GameObject fullInventoryImageObj;
     
     public UnityEvent<Item> viewItemDetails;
 
@@ -46,6 +49,12 @@ public class RewardsPanel : MonoBehaviour
         else
         {
             itemPanel.SetActive(false);
+        }
+
+        if (playerInventory != null)
+        {
+            InventorySlot slot = playerInventory.GetItemSlot(rewards.item.name);
+            fullInventoryImageObj.SetActive(slot.count >= slot.item.MaxCarryable);
         }
     }
 

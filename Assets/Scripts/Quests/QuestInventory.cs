@@ -2,16 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum QuestStatus : int
-{
-    All = -2, //for quest filtering only
-    Incomplete = -1,  //for quest filtering only
-    NotStarted = 0,
-    InProgress = 1,
-    ReadyToTurnInStep = 2,
-    Completed = 3
-}
-
 public class QuestInventory : MonoBehaviour
 {
     public List<QuestTracker> quests;
@@ -46,7 +36,7 @@ public class QuestInventory : MonoBehaviour
             if (playerInfo == null)
                 playerInfo = player.GetComponent<PlayerInfo>();
             
-            if (playerInventory)
+            if (playerInventory == null)
                 playerInventory = player.GetComponent<Inventory>();
         }
     }
@@ -77,16 +67,7 @@ public class QuestInventory : MonoBehaviour
         if (entry == null)  //if not found, the player hasn't started it
             return QuestStatus.NotStarted;
 
-        int step = entry.GetCurrentStepProgress();
-        if (step >= 0)  //GetCurrentStepProgress() returns -1 if quest is complete
-        {
-            if (entry.IsCurrentStepCompleted())  //if the current step has completed progress, that means the player hasn't turned it in yet
-                return QuestStatus.ReadyToTurnInStep;
-            else
-                return QuestStatus.InProgress;  //if the current step isn't completed, we're still working on this step
-        }
-        else
-            return QuestStatus.Completed;  //if the current step index is out of range of the list of steps, this quest is done
+        return entry.GetStatus();
     }
 
     public bool SetQuestStepProgress(string questName, QuestType type, string objectiveName, int accomplishedCount)

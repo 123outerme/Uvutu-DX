@@ -17,6 +17,8 @@ public class NPCDialogue : MonoBehaviour
 
     public bool hasShop = false;
     private NPCShop shop = null;
+    public bool showingTurnInButton = false;
+    public bool showingTurnIn = false;
     public bool showingShopButton = false;
     public bool showingShop = false;
 
@@ -33,7 +35,9 @@ public class NPCDialogue : MonoBehaviour
     private PlayerController pController = null;
     private QuestInventory questsInventory = null;
     private TMP_Text dialogueText = null;
+    private GameObject buttonPanel = null;
     private GameObject shopButton = null;
+    private GameObject turnInButton = null;
 
     // Start is called before the first frame update
     void Start()
@@ -53,7 +57,7 @@ public class NPCDialogue : MonoBehaviour
             {
                 if (!inDialogue && readyDialogue)  //If the NPC is not yet speaking but ready to speak, start dialogue
                 {
-                    HideShopButton();
+                    HideButtonPanel();
                     //tell quest handler to add progress to quest steps that involve talking to this NPC (so progress can be checked below on self-referencing talk quests)
                     questsInventory.ProgressQuest(gameObject.name, QuestType.Talk, 1);
 
@@ -106,8 +110,8 @@ public class NPCDialogue : MonoBehaviour
                             questsInventory.AddQuest(q);
                             
                         //turn in quest(s) (if any)
-                        foreach(QuestAndStepPair pair in turningInQuestSteps)
-                            questsInventory.TurnInCurrentQuestStep(pair.quest.name);
+                        if (turningInQuestSteps.Count > 0)
+                            ShowTurnInButton();
 
                         //reset state to disable dialogue mode changes                        
                         dialogueItem = 0;  //reset current dialogue string index
@@ -155,8 +159,14 @@ public class NPCDialogue : MonoBehaviour
         if (dialogueText == null)
             dialogueText = GameObject.Find("WorldCanvas/Dialogue").GetComponent<TMP_Text>();
         
+        if (buttonPanel == null)
+            buttonPanel = GameObject.Find("WorldCanvas/ButtonPanel");
+
         if (shopButton == null)
-            shopButton = GameObject.Find("WorldCanvas").transform.Find("ShopButton").gameObject;
+            shopButton = buttonPanel.transform.Find("ShopButton").gameObject;
+
+        if (turnInButton == null)
+            turnInButton = buttonPanel.transform.Find("TurnInButton").gameObject;
         //have to use Transform.Find to get an inactive object
     }
 
@@ -217,8 +227,9 @@ public class NPCDialogue : MonoBehaviour
         dialogueText.gameObject.transform.position = transform.position - conversationPosDiff;
     }
 
-    public void UpdateShopButtonPosition()
+    public void UpdateButtonPanelPosition()
     {
+        GetAllScripts();
         Vector3 conversationPosDiff = player.transform.position - transform.position;  //vector from NPC to player
 
         float newYPos = -1.0f;
@@ -226,7 +237,7 @@ public class NPCDialogue : MonoBehaviour
             newYPos = 1.0f;
 
         conversationPosDiff = new Vector3(conversationPosDiff.x, newYPos, 0);
-        shopButton.transform.position = transform.position - conversationPosDiff;
+        buttonPanel.transform.position = transform.position - conversationPosDiff;
     }
 
     public void ShowShopButton()
@@ -235,23 +246,31 @@ public class NPCDialogue : MonoBehaviour
         NPCShopButton shopBtnScript = shopButton.GetComponent<NPCShopButton>();
         shopBtnScript.dialogue = this;
         shopBtnScript.shop = shop;
-        UpdateShopButtonPosition();
+        UpdateButtonPanelPosition();
         shopButton.SetActive(true);
         showingShopButton = true;
         //Debug.Log("show shop button");
     }
 
-    public void HideShopButton()
+    public void HideButtonPanel()
     {
-        if (showingShopButton)
+        if (showingShopButton || showingTurnInButton)
         {
             GetAllScripts();
+            
             NPCShopButton shopBtnScript = shopButton.GetComponent<NPCShopButton>();
             shopButton.SetActive(false);
             shopBtnScript.dialogue = null;
             shopBtnScript.shop = null;
-            ReenableMovement();
             showingShopButton = false;
+            
+            TurnInButton turnInBtnScript = turnInButton.GetComponent<TurnInButton>();
+            turnInButton.SetActive(false);
+            turnInBtnScript.dialogue = null;
+            turnInBtnScript.turnInName = "";
+            showingTurnInButton = false;
+
+            ReenableMovement();
         }
     }
 
@@ -259,7 +278,17 @@ public class NPCDialogue : MonoBehaviour
     {
         //Debug.Log("on close shop");
         showingShop = false;
-        HideShopButton();
         SetPlayerLock(false);
+    }
+
+    public void ShowTurnInButton()
+    {
+        GetAllScripts();
+        UpdateButtonPanelPosition();
+        turnInButton.SetActive(true);
+        showingTurnInButton = true;
+        TurnInButton turnInBtnScript = turnInButton.GetComponent<TurnInButton>();
+        turnInBtnScript.turnInName = gameObject.name;
+        turnInBtnScript.dialogue = this;
     }
 }
